@@ -1,0 +1,1271 @@
+<!--
+  ============================================================
+  WOULD YOU RATHER — Kaidan Game Hub Component
+  ============================================================
+  This file contains all CSS, HTML, and JS for the Would You
+  Rather game. It is NOT a standalone page — it is organized
+  for integration into index.html.
+
+  INTEGRATION GUIDE:
+  1. CSS  → paste into <style> block, after Battleship styles
+  2. HTML → paste game card into #game-grid
+           → paste game view after other game views
+  3. JS   → paste after Battleship JS, before "// ── Launch"
+  4. HOOKS → add to showView(), updateGameCards(), bindUI(),
+             init(), listenToRoom(), leaveRoom() — see notes
+  ============================================================
+-->
+
+
+<!-- ============================================================
+     SECTION 1: CSS
+     Paste inside <style> block, after Battleship responsive styles
+     (after line ~1027 in current index.html)
+     ============================================================ -->
+
+<!--  START CSS: WOULD YOU RATHER  -->
+<style>
+
+/* ========== WOULD YOU RATHER STYLES ========== */
+
+/* --- WYR Layout --- */
+.wyr-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+/* --- WYR Header Bar --- */
+.wyr-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.wyr-title {
+  font-size: 24px;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: 2px;
+}
+
+.wyr-title .wyr-accent {
+  color: #F4A261;
+}
+
+.wyr-mute-btn {
+  background: none;
+  border: 1px solid #3a4a6c;
+  color: #8a8a9a;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.wyr-mute-btn:hover {
+  color: #fff;
+  border-color: #fff;
+}
+
+/* --- Match Counter --- */
+.wyr-score-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  width: 100%;
+  padding: 10px 20px;
+  background: #16213e;
+  border-radius: 8px;
+  border: 1px solid #2a3a5c;
+}
+
+.wyr-score-item {
+  font-size: 14px;
+  font-weight: 600;
+  color: #8a8a9a;
+}
+
+.wyr-score-item .wyr-score-val {
+  color: #F4A261;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.wyr-score-item .wyr-score-val.match-green {
+  color: #2dc653;
+}
+
+/* --- Category Filters --- */
+.wyr-categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  width: 100%;
+}
+
+.wyr-cat-btn {
+  padding: 6px 14px;
+  border: 1px solid #3a4a6c;
+  border-radius: 20px;
+  background: transparent;
+  color: #8a8a9a;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.wyr-cat-btn:hover {
+  border-color: #F4A261;
+  color: #F4A261;
+}
+
+.wyr-cat-btn.active {
+  background: #F4A261;
+  color: #1a1a2e;
+  border-color: #F4A261;
+}
+
+/* --- Question Card --- */
+.wyr-card {
+  width: 100%;
+  background: #16213e;
+  border: 2px solid #F4A261;
+  border-radius: 16px;
+  padding: 32px 24px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.wyr-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #F4A261, #e76f51, #F4A261);
+}
+
+.wyr-card-category {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #F4A261;
+  margin-bottom: 16px;
+}
+
+.wyr-card-question {
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.4;
+  margin-bottom: 4px;
+}
+
+.wyr-card-number {
+  font-size: 11px;
+  color: #555;
+  margin-top: 12px;
+}
+
+/* --- Choice Buttons --- */
+.wyr-choices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  width: 100%;
+}
+
+.wyr-choice-btn {
+  padding: 20px 16px;
+  border: 2px solid #3a4a6c;
+  border-radius: 12px;
+  background: #16213e;
+  color: #e0e0e0;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+  line-height: 1.3;
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.wyr-choice-btn .wyr-choice-label {
+  position: absolute;
+  top: 8px;
+  left: 12px;
+  font-size: 11px;
+  font-weight: 900;
+  color: #F4A261;
+  letter-spacing: 1px;
+}
+
+.wyr-choice-btn:hover:not(.selected):not(.locked) {
+  border-color: #F4A261;
+  background: rgba(244, 162, 97, 0.08);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(244, 162, 97, 0.2);
+}
+
+.wyr-choice-btn.selected {
+  border-color: #F4A261;
+  background: rgba(244, 162, 97, 0.15);
+  color: #F4A261;
+  box-shadow: 0 0 20px rgba(244, 162, 97, 0.2);
+}
+
+.wyr-choice-btn.locked {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.wyr-choice-btn.selected.locked {
+  opacity: 1;
+}
+
+/* --- Waiting for opponent after selecting --- */
+.wyr-waiting-answer {
+  text-align: center;
+  padding: 12px;
+  font-size: 14px;
+  color: #8a8a9a;
+  font-weight: 600;
+}
+
+.wyr-waiting-answer .pulse {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* --- Reveal Panel --- */
+.wyr-reveal {
+  display: none;
+  width: 100%;
+  text-align: center;
+  padding: 24px;
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+.wyr-reveal.active {
+  display: block;
+  animation: wyrRevealIn 0.5s ease-out;
+}
+
+@keyframes wyrRevealIn {
+  0% { opacity: 0; transform: scale(0.8); }
+  60% { transform: scale(1.05); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.wyr-reveal.match {
+  background: rgba(45, 198, 83, 0.12);
+  border: 2px solid #2dc653;
+}
+
+.wyr-reveal.differ {
+  background: rgba(244, 162, 97, 0.12);
+  border: 2px solid #F4A261;
+}
+
+.wyr-reveal-title {
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.wyr-reveal.match .wyr-reveal-title {
+  color: #2dc653;
+  text-shadow: 0 0 20px rgba(45, 198, 83, 0.4);
+}
+
+.wyr-reveal.differ .wyr-reveal-title {
+  color: #F4A261;
+  text-shadow: 0 0 20px rgba(244, 162, 97, 0.4);
+}
+
+.wyr-reveal-answers {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.wyr-reveal-player {
+  text-align: center;
+}
+
+.wyr-reveal-player-name {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #8a8a9a;
+  margin-bottom: 6px;
+}
+
+.wyr-reveal-player-answer {
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  padding: 10px 18px;
+  background: #1a1a2e;
+  border-radius: 8px;
+  border: 1px solid #3a4a6c;
+  max-width: 200px;
+}
+
+/* --- Next Question Button --- */
+.wyr-next-btn {
+  padding: 14px 32px;
+  border: none;
+  border-radius: 8px;
+  background: #F4A261;
+  color: #1a1a2e;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  font-weight: 900;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  transition: transform 0.15s, box-shadow 0.15s;
+  margin-top: 8px;
+}
+
+.wyr-next-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(244, 162, 97, 0.4);
+}
+
+.wyr-next-btn:active {
+  transform: translateY(0);
+}
+
+/* --- WYR Confetti --- */
+.wyr-confetti {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  top: -20px;
+  z-index: 860;
+  opacity: 0;
+  animation: confettiFall linear forwards;
+  border-radius: 2px;
+}
+
+/* --- WYR Waiting for opponent to join game --- */
+.wyr-lobby-wait {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.wyr-lobby-wait h3 {
+  font-size: 20px;
+  color: #F4A261;
+  margin-bottom: 12px;
+}
+
+.wyr-lobby-wait p {
+  color: #8a8a9a;
+  font-size: 14px;
+}
+
+/* --- Responsive --- */
+@media (max-width: 600px) {
+  .wyr-card-question {
+    font-size: 18px;
+  }
+  .wyr-choice-btn {
+    font-size: 14px;
+    padding: 16px 12px;
+    min-height: 64px;
+  }
+  .wyr-reveal-title {
+    font-size: 22px;
+  }
+  .wyr-reveal-answers {
+    gap: 16px;
+  }
+  .wyr-score-bar {
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 400px) {
+  .wyr-choices {
+    grid-template-columns: 1fr;
+  }
+}
+
+</style>
+<!--  END CSS: WOULD YOU RATHER  -->
+
+
+<!-- ============================================================
+     SECTION 2A: GAME CARD for the Hub Grid
+     Paste inside #game-grid, alongside the other game cards.
+     Replace the hangman card or add as a new card.
+     ============================================================ -->
+
+<!--  START HUB CARD: WOULD YOU RATHER  -->
+<!--
+  Add this CSS rule alongside the other game-card color rules
+  (near line ~270 in current index.html):
+
+  .game-card[data-game="wouldyourather"] { border-color: #F4A261; }
+  .game-card[data-game="wouldyourather"]:hover { box-shadow: 0 8px 24px rgba(244, 162, 97, 0.3); }
+  .game-card[data-game="wouldyourather"] .game-icon { color: #F4A261; }
+-->
+
+<div class="game-card disabled" data-game="wouldyourather">
+  <span class="game-icon">&#x2753;</span>
+  <div class="game-name">Would You Rather</div>
+  <div class="game-tagline">Pick a side. See if you agree.</div>
+  <span class="game-status coming-soon">Join a room to play</span>
+</div>
+<!--  END HUB CARD: WOULD YOU RATHER  -->
+
+
+<!-- ============================================================
+     SECTION 2B: GAME VIEW
+     Paste after the other game views, before the Firebase SDK
+     script tags (before line ~1216 in current index.html)
+     ============================================================ -->
+
+<!--  START VIEW: WOULD YOU RATHER  -->
+<div class="game-view" id="view-wouldyourather">
+  <button class="back-to-hub" id="back-wouldyourather">&#x2190; Back to Hub</button>
+
+  <div class="wyr-container">
+    <!-- Header -->
+    <div class="wyr-header">
+      <div class="wyr-title">WOULD YOU <span class="wyr-accent">RATHER</span></div>
+      <button class="wyr-mute-btn" id="wyr-mute-btn" title="Toggle sound">&#x1F50A;</button>
+    </div>
+
+    <!-- Score Bar -->
+    <div class="wyr-score-bar">
+      <div class="wyr-score-item">Matched: <span class="wyr-score-val match-green" id="wyr-matches">0</span></div>
+      <div class="wyr-score-item">Questions: <span class="wyr-score-val" id="wyr-total">0</span></div>
+      <div class="wyr-score-item">Streak: <span class="wyr-score-val match-green" id="wyr-streak">0</span></div>
+    </div>
+
+    <!-- Category Filters -->
+    <div class="wyr-categories" id="wyr-categories">
+      <button class="wyr-cat-btn active" data-cat="all">All</button>
+      <button class="wyr-cat-btn" data-cat="silly">Silly</button>
+      <button class="wyr-cat-btn" data-cat="superpower">Superpower</button>
+      <button class="wyr-cat-btn" data-cat="food">Food</button>
+      <button class="wyr-cat-btn" data-cat="animal">Animal</button>
+      <button class="wyr-cat-btn" data-cat="adventure">Adventure</button>
+      <button class="wyr-cat-btn" data-cat="gross">Gross</button>
+      <button class="wyr-cat-btn" data-cat="thisorthat">This or That</button>
+      <button class="wyr-cat-btn" data-cat="family">Family</button>
+    </div>
+
+    <!-- Question Card -->
+    <div class="wyr-card" id="wyr-card">
+      <div class="wyr-card-category" id="wyr-card-category">LOADING...</div>
+      <div class="wyr-card-question" id="wyr-card-question">Getting your first question ready...</div>
+      <div class="wyr-card-number" id="wyr-card-number"></div>
+    </div>
+
+    <!-- Choice Buttons -->
+    <div class="wyr-choices" id="wyr-choices">
+      <button class="wyr-choice-btn" id="wyr-choice-a" data-choice="A">
+        <span class="wyr-choice-label">A</span>
+        <span id="wyr-choice-a-text">Option A</span>
+      </button>
+      <button class="wyr-choice-btn" id="wyr-choice-b" data-choice="B">
+        <span class="wyr-choice-label">B</span>
+        <span id="wyr-choice-b-text">Option B</span>
+      </button>
+    </div>
+
+    <!-- Waiting for opponent -->
+    <div class="wyr-waiting-answer" id="wyr-waiting-answer" style="display:none;">
+      <span class="pulse">Waiting for the other player to pick...</span>
+    </div>
+
+    <!-- Reveal Panel -->
+    <div class="wyr-reveal" id="wyr-reveal">
+      <div class="wyr-reveal-title" id="wyr-reveal-title">GREAT MINDS!</div>
+      <div class="wyr-reveal-answers" id="wyr-reveal-answers">
+        <div class="wyr-reveal-player">
+          <div class="wyr-reveal-player-name" id="wyr-reveal-p1-name">Player 1</div>
+          <div class="wyr-reveal-player-answer" id="wyr-reveal-p1-answer">—</div>
+        </div>
+        <div class="wyr-reveal-player">
+          <div class="wyr-reveal-player-name" id="wyr-reveal-p2-name">Player 2</div>
+          <div class="wyr-reveal-player-answer" id="wyr-reveal-p2-answer">—</div>
+        </div>
+      </div>
+      <button class="wyr-next-btn" id="wyr-next-btn">Next Question &#x27A1;</button>
+    </div>
+
+    <!-- Lobby waiting -->
+    <div class="wyr-lobby-wait" id="wyr-lobby-wait" style="display:none;">
+      <h3 class="pulse">Waiting for opponent...</h3>
+      <p>They'll see the invite any second now.</p>
+    </div>
+  </div>
+</div>
+<!--  END VIEW: WOULD YOU RATHER  -->
+
+
+<!-- ============================================================
+     SECTION 3: JAVASCRIPT
+     Paste inside the <script> block, after all Battleship JS
+     and before the "// ── Launch" line (before line ~2748)
+     ============================================================ -->
+
+<script>
+/* ==========================================================
+   WOULD YOU RATHER — Bonding Game
+   Firebase path: /rooms/{roomId}/wouldyourather/
+   ========================================================== */
+
+// ── WYR Question Bank (75+ questions) ────────────────────
+var WYR_QUESTIONS = [
+  // === SILLY (10) ===
+  { cat: "silly", q: "Would you rather...", a: "Have spaghetti for hair", b: "Sweat maple syrup" },
+  { cat: "silly", q: "Would you rather...", a: "Talk like a robot forever", b: "Walk like a crab forever" },
+  { cat: "silly", q: "Would you rather...", a: "Have a horn like a unicorn", b: "Have a tail like a monkey" },
+  { cat: "silly", q: "Would you rather...", a: "Burp glitter", b: "Sneeze confetti" },
+  { cat: "silly", q: "Would you rather...", a: "Have fingers as long as your legs", b: "Have legs as short as your fingers" },
+  { cat: "silly", q: "Would you rather...", a: "Only be able to whisper", b: "Only be able to shout" },
+  { cat: "silly", q: "Would you rather...", a: "Smell like fresh cookies all the time", b: "Have everything you touch smell like fresh cookies" },
+  { cat: "silly", q: "Would you rather...", a: "Have a pet dinosaur", b: "Have a pet dragon" },
+  { cat: "silly", q: "Would you rather...", a: "Laugh every time you tried to be serious", b: "Cry every time you tried to tell a joke" },
+  { cat: "silly", q: "Would you rather...", a: "Have your clothes always be one size too big", b: "Have your shoes always be untied" },
+
+  // === SUPERPOWER (10) ===
+  { cat: "superpower", q: "Would you rather...", a: "Be able to fly", b: "Be invisible" },
+  { cat: "superpower", q: "Would you rather...", a: "Read minds", b: "Control time" },
+  { cat: "superpower", q: "Would you rather...", a: "Have super strength", b: "Have super speed" },
+  { cat: "superpower", q: "Would you rather...", a: "Talk to animals", b: "Speak every human language" },
+  { cat: "superpower", q: "Would you rather...", a: "Breathe underwater", b: "Survive in outer space" },
+  { cat: "superpower", q: "Would you rather...", a: "Be able to teleport", b: "Be able to shapeshift" },
+  { cat: "superpower", q: "Would you rather...", a: "Have X-ray vision", b: "Have night vision" },
+  { cat: "superpower", q: "Would you rather...", a: "Control the weather", b: "Control gravity" },
+  { cat: "superpower", q: "Would you rather...", a: "Never need to sleep", b: "Never need to eat" },
+  { cat: "superpower", q: "Would you rather...", a: "Shoot webs like Spider-Man", b: "Have claws like Wolverine" },
+
+  // === FOOD (10) ===
+  { cat: "food", q: "Would you rather...", a: "Only eat pizza forever", b: "Never eat pizza again" },
+  { cat: "food", q: "Would you rather...", a: "Drink ketchup like a smoothie", b: "Put mustard on your cereal" },
+  { cat: "food", q: "Would you rather...", a: "Only eat breakfast food", b: "Never eat breakfast food again" },
+  { cat: "food", q: "Would you rather...", a: "Have unlimited candy", b: "Have unlimited video games" },
+  { cat: "food", q: "Would you rather...", a: "Eat the same meal every day forever", b: "Never eat the same meal twice" },
+  { cat: "food", q: "Would you rather...", a: "Have a chocolate fountain in your house", b: "Have a soda fountain in your house" },
+  { cat: "food", q: "Would you rather...", a: "Only eat spicy food", b: "Only eat bland food" },
+  { cat: "food", q: "Would you rather...", a: "Have Yaya's cooking every day", b: "Eat at a restaurant every day" },
+  { cat: "food", q: "Would you rather...", a: "Give up ice cream forever", b: "Give up cookies forever" },
+  { cat: "food", q: "Would you rather...", a: "Eat a whole raw onion", b: "Eat a whole lemon with the peel" },
+
+  // === ANIMAL (10) ===
+  { cat: "animal", q: "Would you rather...", a: "Be a shark", b: "Be an eagle" },
+  { cat: "animal", q: "Would you rather...", a: "Ride a grizzly bear to school", b: "Ride a giraffe to school" },
+  { cat: "animal", q: "Would you rather...", a: "Have a pet sloth", b: "Have a pet penguin" },
+  { cat: "animal", q: "Would you rather...", a: "Be as tiny as an ant for a day", b: "Be as big as a whale for a day" },
+  { cat: "animal", q: "Would you rather...", a: "Be the fastest animal alive", b: "Be the strongest animal alive" },
+  { cat: "animal", q: "Would you rather...", a: "Have a conversation with your pet", b: "Have a conversation with a wild animal" },
+  { cat: "animal", q: "Would you rather...", a: "Be able to purr like a cat", b: "Be able to howl like a wolf" },
+  { cat: "animal", q: "Would you rather...", a: "Live with 100 puppies for a week", b: "Live with 100 kittens for a week" },
+  { cat: "animal", q: "Would you rather...", a: "Swim with dolphins", b: "Run with cheetahs" },
+  { cat: "animal", q: "Would you rather...", a: "Have a parrot that repeats everything you say", b: "Have a dog that can do any trick" },
+
+  // === ADVENTURE (10) ===
+  { cat: "adventure", q: "Would you rather...", a: "Explore outer space", b: "Explore the deep ocean" },
+  { cat: "adventure", q: "Would you rather...", a: "Discover a new planet", b: "Discover a new species" },
+  { cat: "adventure", q: "Would you rather...", a: "Go skydiving", b: "Go scuba diving" },
+  { cat: "adventure", q: "Would you rather...", a: "Live on a tropical island", b: "Live in a mountain cabin" },
+  { cat: "adventure", q: "Would you rather...", a: "Travel by hot air balloon everywhere", b: "Travel by submarine everywhere" },
+  { cat: "adventure", q: "Would you rather...", a: "Explore an ancient pyramid", b: "Explore a sunken pirate ship" },
+  { cat: "adventure", q: "Would you rather...", a: "Camp in a jungle for a week", b: "Camp in the Arctic for a week" },
+  { cat: "adventure", q: "Would you rather...", a: "Time travel to the dinosaur age", b: "Time travel 500 years into the future" },
+  { cat: "adventure", q: "Would you rather...", a: "Find a treasure map", b: "Find a secret passageway in your house" },
+  { cat: "adventure", q: "Would you rather...", a: "Visit every country on Earth", b: "Visit another planet" },
+
+  // === GROSS (kid-friendly) (10) ===
+  { cat: "gross", q: "Would you rather...", a: "Lick the bottom of your shoe", b: "Eat a bug" },
+  { cat: "gross", q: "Would you rather...", a: "Smell a skunk up close", b: "Touch a slug with your bare hand" },
+  { cat: "gross", q: "Would you rather...", a: "Eat a worm gummy that's actually a worm", b: "Drink milk that expired yesterday" },
+  { cat: "gross", q: "Would you rather...", a: "Have boogers that glow in the dark", b: "Have earwax that smells like cheese" },
+  { cat: "gross", q: "Would you rather...", a: "Brush your teeth with hot sauce", b: "Wash your hair with mayonnaise" },
+  { cat: "gross", q: "Would you rather...", a: "Step in a huge mud puddle with socks on", b: "Sit on a wet bench in white pants" },
+  { cat: "gross", q: "Would you rather...", a: "Eat a sandwich you dropped on the floor", b: "Drink water from the dog bowl" },
+  { cat: "gross", q: "Would you rather...", a: "Have permanent stinky feet", b: "Have permanent bad breath" },
+  { cat: "gross", q: "Would you rather...", a: "Eat a spoonful of dirt", b: "Eat a spoonful of sand" },
+  { cat: "gross", q: "Would you rather...", a: "Pick up a spider with your bare hands", b: "Let a lizard crawl on your face" },
+
+  // === THIS OR THAT (10) ===
+  { cat: "thisorthat", q: "Would you rather...", a: "Live in the past", b: "Live in the future" },
+  { cat: "thisorthat", q: "Would you rather...", a: "Be the funniest person in the room", b: "Be the smartest person in the room" },
+  { cat: "thisorthat", q: "Would you rather...", a: "Always be 10 minutes early", b: "Always be 10 minutes late" },
+  { cat: "thisorthat", q: "Would you rather...", a: "Have summer all year", b: "Have winter all year" },
+  { cat: "thisorthat", q: "Would you rather...", a: "Be famous", b: "Be rich but nobody knows you" },
+  { cat: "thisorthat", q: "Would you rather...", a: "Have a rewind button for your life", b: "Have a pause button for your life" },
+  { cat: "thisorthat", q: "Would you rather...", a: "Know how everything works", b: "Know what everyone is thinking" },
+  { cat: "thisorthat", q: "Would you rather...", a: "Be able to sing perfectly", b: "Be able to dance perfectly" },
+  { cat: "thisorthat", q: "Would you rather...", a: "Live in a treehouse", b: "Live in an underground bunker" },
+  { cat: "thisorthat", q: "Would you rather...", a: "Have school four days a week (longer days)", b: "Have school six days a week (shorter days)" },
+
+  // === FAMILY (9) ===
+  { cat: "family", q: "Would you rather...", a: "Have 10 dogs", b: "Have 10 cats" },
+  { cat: "family", q: "Would you rather...", a: "Be the oldest sibling", b: "Be the youngest sibling" },
+  { cat: "family", q: "Would you rather...", a: "Have a family game night every night", b: "Have a family movie night every night" },
+  { cat: "family", q: "Would you rather...", a: "Cook dinner for the whole family", b: "Clean the whole house by yourself" },
+  { cat: "family", q: "Would you rather...", a: "Live next door to your best friend", b: "Live next door to Yaya" },
+  { cat: "family", q: "Would you rather...", a: "Go on a family road trip across the country", b: "Go on a family cruise" },
+  { cat: "family", q: "Would you rather...", a: "Swap lives with Yaya for a day", b: "Swap lives with your teacher for a day" },
+  { cat: "family", q: "Would you rather...", a: "Have a family talent show", b: "Have a family cooking competition" },
+  { cat: "family", q: "Would you rather...", a: "Tell Yaya every secret you have", b: "Have Yaya tell you every secret she has" }
+];
+
+// ── WYR State ────────────────────────────────────────────
+var wyrState = {
+  active: false,
+  currentQuestion: null,     // question object
+  currentIdx: -1,            // index in filtered list (for display)
+  myAnswer: null,            // "A" or "B"
+  opAnswer: null,
+  revealed: false,
+  matches: 0,
+  total: 0,
+  streak: 0,
+  category: 'all',
+  soundOn: true,
+  listeners: [],
+  audioCtx: null,
+  usedIndices: [],           // tracks which question indices we've shown
+  filteredQuestions: [],      // current filtered set with original indices
+  gameStarted: false
+};
+
+// ── WYR Init (called once at page load) ──────────────────
+// ADD THIS CALL to the init() function, alongside bsInit():
+//   wyrInit();
+function wyrInit() {
+  // Mute
+  document.getElementById('wyr-mute-btn').addEventListener('click', function() {
+    wyrState.soundOn = !wyrState.soundOn;
+    this.textContent = wyrState.soundOn ? '\u{1F50A}' : '\u{1F507}';
+  });
+
+  // Back to hub
+  // ADD THIS to bindUI():
+  //   document.getElementById('back-wouldyourather').addEventListener('click', function() { wyrLeaveGame(); });
+  document.getElementById('back-wouldyourather').addEventListener('click', function() {
+    wyrLeaveGame();
+  });
+
+  // Choice buttons
+  document.getElementById('wyr-choice-a').addEventListener('click', function() {
+    wyrSelectAnswer('A');
+  });
+  document.getElementById('wyr-choice-b').addEventListener('click', function() {
+    wyrSelectAnswer('B');
+  });
+
+  // Next question button
+  document.getElementById('wyr-next-btn').addEventListener('click', function() {
+    wyrNextQuestion();
+  });
+
+  // Category filter buttons
+  document.querySelectorAll('.wyr-cat-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var cat = btn.getAttribute('data-cat');
+      wyrSetCategory(cat);
+    });
+  });
+}
+
+// ── WYR Start Game (called when currentGame = wouldyourather) ──
+// ADD THIS to the currentGame listener in listenToRoom():
+//   if (game === 'wouldyourather') { wyrStartGame(); }
+function wyrStartGame() {
+  if (wyrState.gameStarted) return;
+  wyrState.gameStarted = true;
+  wyrState.active = true;
+
+  // Reset state
+  wyrState.myAnswer = null;
+  wyrState.opAnswer = null;
+  wyrState.revealed = false;
+  wyrState.matches = 0;
+  wyrState.total = 0;
+  wyrState.streak = 0;
+  wyrState.usedIndices = [];
+  wyrState.category = 'all';
+
+  // Reset UI
+  document.getElementById('wyr-matches').textContent = '0';
+  document.getElementById('wyr-total').textContent = '0';
+  document.getElementById('wyr-streak').textContent = '0';
+  document.getElementById('wyr-reveal').classList.remove('active', 'match', 'differ');
+  document.getElementById('wyr-waiting-answer').style.display = 'none';
+  document.getElementById('wyr-lobby-wait').style.display = 'none';
+  document.getElementById('wyr-choices').style.display = 'grid';
+  document.getElementById('wyr-card').style.display = 'flex';
+
+  // Reset category buttons
+  document.querySelectorAll('.wyr-cat-btn').forEach(function(b) {
+    b.classList.remove('active');
+  });
+  document.querySelector('.wyr-cat-btn[data-cat="all"]').classList.add('active');
+
+  // Update player names in reveal panel
+  if (playerId === 'p1') {
+    document.getElementById('wyr-reveal-p1-name').textContent = playerName;
+    document.getElementById('wyr-reveal-p2-name').textContent = opponentName || 'Player 2';
+  } else {
+    document.getElementById('wyr-reveal-p1-name').textContent = opponentName || 'Player 1';
+    document.getElementById('wyr-reveal-p2-name').textContent = playerName;
+  }
+
+  // Listen for Firebase changes
+  wyrListenForAnswers();
+
+  // Player 1 picks the first question
+  if (playerId === 'p1') {
+    wyrFilterAndPick();
+  }
+}
+
+// ── Filter questions by category and pick next ───────────
+function wyrFilterAndPick() {
+  wyrState.filteredQuestions = [];
+  for (var i = 0; i < WYR_QUESTIONS.length; i++) {
+    if (wyrState.category === 'all' || WYR_QUESTIONS[i].cat === wyrState.category) {
+      wyrState.filteredQuestions.push({ idx: i, q: WYR_QUESTIONS[i] });
+    }
+  }
+
+  // Find an unused question
+  var available = wyrState.filteredQuestions.filter(function(item) {
+    return wyrState.usedIndices.indexOf(item.idx) === -1;
+  });
+
+  // If all used, reset
+  if (available.length === 0) {
+    wyrState.usedIndices = [];
+    available = wyrState.filteredQuestions.slice();
+  }
+
+  // Pick random
+  var pick = available[Math.floor(Math.random() * available.length)];
+  wyrState.usedIndices.push(pick.idx);
+
+  // Write to Firebase
+  roomRef.child('wouldyourather').set({
+    currentQuestion: pick.idx,
+    player1Answer: null,
+    player2Answer: null,
+    revealed: false,
+    matches: wyrState.matches,
+    total: wyrState.total,
+    streak: wyrState.streak,
+    category: wyrState.category
+  });
+}
+
+// ── Listen for Firebase answer changes ───────────────────
+function wyrListenForAnswers() {
+  var wyrRef = roomRef.child('wouldyourather');
+
+  var listener = wyrRef.on('value', function(snap) {
+    var data = snap.val();
+    if (!data || !wyrState.active) return;
+
+    // Load question
+    var qIdx = data.currentQuestion;
+    if (qIdx !== undefined && qIdx !== null && qIdx >= 0 && qIdx < WYR_QUESTIONS.length) {
+      var q = WYR_QUESTIONS[qIdx];
+      wyrState.currentQuestion = q;
+      wyrState.currentIdx = qIdx;
+      wyrDisplayQuestion(q, qIdx);
+    }
+
+    // Sync scores from Firebase
+    if (typeof data.matches === 'number') wyrState.matches = data.matches;
+    if (typeof data.total === 'number') wyrState.total = data.total;
+    if (typeof data.streak === 'number') wyrState.streak = data.streak;
+    if (data.category) wyrState.category = data.category;
+
+    document.getElementById('wyr-matches').textContent = wyrState.matches;
+    document.getElementById('wyr-total').textContent = wyrState.total;
+    document.getElementById('wyr-streak').textContent = wyrState.streak;
+
+    // Sync category UI
+    document.querySelectorAll('.wyr-cat-btn').forEach(function(b) {
+      b.classList.toggle('active', b.getAttribute('data-cat') === wyrState.category);
+    });
+
+    // Read answers
+    var myKey = playerId === 'p1' ? 'player1Answer' : 'player2Answer';
+    var opKey = playerId === 'p1' ? 'player2Answer' : 'player1Answer';
+
+    var myAns = data[myKey];
+    var opAns = data[opKey];
+
+    // Update local answer tracking
+    wyrState.myAnswer = myAns || null;
+    wyrState.opAnswer = opAns || null;
+
+    // Update UI for selection state
+    wyrUpdateChoiceUI();
+
+    // Waiting indicator
+    if (myAns && !opAns && !data.revealed) {
+      document.getElementById('wyr-waiting-answer').style.display = 'block';
+    } else {
+      document.getElementById('wyr-waiting-answer').style.display = 'none';
+    }
+
+    // Both answered — reveal
+    if (data.player1Answer && data.player2Answer && !data.revealed) {
+      // Only p1 triggers the reveal write to avoid race conditions
+      if (playerId === 'p1') {
+        var isMatch = data.player1Answer === data.player2Answer;
+        var newMatches = wyrState.matches + (isMatch ? 1 : 0);
+        var newTotal = wyrState.total + 1;
+        var newStreak = isMatch ? wyrState.streak + 1 : 0;
+
+        roomRef.child('wouldyourather').update({
+          revealed: true,
+          matches: newMatches,
+          total: newTotal,
+          streak: newStreak
+        });
+      }
+    }
+
+    // Handle reveal
+    if (data.revealed && data.player1Answer && data.player2Answer) {
+      wyrShowReveal(data.player1Answer, data.player2Answer);
+    } else if (!data.revealed) {
+      // Hide reveal panel when new question starts
+      document.getElementById('wyr-reveal').classList.remove('active', 'match', 'differ');
+      wyrState.revealed = false;
+    }
+  });
+
+  wyrState.listeners.push({ ref: wyrRef, event: 'value', fn: listener });
+}
+
+// ── Display a question on the card ───────────────────────
+function wyrDisplayQuestion(q, idx) {
+  document.getElementById('wyr-card-category').textContent = wyrCategoryLabel(q.cat);
+  document.getElementById('wyr-card-question').textContent = q.q;
+  document.getElementById('wyr-card-number').textContent = '';
+  document.getElementById('wyr-choice-a-text').textContent = q.a;
+  document.getElementById('wyr-choice-b-text').textContent = q.b;
+
+  // Show card and choices
+  document.getElementById('wyr-card').style.display = 'flex';
+  document.getElementById('wyr-choices').style.display = 'grid';
+}
+
+// ── Category label prettifier ────────────────────────────
+function wyrCategoryLabel(cat) {
+  var labels = {
+    silly: 'SILLY',
+    superpower: 'SUPERPOWER',
+    food: 'FOOD',
+    animal: 'ANIMAL',
+    adventure: 'ADVENTURE',
+    gross: 'GROSS',
+    thisorthat: 'THIS OR THAT',
+    family: 'FAMILY'
+  };
+  return labels[cat] || cat.toUpperCase();
+}
+
+// ── Select an answer ─────────────────────────────────────
+function wyrSelectAnswer(choice) {
+  if (wyrState.revealed) return;
+  if (wyrState.myAnswer) return; // already picked
+
+  wyrState.myAnswer = choice;
+
+  // Write to Firebase
+  var key = playerId === 'p1' ? 'player1Answer' : 'player2Answer';
+  roomRef.child('wouldyourather/' + key).set(choice);
+
+  // Sound
+  wyrPlaySound('click');
+
+  wyrUpdateChoiceUI();
+}
+
+// ── Update choice button visuals ─────────────────────────
+function wyrUpdateChoiceUI() {
+  var btnA = document.getElementById('wyr-choice-a');
+  var btnB = document.getElementById('wyr-choice-b');
+
+  btnA.classList.remove('selected', 'locked');
+  btnB.classList.remove('selected', 'locked');
+
+  if (wyrState.myAnswer === 'A') {
+    btnA.classList.add('selected');
+    btnB.classList.add('locked');
+  } else if (wyrState.myAnswer === 'B') {
+    btnB.classList.add('selected');
+    btnA.classList.add('locked');
+  }
+}
+
+// ── Show the reveal panel ────────────────────────────────
+function wyrShowReveal(p1Answer, p2Answer) {
+  if (wyrState.revealed) return;
+  wyrState.revealed = true;
+
+  var isMatch = p1Answer === p2Answer;
+  var q = wyrState.currentQuestion;
+  if (!q) return;
+
+  var p1Text = p1Answer === 'A' ? q.a : q.b;
+  var p2Text = p2Answer === 'A' ? q.a : q.b;
+
+  // Sound
+  wyrPlaySound('drumroll');
+  setTimeout(function() {
+    if (isMatch) {
+      wyrPlaySound('match');
+    } else {
+      wyrPlaySound('differ');
+    }
+  }, 600);
+
+  // Delay reveal slightly for drumroll effect
+  setTimeout(function() {
+    var revealEl = document.getElementById('wyr-reveal');
+    revealEl.classList.remove('active', 'match', 'differ');
+
+    // Force reflow for re-animation
+    void revealEl.offsetWidth;
+
+    if (isMatch) {
+      revealEl.classList.add('active', 'match');
+      document.getElementById('wyr-reveal-title').textContent = 'GREAT MINDS!';
+      if (wyrState.streak >= 3) {
+        document.getElementById('wyr-reveal-title').textContent = 'GREAT MINDS! (' + wyrState.streak + ' IN A ROW!)';
+      }
+      wyrSpawnConfetti();
+    } else {
+      revealEl.classList.add('active', 'differ');
+      document.getElementById('wyr-reveal-title').textContent = 'OPPOSITES!';
+    }
+
+    // Set answer text
+    if (playerId === 'p1') {
+      document.getElementById('wyr-reveal-p1-answer').textContent = p1Text;
+      document.getElementById('wyr-reveal-p2-answer').textContent = p2Text;
+    } else {
+      document.getElementById('wyr-reveal-p1-answer').textContent = p1Text;
+      document.getElementById('wyr-reveal-p2-answer').textContent = p2Text;
+    }
+
+    // Update score display
+    document.getElementById('wyr-matches').textContent = wyrState.matches;
+    document.getElementById('wyr-total').textContent = wyrState.total;
+    document.getElementById('wyr-streak').textContent = wyrState.streak;
+
+    // Lock choice buttons
+    document.getElementById('wyr-choice-a').classList.add('locked');
+    document.getElementById('wyr-choice-b').classList.add('locked');
+
+    // Hide waiting
+    document.getElementById('wyr-waiting-answer').style.display = 'none';
+  }, 500);
+}
+
+// ── Next Question ────────────────────────────────────────
+function wyrNextQuestion() {
+  // Reset local state
+  wyrState.myAnswer = null;
+  wyrState.opAnswer = null;
+  wyrState.revealed = false;
+
+  // Hide reveal
+  document.getElementById('wyr-reveal').classList.remove('active', 'match', 'differ');
+
+  // Reset buttons
+  document.getElementById('wyr-choice-a').classList.remove('selected', 'locked');
+  document.getElementById('wyr-choice-b').classList.remove('selected', 'locked');
+
+  // Sound
+  wyrPlaySound('shuffle');
+
+  // Player 1 picks next question (or whoever clicks — p1 preferred for consistency)
+  wyrFilterAndPick();
+}
+
+// ── Set Category Filter ──────────────────────────────────
+function wyrSetCategory(cat) {
+  wyrState.category = cat;
+
+  // Update button UI
+  document.querySelectorAll('.wyr-cat-btn').forEach(function(b) {
+    b.classList.toggle('active', b.getAttribute('data-cat') === cat);
+  });
+
+  // If we're between questions (revealed or no question), pick a new one
+  if (wyrState.revealed || !wyrState.currentQuestion) {
+    wyrState.myAnswer = null;
+    wyrState.opAnswer = null;
+    wyrState.revealed = false;
+    document.getElementById('wyr-reveal').classList.remove('active', 'match', 'differ');
+    document.getElementById('wyr-choice-a').classList.remove('selected', 'locked');
+    document.getElementById('wyr-choice-b').classList.remove('selected', 'locked');
+    wyrFilterAndPick();
+  }
+  // If mid-question, category takes effect on next question
+}
+
+// ── Leave game / cleanup ─────────────────────────────────
+// ADD THIS to leaveRoom() cleanup, alongside bsCleanup():
+//   wyrCleanup();
+function wyrLeaveGame() {
+  wyrCleanup();
+  showView('hub');
+}
+
+function wyrCleanup() {
+  wyrState.active = false;
+  wyrState.gameStarted = false;
+  wyrState.currentQuestion = null;
+  wyrState.myAnswer = null;
+  wyrState.opAnswer = null;
+  wyrState.revealed = false;
+
+  // Detach Firebase listeners
+  wyrState.listeners.forEach(function(l) {
+    l.ref.off(l.event, l.fn);
+  });
+  wyrState.listeners = [];
+
+  // Clean up Firebase data
+  if (roomRef) {
+    roomRef.child('wouldyourather').remove();
+  }
+}
+
+// ── Confetti for matches ─────────────────────────────────
+function wyrSpawnConfetti() {
+  var colors = ['#2dc653', '#F4A261', '#e76f51', '#48cae4', '#ffd700', '#ff6b6b', '#c77dff'];
+  for (var i = 0; i < 40; i++) {
+    (function(idx) {
+      setTimeout(function() {
+        var el = document.createElement('div');
+        el.className = 'wyr-confetti';
+        el.style.left = Math.random() * 100 + 'vw';
+        el.style.background = colors[Math.floor(Math.random() * colors.length)];
+        el.style.width = (6 + Math.random() * 8) + 'px';
+        el.style.height = (6 + Math.random() * 8) + 'px';
+        el.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+        el.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+        document.body.appendChild(el);
+        setTimeout(function() {
+          if (el.parentNode) el.parentNode.removeChild(el);
+        }, 4000);
+      }, idx * 30);
+    })(i);
+  }
+}
+
+// ── Sound Effects (Web Audio API) ────────────────────────
+function wyrGetAudioCtx() {
+  if (!wyrState.audioCtx) {
+    wyrState.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  return wyrState.audioCtx;
+}
+
+function wyrPlaySound(type) {
+  if (!wyrState.soundOn) return;
+  try {
+    var ctx = wyrGetAudioCtx();
+    var vol = 0.3;
+    switch (type) {
+      case 'click':
+        wyrSoundClick(ctx, vol);
+        break;
+      case 'drumroll':
+        wyrSoundDrumroll(ctx, vol);
+        break;
+      case 'match':
+        wyrSoundMatch(ctx, vol);
+        break;
+      case 'differ':
+        wyrSoundDiffer(ctx, vol);
+        break;
+      case 'shuffle':
+        wyrSoundShuffle(ctx, vol);
+        break;
+    }
+  } catch (e) {
+    // Audio not available — silent fail
+  }
+}
+
+function wyrSoundClick(ctx, vol) {
+  var osc = ctx.createOscillator();
+  var gain = ctx.createGain();
+  osc.type = 'sine';
+  osc.frequency.value = 800;
+  gain.gain.setValueAtTime(vol, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start();
+  osc.stop(ctx.currentTime + 0.1);
+}
+
+function wyrSoundDrumroll(ctx, vol) {
+  // Rapid tapping that builds
+  for (var i = 0; i < 12; i++) {
+    (function(idx) {
+      var delay = idx * 0.04;
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.value = 200 + idx * 15;
+      gain.gain.setValueAtTime(vol * 0.2 * (idx / 12 + 0.3), ctx.currentTime + delay);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + 0.06);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(ctx.currentTime + delay);
+      osc.stop(ctx.currentTime + delay + 0.06);
+    })(i);
+  }
+}
+
+function wyrSoundMatch(ctx, vol) {
+  // Happy ascending chime — three tones
+  var notes = [523.25, 659.25, 783.99]; // C5, E5, G5 — major chord ascending
+  notes.forEach(function(freq, i) {
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    var t = ctx.currentTime + i * 0.12;
+    gain.gain.setValueAtTime(vol * 0.5, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(t);
+    osc.stop(t + 0.4);
+  });
+}
+
+function wyrSoundDiffer(ctx, vol) {
+  // Playful "boing" buzzer — not negative, just silly
+  var osc = ctx.createOscillator();
+  var gain = ctx.createGain();
+  osc.type = 'sawtooth';
+  osc.frequency.setValueAtTime(400, ctx.currentTime);
+  osc.frequency.linearRampToValueAtTime(200, ctx.currentTime + 0.15);
+  osc.frequency.linearRampToValueAtTime(350, ctx.currentTime + 0.25);
+  gain.gain.setValueAtTime(vol * 0.25, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start();
+  osc.stop(ctx.currentTime + 0.3);
+}
+
+function wyrSoundShuffle(ctx, vol) {
+  // Quick swoosh — card shuffle feel
+  for (var i = 0; i < 4; i++) {
+    (function(idx) {
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = 300 + idx * 100;
+      var t = ctx.currentTime + idx * 0.05;
+      gain.gain.setValueAtTime(vol * 0.15, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(t);
+      osc.stop(t + 0.08);
+    })(i);
+  }
+}
+
+
+/* ==========================================================
+   INTEGRATION HOOKS — Changes needed in existing code
+   ==========================================================
+
+   1. In init() function, add after bsInit():
+      wyrInit();
+
+   2. In bindUI() function, add:
+      document.getElementById('back-wouldyourather').addEventListener('click', function() { wyrLeaveGame(); });
+      (Note: wyrInit() already binds this, so this is optional if wyrInit runs)
+
+   3. In listenToRoom() → currentGame listener, add:
+      if (game === 'wouldyourather') {
+        wyrStartGame();
+      }
+
+   4. In updateGameCards() function, change the check from:
+      if (game !== 'battleship') {
+        card.classList.add('disabled');
+        return;
+      }
+   To:
+      if (game !== 'battleship' && game !== 'wouldyourather') {
+        if (game !== 'chess') {
+          card.classList.add('disabled');
+        }
+        return;
+      }
+   And duplicate the bothConnected logic for wouldyourather.
+
+   5. In leaveRoom() function, add alongside bsCleanup():
+      wyrCleanup();
+
+   6. Add game card CSS colors near line ~270:
+      .game-card[data-game="wouldyourather"] { border-color: #F4A261; }
+      .game-card[data-game="wouldyourather"]:hover { box-shadow: 0 8px 24px rgba(244, 162, 97, 0.3); }
+      .game-card[data-game="wouldyourather"] .game-icon { color: #F4A261; }
+
+   ========================================================== */
+</script>
