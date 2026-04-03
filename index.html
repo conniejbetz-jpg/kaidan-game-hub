@@ -6563,7 +6563,11 @@ function ccInit() {
 }
 
 function ccStartGame() {
-  if (ccState.gameStarted) return;
+  // Clean stale state from prior game
+  if (ccState.gameStarted) {
+    ccState.listeners.forEach(function(l) { l.ref.off(l.event, l.fn); });
+    ccState.listeners = [];
+  }
   ccState.gameStarted = true;
   ccState.active = true;
   ccState.p1Score = 0;
@@ -6677,7 +6681,10 @@ function ccSubmitAnswer() {
   var val = input.value.trim().toUpperCase();
   if (!val) return;
 
-  var isCorrect = val === ccState.currentAnswer;
+  // Re-read answer from state in case it updated since page render
+  var correctAnswer = ccState.currentAnswer;
+  if (!correctAnswer) return;
+  var isCorrect = val === correctAnswer;
 
   if (!isCorrect) {
     ccState.locked = true;
@@ -8397,13 +8404,15 @@ function hmListenForState() {
       document.getElementById('hm-gameover-word').textContent = 'The word was: ' + (data.word || '');
       document.getElementById('hm-status-msg').textContent = '';
 
-      // Reveal unrevealed letters in red
-      if (data.word && data.revealed) {
-        var slots = document.querySelectorAll('.hm-letter-slot');
+      // Reveal unrevealed letters in red — rebuild from word if revealed is incomplete
+      if (data.word) {
         var wordArr = data.word.split('');
+        var revArr = data.revealed || [];
+        // Force render the full word so all letters show
+        hmRenderWord(wordArr.map(function(c) { return c; }));
+        var slots = document.querySelectorAll('.hm-letter-slot');
         slots.forEach(function(slot, i) {
-          if (i < wordArr.length && wordArr[i] !== ' ' && data.revealed[i] === '_') {
-            slot.textContent = wordArr[i];
+          if (i < wordArr.length && wordArr[i] !== ' ' && (!revArr[i] || revArr[i] === '_')) {
             slot.classList.add('wrong-reveal');
           }
         });
@@ -8438,6 +8447,7 @@ function hmGuessLetter(letter) {
   if (hmState.myRole !== 'guesser') return;
   if (hmState.status !== 'guessing') return;
   if (hmState.guessedLetters.indexOf(letter) !== -1) return;
+  if (!hmState.word || hmState.word.length === 0) return;
 
   var newGuessed = hmState.guessedLetters.slice();
   newGuessed.push(letter);
@@ -8836,7 +8846,11 @@ function wyrInit() {
 }
 
 function wyrStartGame() {
-  if (wyrState.gameStarted) return;
+  // Clean up any stale state from prior game
+  if (wyrState.gameStarted) {
+    wyrState.listeners.forEach(function(l) { l.ref.off(l.event, l.fn); });
+    wyrState.listeners = [];
+  }
   wyrState.gameStarted = true;
   wyrState.active = true;
 
@@ -8889,6 +8903,10 @@ function wyrStartGame() {
 }
 
 function wyrFilterAndPick() {
+  if (typeof WYR_QUESTIONS === 'undefined' || !WYR_QUESTIONS || WYR_QUESTIONS.length === 0) {
+    console.error('WYR_QUESTIONS not loaded');
+    return;
+  }
   wyrState.filteredQuestions = [];
   for (var i = 0; i < WYR_QUESTIONS.length; i++) {
     if (wyrState.category === 'all' || WYR_QUESTIONS[i].cat === wyrState.category) {
