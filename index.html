@@ -2387,6 +2387,17 @@ body {
   font-family: 'Courier New', monospace; line-height: 1.6; text-align: center;
 }
 .cc-morse-ref span { color: #8a8a9a; margin: 0 4px; }
+.cc-alpha-ref {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  width: 100%; max-width: 420px; margin: 0 auto;
+  background: #1a1a2e; border: 1px solid #2a3a5c; border-radius: 8px;
+  padding: 8px 12px; font-family: 'Courier New', monospace;
+  font-size: 13px; color: #8a8a9a; line-height: 1.8; text-align: center;
+}
+.cc-alpha-ref .cc-alpha-hdr {
+  font-weight: 900; color: #F4A261; border-bottom: 1px solid #3a4a6c;
+  padding-bottom: 4px; margin-bottom: 4px;
+}
 @media (max-width: 600px) {
   .cc-encoded { font-size: 18px; letter-spacing: 2px; }
   .cc-answer-input { font-size: 16px; }
@@ -2587,7 +2598,7 @@ body {
 .hm-cat-btn:hover { border-color: #f4a261; color: #f4a261; }
 .hm-cat-btn.active { background: #f4a261; color: #1a1a2e; border-color: #f4a261; }
 .hm-word-input {
-  width: 100%; max-width: 480px; padding: 12px 16px; border: 2px solid #3a4a6c;
+  width: 100%; max-width: 600px; padding: 12px 16px; border: 2px solid #3a4a6c;
   border-radius: 8px; background: #1a1a2e; color: #fff; font-family: 'Inter', sans-serif;
   font-size: 18px; font-weight: 700; text-align: center; letter-spacing: 3px;
   text-transform: uppercase; outline: none; transition: border-color 0.2s;
@@ -2660,6 +2671,31 @@ body {
   width: 35px; height: 3px; background: #e76f51;
   position: absolute; top: 118px; left: 94px;
   transform: rotate(30deg); transform-origin: left center;
+}
+/* Extended body parts (7-12) */
+.hm-left-hand {
+  width: 10px; height: 10px; border: 2px solid #e76f51; border-radius: 50%;
+  position: absolute; top: 88px; left: 49px;
+}
+.hm-right-hand {
+  width: 10px; height: 10px; border: 2px solid #e76f51; border-radius: 50%;
+  position: absolute; top: 88px; left: 131px;
+}
+.hm-left-foot {
+  width: 12px; height: 8px; border: 2px solid #e76f51; border-radius: 50%;
+  position: absolute; top: 126px; left: 48px;
+}
+.hm-right-foot {
+  width: 12px; height: 8px; border: 2px solid #e76f51; border-radius: 50%;
+  position: absolute; top: 126px; left: 122px;
+}
+.hm-left-eye {
+  width: 5px; height: 5px; background: #e76f51; border-radius: 50%;
+  position: absolute; top: 46px; left: 85px;
+}
+.hm-right-eye {
+  width: 5px; height: 5px; background: #e76f51; border-radius: 50%;
+  position: absolute; top: 46px; left: 100px;
 }
 /* Word display */
 .hm-word-display {
@@ -3045,7 +3081,7 @@ body {
           <button class="hm-cat-btn" data-cat="science">Science</button>
           <button class="hm-cat-btn" data-cat="videogames">Video Games</button>
         </div>
-        <input type="text" class="hm-word-input" id="hm-word-input" placeholder="Type a word or phrase..." maxlength="50" autocomplete="off" spellcheck="false">
+        <input type="text" class="hm-word-input" id="hm-word-input" placeholder="Type a word or phrase..." maxlength="100" autocomplete="off" spellcheck="false">
         <div class="hm-or-divider">— OR —</div>
         <button class="hm-random-btn" id="hm-random-btn">Pick Random Word</button>
         <br>
@@ -3075,6 +3111,12 @@ body {
         <div class="hm-part hm-right-arm" id="hm-part-3"></div>
         <div class="hm-part hm-left-leg" id="hm-part-4"></div>
         <div class="hm-part hm-right-leg" id="hm-part-5"></div>
+        <div class="hm-part hm-left-hand" id="hm-part-6"></div>
+        <div class="hm-part hm-right-hand" id="hm-part-7"></div>
+        <div class="hm-part hm-left-foot" id="hm-part-8"></div>
+        <div class="hm-part hm-right-foot" id="hm-part-9"></div>
+        <div class="hm-part hm-left-eye" id="hm-part-10"></div>
+        <div class="hm-part hm-right-eye" id="hm-part-11"></div>
       </div>
 
       <!-- Word Display -->
@@ -3261,6 +3303,23 @@ body {
 
     <div class="cc-morse-ref" id="cc-morse-ref" style="display:none;">
       <span>A .-</span><span>B -...</span><span>C -.-.</span><span>D -..</span><span>E .</span><span>F ..-.</span><span>G --.</span><span>H ....</span><span>I ..</span><span>J .---</span><span>K -.-</span><span>L .-..</span><span>M --</span><span>N -.</span><span>O ---</span><span>P .--.</span><span>Q --.-</span><span>R .-.</span><span>S ...</span><span>T -</span><span>U ..-</span><span>V ...-</span><span>W .--</span><span>X -..-</span><span>Y -.--</span><span>Z --..</span>
+    </div>
+
+    <div class="cc-alpha-ref" id="cc-alpha-ref" style="display:none;">
+      <div class="cc-alpha-hdr">Letter</div><div class="cc-alpha-hdr">#</div><div class="cc-alpha-hdr">Letter</div><div class="cc-alpha-hdr">#</div>
+      <div>A</div><div>1</div><div>N</div><div>14</div>
+      <div>B</div><div>2</div><div>O</div><div>15</div>
+      <div>C</div><div>3</div><div>P</div><div>16</div>
+      <div>D</div><div>4</div><div>Q</div><div>17</div>
+      <div>E</div><div>5</div><div>R</div><div>18</div>
+      <div>F</div><div>6</div><div>S</div><div>19</div>
+      <div>G</div><div>7</div><div>T</div><div>20</div>
+      <div>H</div><div>8</div><div>U</div><div>21</div>
+      <div>I</div><div>9</div><div>V</div><div>22</div>
+      <div>J</div><div>10</div><div>W</div><div>23</div>
+      <div>K</div><div>11</div><div>X</div><div>24</div>
+      <div>L</div><div>12</div><div>Y</div><div>25</div>
+      <div>M</div><div>13</div><div>Z</div><div>26</div>
     </div>
 
     <div class="cc-round-summary" id="cc-round-summary">
@@ -6531,7 +6590,7 @@ function ccGenerateProblem(diff) {
   var word = pool[Math.floor(Math.random() * pool.length)];
   var type = types[Math.floor(Math.random() * types.length)];
   var encoded = ccEncode(word, type);
-  return { answer: word, encoded: encoded.encoded, cipherType: encoded.cipherType, hint: encoded.hint, isMorse: type === 'morse' };
+  return { answer: word, encoded: encoded.encoded, cipherType: encoded.cipherType, hint: encoded.hint, isMorse: type === 'morse', isLetterNum: type === 'letternum' };
 }
 
 function ccInit() {
@@ -6604,6 +6663,7 @@ function ccNextProblem() {
     cipherType: problem.cipherType,
     hint: problem.hint,
     isMorse: problem.isMorse || false,
+    isLetterNum: problem.isLetterNum || false,
     questionNum: newQNum,
     p1Answer: null,
     p2Answer: null,
@@ -6642,6 +6702,7 @@ function ccListenForState() {
       document.getElementById('cc-answer-area').style.display = 'flex';
       document.getElementById('cc-round-summary').classList.remove('active');
       document.getElementById('cc-morse-ref').style.display = data.isMorse ? 'block' : 'none';
+      document.getElementById('cc-alpha-ref').style.display = data.isLetterNum ? 'grid' : 'none';
 
       var myAnswerKey = playerId === 'p1' ? 'p1Answer' : 'p2Answer';
       if (data[myAnswerKey] !== null && data[myAnswerKey] !== undefined) {
@@ -6816,6 +6877,7 @@ function ccShowRoundSummary() {
   document.getElementById('cc-result-flash').classList.remove('active', 'won', 'lost', 'tie');
   document.getElementById('cc-status-msg').textContent = '';
   document.getElementById('cc-morse-ref').style.display = 'none';
+  document.getElementById('cc-alpha-ref').style.display = 'none';
   document.getElementById('cc-progress').style.width = '100%';
 
   var p1Name = document.getElementById('cc-p1-name').textContent;
@@ -8338,6 +8400,7 @@ function hmListenForState() {
     hmState.p2Score = data.p2Score || 0;
     hmState.round = data.round || 1;
     hmState.wrongCount = data.wrongCount || 0;
+    hmState.maxWrong = data.maxWrong || 6;
     hmState.guessedLetters = data.guessedLetters || [];
     hmState.status = data.status || 'picking';
 
@@ -8444,8 +8507,23 @@ function hmListenForState() {
   hmState.listeners.push({ ref: opRef, event: 'value', fn: opListener });
 }
 
+function hmCalcMaxWrong(word) {
+  // Count unique non-space characters
+  var unique = {};
+  for (var i = 0; i < word.length; i++) {
+    if (word[i] !== ' ') unique[word[i]] = true;
+  }
+  var count = Object.keys(unique).length;
+  if (count <= 6) return 6;
+  if (count <= 9) return 8;
+  if (count <= 12) return 10;
+  return 12;
+}
+
 function hmSubmitWord(word) {
   if (!word || word.length < 2) return;
+
+  var maxWrong = hmCalcMaxWrong(word);
 
   // Build revealed array: all underscores except spaces
   var revealed = [];
@@ -8458,6 +8536,7 @@ function hmSubmitWord(word) {
     revealed: revealed,
     guessedLetters: [],
     wrongCount: 0,
+    maxWrong: maxWrong,
     status: 'guessing'
   });
 
@@ -8550,6 +8629,7 @@ function hmNextRound() {
     revealed: null,
     guessedLetters: null,
     wrongCount: 0,
+    maxWrong: 6,
     round: newRound
   });
 
@@ -8587,7 +8667,7 @@ function hmRenderWord(revealed) {
 }
 
 function hmUpdateFigure(wrongCount) {
-  for (var i = 0; i < 6; i++) {
+  for (var i = 0; i < 12; i++) {
     var part = document.getElementById('hm-part-' + i);
     if (part) {
       part.classList.toggle('visible', i < wrongCount);
@@ -8641,7 +8721,7 @@ function hmCleanup() {
   }
 
   // Reset figure
-  for (var i = 0; i < 6; i++) {
+  for (var i = 0; i < 12; i++) {
     var part = document.getElementById('hm-part-' + i);
     if (part) part.classList.remove('visible');
   }
