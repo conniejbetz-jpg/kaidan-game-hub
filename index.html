@@ -2587,9 +2587,9 @@ body {
 .hm-cat-btn:hover { border-color: #f4a261; color: #f4a261; }
 .hm-cat-btn.active { background: #f4a261; color: #1a1a2e; border-color: #f4a261; }
 .hm-word-input {
-  width: 100%; max-width: 300px; padding: 12px 16px; border: 2px solid #3a4a6c;
+  width: 100%; max-width: 480px; padding: 12px 16px; border: 2px solid #3a4a6c;
   border-radius: 8px; background: #1a1a2e; color: #fff; font-family: 'Inter', sans-serif;
-  font-size: 18px; font-weight: 700; text-align: center; letter-spacing: 4px;
+  font-size: 18px; font-weight: 700; text-align: center; letter-spacing: 3px;
   text-transform: uppercase; outline: none; transition: border-color 0.2s;
 }
 .hm-word-input:focus { border-color: #f4a261; }
@@ -2663,7 +2663,10 @@ body {
 }
 /* Word display */
 .hm-word-display {
-  display: flex; flex-wrap: wrap; justify-content: center; gap: 8px;
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 16px;
+}
+.hm-word-group {
+  display: inline-flex; gap: 4px;
 }
 .hm-letter-slot {
   width: 36px; height: 44px; border-bottom: 3px solid #3a4a6c;
@@ -3042,7 +3045,7 @@ body {
           <button class="hm-cat-btn" data-cat="science">Science</button>
           <button class="hm-cat-btn" data-cat="videogames">Video Games</button>
         </div>
-        <input type="text" class="hm-word-input" id="hm-word-input" placeholder="Type a word..." maxlength="20" autocomplete="off" spellcheck="false">
+        <input type="text" class="hm-word-input" id="hm-word-input" placeholder="Type a word or phrase..." maxlength="50" autocomplete="off" spellcheck="false">
         <div class="hm-or-divider">— OR —</div>
         <button class="hm-random-btn" id="hm-random-btn">Pick Random Word</button>
         <br>
@@ -3783,7 +3786,7 @@ function listenToRoom() {
       if (game === 'battleship') {
         bsStartGame();
       }
-      if (game === 'wouldyourather') {
+      if (game === 'wouldyourather' && !wyrState.active) {
         wyrStartGame();
       }
       if (game === 'hangman') {
@@ -8231,7 +8234,7 @@ function hmInit() {
   });
 
   document.getElementById('hm-word-input').addEventListener('input', function() {
-    this.value = this.value.toUpperCase().replace(/[^A-Z ]/g, '');
+    this.value = this.value.toUpperCase().replace(/[^A-Z0-9 \-'!?&]/g, '');
     document.getElementById('hm-submit-word').disabled = this.value.trim().length < 2;
   });
 
@@ -8270,9 +8273,10 @@ function hmInit() {
     hmNextRound();
   });
 
-  // Build keyboard
+  // Build keyboard — letters, numbers, and symbols
   var keyboard = document.getElementById('hm-keyboard');
-  'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(function(letter) {
+  var allKeys = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-\'!?&';
+  allKeys.split('').forEach(function(letter) {
     var key = document.createElement('button');
     key.className = 'hm-key';
     key.textContent = letter;
@@ -8411,16 +8415,33 @@ function hmListenForState() {
         // Force render the full word so all letters show
         hmRenderWord(wordArr.map(function(c) { return c; }));
         var slots = document.querySelectorAll('.hm-letter-slot');
-        slots.forEach(function(slot, i) {
-          if (i < wordArr.length && wordArr[i] !== ' ' && (!revArr[i] || revArr[i] === '_')) {
-            slot.classList.add('wrong-reveal');
+        var nonSpaceIdx = 0;
+        for (var ri = 0; ri < wordArr.length; ri++) {
+          if (wordArr[ri] === ' ') continue;
+          if (nonSpaceIdx < slots.length && (!revArr[ri] || revArr[ri] === '_')) {
+            slots[nonSpaceIdx].classList.add('wrong-reveal');
           }
-        });
+          nonSpaceIdx++;
+        }
       }
     }
   });
 
   hmState.listeners.push({ ref: hmRef, event: 'value', fn: listener });
+
+  // Watch for opponent disconnect during game
+  var opponentKey = playerId === 'p1' ? 'p2' : 'p1';
+  var opRef = roomRef.child('players/' + opponentKey + '/online');
+  var opListener = opRef.on('value', function(snap) {
+    if (!hmState.active) return;
+    var online = snap.val();
+    if (online === false) {
+      toast((opponentName || 'Opponent') + ' disconnected!', 'error');
+      var msg = document.getElementById('hm-status-msg');
+      if (msg) msg.textContent = '⚠ ' + (opponentName || 'Opponent') + ' has disconnected';
+    }
+  });
+  hmState.listeners.push({ ref: opRef, event: 'value', fn: opListener });
 }
 
 function hmSubmitWord(word) {
@@ -8538,19 +8559,31 @@ function hmNextRound() {
 function hmRenderWord(revealed) {
   var container = document.getElementById('hm-word-display');
   container.innerHTML = '';
+  // Group letters by word (split on spaces) so words never break across lines
+  var wordGroup = document.createElement('div');
+  wordGroup.className = 'hm-word-group';
   revealed.forEach(function(ch) {
-    var slot = document.createElement('div');
     if (ch === ' ') {
-      slot.className = 'hm-letter-slot space';
+      // Close current word group, start a new one
+      if (wordGroup.children.length > 0) {
+        container.appendChild(wordGroup);
+      }
+      wordGroup = document.createElement('div');
+      wordGroup.className = 'hm-word-group';
     } else {
+      var slot = document.createElement('div');
       slot.className = 'hm-letter-slot';
       if (ch !== '_') {
         slot.textContent = ch;
         slot.classList.add('revealed');
       }
+      wordGroup.appendChild(slot);
     }
-    container.appendChild(slot);
   });
+  // Append the last word group
+  if (wordGroup.children.length > 0) {
+    container.appendChild(wordGroup);
+  }
 }
 
 function hmUpdateFigure(wrongCount) {
@@ -8629,21 +8662,52 @@ function hmPlaySound(type) {
     var vol = 0.3;
     switch (type) {
       case 'hit':
-        var osc = ctx.createOscillator(); var gain = ctx.createGain();
-        osc.type = 'sine'; osc.frequency.value = 660;
-        gain.gain.setValueAtTime(vol, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
-        osc.connect(gain); gain.connect(ctx.destination);
-        osc.start(); osc.stop(ctx.currentTime + 0.15);
+        // Applause — burst of filtered noise with shimmer
+        (function() {
+          var bufLen = ctx.sampleRate * 0.6;
+          var buf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
+          var data = buf.getChannelData(0);
+          for (var ai = 0; ai < bufLen; ai++) {
+            data[ai] = (Math.random() * 2 - 1) * 0.5;
+          }
+          var noise = ctx.createBufferSource();
+          noise.buffer = buf;
+          var bpf = ctx.createBiquadFilter();
+          bpf.type = 'bandpass'; bpf.frequency.value = 3000; bpf.Q.value = 0.5;
+          var gn = ctx.createGain();
+          gn.gain.setValueAtTime(0.001, ctx.currentTime);
+          gn.gain.linearRampToValueAtTime(vol * 0.5, ctx.currentTime + 0.05);
+          gn.gain.setValueAtTime(vol * 0.5, ctx.currentTime + 0.2);
+          gn.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+          noise.connect(bpf); bpf.connect(gn); gn.connect(ctx.destination);
+          noise.start(); noise.stop(ctx.currentTime + 0.6);
+          // Add a bright chime on top
+          var chime = ctx.createOscillator(); var cg = ctx.createGain();
+          chime.type = 'sine'; chime.frequency.value = 880;
+          cg.gain.setValueAtTime(vol * 0.3, ctx.currentTime);
+          cg.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+          chime.connect(cg); cg.connect(ctx.destination);
+          chime.start(); chime.stop(ctx.currentTime + 0.3);
+        })();
         break;
       case 'miss':
-        var osc2 = ctx.createOscillator(); var gain2 = ctx.createGain();
-        osc2.type = 'square'; osc2.frequency.value = 200;
-        osc2.frequency.linearRampToValueAtTime(120, ctx.currentTime + 0.2);
-        gain2.gain.setValueAtTime(vol * 0.3, ctx.currentTime);
-        gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
-        osc2.connect(gain2); gain2.connect(ctx.destination);
-        osc2.start(); osc2.stop(ctx.currentTime + 0.25);
+        // Wah-wah-wah-wah sad trombone
+        (function() {
+          var notes = [350, 330, 310, 250];
+          notes.forEach(function(freq, i) {
+            var o = ctx.createOscillator(); var g = ctx.createGain();
+            o.type = 'sawtooth'; o.frequency.value = freq;
+            var t = ctx.currentTime + i * 0.25;
+            // Wah effect: oscillate the frequency slightly
+            o.frequency.setValueAtTime(freq, t);
+            o.frequency.linearRampToValueAtTime(freq * 0.92, t + 0.12);
+            o.frequency.linearRampToValueAtTime(freq * 0.85, t + 0.22);
+            g.gain.setValueAtTime(vol * 0.25, t);
+            g.gain.exponentialRampToValueAtTime(0.001, t + 0.24);
+            o.connect(g); g.connect(ctx.destination);
+            o.start(t); o.stop(t + 0.25);
+          });
+        })();
         break;
       case 'win':
         [523, 659, 784, 1047].forEach(function(f, i) {
@@ -8899,6 +8963,18 @@ function wyrStartGame() {
 
   if (playerId === 'p1') {
     wyrFilterAndPick();
+  } else {
+    // P2 fallback: if no question loaded within 3 seconds, check Firebase directly
+    wyrState._retryTimer = setTimeout(function() {
+      if (!wyrState.active) return;
+      roomRef.child('wouldyourather/currentQuestion').once('value', function(snap) {
+        var qIdx = snap.val();
+        if (qIdx !== null && qIdx !== undefined && qIdx >= 0 && qIdx < WYR_QUESTIONS.length) {
+          // Data exists — listener may have missed it; force display
+          wyrDisplayQuestion(WYR_QUESTIONS[qIdx], qIdx);
+        }
+      });
+    }, 3000);
   }
 }
 
@@ -9174,7 +9250,10 @@ function wyrNextQuestion() {
   document.getElementById('wyr-choice-b').classList.remove('selected', 'locked');
 
   wyrPlaySound('shuffle');
-  wyrFilterAndPick();
+  // Only P1 picks the next question to avoid race conditions
+  if (playerId === 'p1') {
+    wyrFilterAndPick();
+  }
 }
 
 function wyrShowRoundSummary() {
@@ -9290,7 +9369,9 @@ function wyrSetCategory(cat) {
     document.getElementById('wyr-reveal').classList.remove('active', 'match', 'differ');
     document.getElementById('wyr-choice-a').classList.remove('selected', 'locked');
     document.getElementById('wyr-choice-b').classList.remove('selected', 'locked');
-    wyrFilterAndPick();
+    if (playerId === 'p1') {
+      wyrFilterAndPick();
+    }
   }
 }
 
@@ -9306,6 +9387,7 @@ function wyrCleanup() {
   wyrState.myAnswer = null;
   wyrState.opAnswer = null;
   wyrState.revealed = false;
+  if (wyrState._retryTimer) { clearTimeout(wyrState._retryTimer); wyrState._retryTimer = null; }
 
   wyrState.listeners.forEach(function(l) {
     l.ref.off(l.event, l.fn);
