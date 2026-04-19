@@ -6035,6 +6035,19 @@ function gcShuffle(arr) {
   return arr;
 }
 
+// When deck is empty, rebuild from cards NOT currently in play — equivalent
+// to reshuffling the discard pile (which this game doesn't persist) back in.
+function gcReshuffleIfNeeded(deck, p1Hand, p2Hand, topDiscard) {
+  if (deck && deck.length > 0) return deck;
+  var fullDeck = gcBuildDeck();
+  var inPlay = {};
+  (p1Hand || []).forEach(function(c) { inPlay[c.id] = true; });
+  (p2Hand || []).forEach(function(c) { inPlay[c.id] = true; });
+  if (topDiscard) inPlay[topDiscard.id] = true;
+  var remaining = fullDeck.filter(function(c) { return !inPlay[c.id]; });
+  return gcShuffle(remaining);
+}
+
 var gcState = {
   active: false,
   gameStarted: false,
@@ -6045,7 +6058,8 @@ var gcState = {
   pendingWild: null,  // card waiting for color pick
   p1Score: 0,
   p2Score: 0,
-  round: 1
+  round: 1,
+  lastTurn: null
 };
 
 function gcInit() {
@@ -6142,6 +6156,12 @@ function gcListenForState() {
     gcState.myHand = myHand;
 
     var isMyTurn = data.turn === playerId;
+
+    // Goat bleat when turn flips from opponent to me (not on first load or my own plays)
+    if (data.status === 'playing' && isMyTurn && gcState.lastTurn && gcState.lastTurn !== playerId) {
+      gcPlaySound('yourturn');
+    }
+    gcState.lastTurn = data.turn;
 
     if (data.status === 'playing') {
       document.getElementById('gc-table').style.display = 'flex';
@@ -6310,6 +6330,7 @@ function gcExecutePlay(idx, card, chosenColor) {
     } else if (card.type === 'draw2') {
       // Opponent draws 2, loses turn
       for (var d = 0; d < 2; d++) {
+        deck = gcReshuffleIfNeeded(deck, myHand, opHand, card);
         if (deck.length > 0) opHand.push(deck.shift());
       }
       nextTurn = playerId;
@@ -6317,6 +6338,7 @@ function gcExecutePlay(idx, card, chosenColor) {
     } else if (card.type === 'wilddraw4') {
       // Opponent draws 4, loses turn
       for (var d2 = 0; d2 < 4; d2++) {
+        deck = gcReshuffleIfNeeded(deck, myHand, opHand, card);
         if (deck.length > 0) opHand.push(deck.shift());
       }
       nextTurn = playerId;
@@ -6373,9 +6395,12 @@ function gcDrawCard() {
     var myHandKey = playerId === 'p1' ? 'p1Hand' : 'p2Hand';
     var myHand = (data[myHandKey] || []).slice();
     var deck = (data.deck || []).slice();
+    var p1H = (data.p1Hand || []).slice();
+    var p2H = (data.p2Hand || []).slice();
+    deck = gcReshuffleIfNeeded(deck, p1H, p2H, data.discard);
 
     if (deck.length === 0) {
-      toast('Deck empty!', 'info');
+      toast('Deck empty — no cards left to reshuffle.', 'info');
       return;
     }
 
@@ -6493,6 +6518,26 @@ function gcPlaySound(type) {
           o4.connect(g4); g4.connect(ctx.destination);
           o4.start(t2); o4.stop(t2 + 0.3);
         });
+        break;
+      case 'yourturn':
+        // Goat bleat — sawtooth wave with rapid vibrato for "baa-a-a" effect
+        var o5 = ctx.createOscillator(); var g5 = ctx.createGain();
+        o5.type = 'sawtooth';
+        o5.frequency.setValueAtTime(185, ctx.currentTime);
+        o5.frequency.linearRampToValueAtTime(210, ctx.currentTime + 0.08);
+        o5.frequency.linearRampToValueAtTime(175, ctx.currentTime + 0.32);
+        g5.gain.setValueAtTime(0, ctx.currentTime);
+        g5.gain.linearRampToValueAtTime(vol * 0.45, ctx.currentTime + 0.02);
+        g5.gain.setValueAtTime(vol * 0.45, ctx.currentTime + 0.28);
+        g5.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.34);
+        // Tremolo LFO for goat-like wobble
+        var lfo = ctx.createOscillator(); var lfoGain = ctx.createGain();
+        lfo.type = 'sine'; lfo.frequency.value = 22;
+        lfoGain.gain.value = 14;
+        lfo.connect(lfoGain); lfoGain.connect(o5.frequency);
+        o5.connect(g5); g5.connect(ctx.destination);
+        lfo.start(ctx.currentTime); lfo.stop(ctx.currentTime + 0.34);
+        o5.start(); o5.stop(ctx.currentTime + 0.34);
         break;
     }
   } catch (e) { /* Audio not available */ }
