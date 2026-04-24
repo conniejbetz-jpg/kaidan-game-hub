@@ -9404,10 +9404,9 @@ function wyrNextQuestion() {
   document.getElementById('wyr-choice-b').classList.remove('selected', 'locked');
 
   wyrPlaySound('shuffle');
-  // Only P1 picks the next question to avoid race conditions
-  if (playerId === 'p1') {
-    wyrFilterAndPick();
-  }
+  // Either player can trigger the next pick. Rare race if both click within the
+  // same network round-trip is benign — Firebase last-write-wins, brief visual flash.
+  wyrFilterAndPick();
 }
 
 function wyrShowRoundSummary() {
@@ -9504,9 +9503,8 @@ function wyrNewRound() {
 
   wyrPlaySound('shuffle');
 
-  if (playerId === 'p1') {
-    wyrFilterAndPick();
-  }
+  // Either player can trigger the pick (same pattern as wyrNextQuestion).
+  wyrFilterAndPick();
 }
 
 function wyrSetCategory(cat) {
@@ -9523,9 +9521,8 @@ function wyrSetCategory(cat) {
     document.getElementById('wyr-reveal').classList.remove('active', 'match', 'differ');
     document.getElementById('wyr-choice-a').classList.remove('selected', 'locked');
     document.getElementById('wyr-choice-b').classList.remove('selected', 'locked');
-    if (playerId === 'p1') {
-      wyrFilterAndPick();
-    }
+    // Either player can trigger the pick after category change.
+    wyrFilterAndPick();
   }
 }
 
