@@ -2139,6 +2139,7 @@ body {
   display: flex; align-items: center; justify-content: center; gap: 24px;
   padding: 16px 0;
 }
+.gc-draw-wrap { display: flex; flex-direction: column; align-items: center; gap: 6px; }
 .gc-draw-pile {
   width: 70px; height: 100px; background: #2a3a5c; border: 3px solid #3a4a6c;
   border-radius: 8px; cursor: pointer; display: flex; align-items: center;
@@ -2149,6 +2150,10 @@ body {
 .gc-draw-pile:hover { border-color: #2dc653; color: #2dc653; transform: translateY(-2px); }
 .gc-draw-pile.disabled { cursor: default; opacity: 0.5; }
 .gc-draw-pile.disabled:hover { border-color: #3a4a6c; color: #555; transform: none; }
+.gc-deck-count {
+  font-size: 12px; font-weight: 600; color: #aab; letter-spacing: 0.3px;
+  text-align: center; min-width: 70px;
+}
 .gc-discard-pile {
   width: 70px; height: 100px; border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
@@ -3222,7 +3227,10 @@ body {
 
       <!-- Play area -->
       <div class="gc-play-area">
-        <div class="gc-draw-pile" id="gc-draw-pile">DRAW</div>
+        <div class="gc-draw-wrap">
+          <div class="gc-draw-pile" id="gc-draw-pile">DRAW</div>
+          <div class="gc-deck-count" id="gc-deck-count">&mdash;</div>
+        </div>
         <div class="gc-discard-pile" id="gc-discard-pile"></div>
         <div class="gc-color-indicator" id="gc-color-indicator">
           <div class="gc-color-dot" data-c="red" style="background:#e74c3c;"></div>
@@ -6208,14 +6216,15 @@ function gcListenForState() {
       turnEl.textContent = isMyTurn ? 'YOUR TURN' : "OPPONENT'S TURN";
       turnEl.className = 'gc-turn-indicator ' + (isMyTurn ? 'my-turn' : 'their-turn');
 
-      // Draw pile — disable when it's opponent's turn OR player has a non-wild playable card
-      // Wilds are exempt so players can strategically save them.
+      // Draw pile — disable when it's opponent's turn OR player has a non-wild playable card.
+      // Wilds are exempt so players can strategically save them. (Authoritative guard is in gcDrawCard.)
       var drawPile = document.getElementById('gc-draw-pile');
       var hasNonWildPlayable = myHand.some(function(c) {
         return c.color !== 'wild' && gcCanPlay(c, data.discard, data.currentColor);
       });
       drawPile.classList.toggle('disabled', !isMyTurn || hasNonWildPlayable);
-      drawPile.innerHTML = 'DRAW<br><span style="font-size:11px;font-weight:400;opacity:0.75;">' + ((data.deck || []).length) + ' left</span>';
+      drawPile.textContent = 'DRAW';
+      document.getElementById('gc-deck-count').textContent = ((data.deck || []).length) + ' left';
 
       // Status message
       var msg = document.getElementById('gc-status-msg');
@@ -6418,6 +6427,18 @@ function gcDrawCard() {
 
     var myHandKey = playerId === 'p1' ? 'p1Hand' : 'p2Hand';
     var myHand = (data[myHandKey] || []).slice();
+
+    // Behavioral guard — authoritative. The CSS .disabled class is visual only
+    // and can be bypassed (stale render, cache, click during race window).
+    // Block the draw if the hand already contains a non-wild playable card.
+    var hasNonWildPlayable = myHand.some(function(c) {
+      return c.color !== 'wild' && gcCanPlay(c, data.discard, data.currentColor);
+    });
+    if (hasNonWildPlayable) {
+      gcBroadcastToast('You have a playable card — play it!', 'info');
+      return;
+    }
+
     var deck = (data.deck || []).slice();
     var p1H = (data.p1Hand || []).slice();
     var p2H = (data.p2Hand || []).slice();
@@ -6431,11 +6452,12 @@ function gcDrawCard() {
     var drawn = deck.shift();
     myHand.push(drawn);
 
-    // Check if drawn card can be played
-    var canPlay = gcCanPlay(drawn, data.discard, data.currentColor);
+    // Wilds are exempt from the "playable" announcement — player can choose to save them.
+    var drewWild = drawn.color === 'wild';
+    var canPlay = !drewWild && gcCanPlay(drawn, data.discard, data.currentColor);
 
     if (canPlay) {
-      // Drawn card is playable — keep turn so player can play it (or choose to hold)
+      // Non-wild playable card — keep turn so player can play it
       var update = {
         deck: deck,
         lastAction: playerName + ' drew a playable card!'
@@ -6443,10 +6465,12 @@ function gcDrawCard() {
       update[myHandKey] = myHand;
       roomRef.child('goatcards').update(update);
     } else {
-      // Drawn card not playable — keep drawing (stay on same turn, let listener re-render)
+      // Non-playable OR wild — player can keep drawing
       var update2 = {
         deck: deck,
-        lastAction: playerName + ' drew... no match, draw again!',
+        lastAction: drewWild
+          ? playerName + ' drew a card.'
+          : playerName + ' drew... no match, draw again!',
         drawCount: (data.drawCount || 0) + 1
       };
       update2[myHandKey] = myHand;
