@@ -6048,6 +6048,16 @@ function gcReshuffleIfNeeded(deck, p1Hand, p2Hand, topDiscard) {
   return gcShuffle(remaining);
 }
 
+// Broadcast a toast message to both players via Firebase. Both clients see it.
+function gcBroadcastToast(message, type) {
+  if (!roomRef) return;
+  roomRef.child('goatcards').child('toast').set({
+    msg: message,
+    type: type || 'info',
+    id: Date.now() + '-' + Math.random().toString(36).substr(2, 5)
+  });
+}
+
 var gcState = {
   active: false,
   gameStarted: false,
@@ -6059,7 +6069,8 @@ var gcState = {
   p1Score: 0,
   p2Score: 0,
   round: 1,
-  lastTurn: null
+  lastTurn: null,
+  lastToastId: null
 };
 
 function gcInit() {
@@ -6157,11 +6168,13 @@ function gcListenForState() {
 
     var isMyTurn = data.turn === playerId;
 
-    // Goat bleat when turn flips from opponent to me (not on first load or my own plays)
-    if (data.status === 'playing' && isMyTurn && gcState.lastTurn && gcState.lastTurn !== playerId) {
-      gcPlaySound('yourturn');
-    }
     gcState.lastTurn = data.turn;
+
+    // Cross-player toast — show any new broadcast message from either client
+    if (data.toast && data.toast.id && data.toast.id !== gcState.lastToastId) {
+      gcState.lastToastId = data.toast.id;
+      toast(data.toast.msg, data.toast.type);
+    }
 
     if (data.status === 'playing') {
       document.getElementById('gc-table').style.display = 'flex';
@@ -6195,9 +6208,14 @@ function gcListenForState() {
       turnEl.textContent = isMyTurn ? 'YOUR TURN' : "OPPONENT'S TURN";
       turnEl.className = 'gc-turn-indicator ' + (isMyTurn ? 'my-turn' : 'their-turn');
 
-      // Draw pile
+      // Draw pile — disable when it's opponent's turn OR player has a non-wild playable card
+      // Wilds are exempt so players can strategically save them.
       var drawPile = document.getElementById('gc-draw-pile');
-      drawPile.classList.toggle('disabled', !isMyTurn);
+      var hasNonWildPlayable = myHand.some(function(c) {
+        return c.color !== 'wild' && gcCanPlay(c, data.discard, data.currentColor);
+      });
+      drawPile.classList.toggle('disabled', !isMyTurn || hasNonWildPlayable);
+      drawPile.innerHTML = 'DRAW<br><span style="font-size:11px;font-weight:400;opacity:0.75;">' + ((data.deck || []).length) + ' left</span>';
 
       // Status message
       var msg = document.getElementById('gc-status-msg');
@@ -6328,21 +6346,27 @@ function gcExecutePlay(idx, card, chosenColor) {
       nextTurn = playerId;
       action = (playerId === 'p1' ? data.p1Hand[0] && document.getElementById('gc-p1-name').textContent : document.getElementById('gc-p2-name').textContent) + ' played ' + card.value + '! Turn skipped!';
     } else if (card.type === 'draw2') {
-      // Opponent draws 2, loses turn
+      // Opponent draws 2, loses turn. Reshuffle mid-loop if deck empties.
+      var transferred2 = 0;
       for (var d = 0; d < 2; d++) {
         deck = gcReshuffleIfNeeded(deck, myHand, opHand, card);
-        if (deck.length > 0) opHand.push(deck.shift());
+        if (deck.length > 0) { opHand.push(deck.shift()); transferred2++; }
       }
       nextTurn = playerId;
-      action = 'Draw 2! Opponent picks up 2 cards!';
+      action = transferred2 === 2
+        ? 'Draw 2! Opponent picks up 2 cards!'
+        : 'Draw 2! Only ' + transferred2 + ' of 2 cards transferred — deck exhausted.';
     } else if (card.type === 'wilddraw4') {
-      // Opponent draws 4, loses turn
+      // Opponent draws 4, loses turn. Reshuffle mid-loop if deck empties.
+      var transferred4 = 0;
       for (var d2 = 0; d2 < 4; d2++) {
         deck = gcReshuffleIfNeeded(deck, myHand, opHand, card);
-        if (deck.length > 0) opHand.push(deck.shift());
+        if (deck.length > 0) { opHand.push(deck.shift()); transferred4++; }
       }
       nextTurn = playerId;
-      action = 'WILD +4! Opponent picks up 4 cards!';
+      action = transferred4 === 4
+        ? 'WILD +4! Opponent picks up 4 cards!'
+        : 'WILD +4! Only ' + transferred4 + ' of 4 cards transferred — deck exhausted.';
     }
 
     // Check win
@@ -6400,7 +6424,7 @@ function gcDrawCard() {
     deck = gcReshuffleIfNeeded(deck, p1H, p2H, data.discard);
 
     if (deck.length === 0) {
-      toast('Deck empty — no cards left to reshuffle.', 'info');
+      gcBroadcastToast('Deck empty — no cards left to reshuffle.', 'info');
       return;
     }
 
@@ -6518,26 +6542,6 @@ function gcPlaySound(type) {
           o4.connect(g4); g4.connect(ctx.destination);
           o4.start(t2); o4.stop(t2 + 0.3);
         });
-        break;
-      case 'yourturn':
-        // Goat bleat — sawtooth wave with rapid vibrato for "baa-a-a" effect
-        var o5 = ctx.createOscillator(); var g5 = ctx.createGain();
-        o5.type = 'sawtooth';
-        o5.frequency.setValueAtTime(185, ctx.currentTime);
-        o5.frequency.linearRampToValueAtTime(210, ctx.currentTime + 0.08);
-        o5.frequency.linearRampToValueAtTime(175, ctx.currentTime + 0.32);
-        g5.gain.setValueAtTime(0, ctx.currentTime);
-        g5.gain.linearRampToValueAtTime(vol * 0.45, ctx.currentTime + 0.02);
-        g5.gain.setValueAtTime(vol * 0.45, ctx.currentTime + 0.28);
-        g5.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.34);
-        // Tremolo LFO for goat-like wobble
-        var lfo = ctx.createOscillator(); var lfoGain = ctx.createGain();
-        lfo.type = 'sine'; lfo.frequency.value = 22;
-        lfoGain.gain.value = 14;
-        lfo.connect(lfoGain); lfoGain.connect(o5.frequency);
-        o5.connect(g5); g5.connect(ctx.destination);
-        lfo.start(ctx.currentTime); lfo.stop(ctx.currentTime + 0.34);
-        o5.start(); o5.stop(ctx.currentTime + 0.34);
         break;
     }
   } catch (e) { /* Audio not available */ }
