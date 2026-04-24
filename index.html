@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>Kaidan Game Hub</title>
 <style>
 /* ========== RESET & BASE ========== */
@@ -6453,6 +6456,7 @@ function gcDrawCard() {
     myHand.push(drawn);
 
     // Wilds are exempt from the "playable" announcement — player can choose to save them.
+    // Wild draws show the same message as non-playable draws so drawing flow feels consistent.
     var drewWild = drawn.color === 'wild';
     var canPlay = !drewWild && gcCanPlay(drawn, data.discard, data.currentColor);
 
@@ -6468,9 +6472,7 @@ function gcDrawCard() {
       // Non-playable OR wild — player can keep drawing
       var update2 = {
         deck: deck,
-        lastAction: drewWild
-          ? playerName + ' drew a card.'
-          : playerName + ' drew... no match, draw again!',
+        lastAction: playerName + ' drew... no match, draw again!',
         drawCount: (data.drawCount || 0) + 1
       };
       update2[myHandKey] = myHand;
@@ -9083,7 +9085,6 @@ function wyrStartGame() {
   wyrState.roundOver = false;
   wyrState.roundShown = false;
 
-  document.getElementById('wyr-matches').textContent = '0';
   document.getElementById('wyr-qnum').textContent = '1';
   document.getElementById('wyr-streak').textContent = '0';
   document.getElementById('wyr-progress').style.width = '0%';
