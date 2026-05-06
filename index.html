@@ -292,6 +292,8 @@ body {
 .game-card[data-game="cipher"]:hover { box-shadow: 0 8px 24px rgba(255, 215, 0, 0.3); }
 .game-card[data-game="goatcards"] { border-color: #27ae60; }
 .game-card[data-game="goatcards"]:hover { box-shadow: 0 8px 24px rgba(39, 174, 96, 0.3); }
+.game-card[data-game="spanishmath"] { border-color: #06d6a0; }
+.game-card[data-game="spanishmath"]:hover { box-shadow: 0 8px 24px rgba(6, 214, 160, 0.3); }
 
 .game-icon {
   font-size: 48px;
@@ -2683,19 +2685,19 @@ body {
 /* Extended body parts (7-12) */
 .hm-left-hand {
   width: 10px; height: 10px; border: 2px solid #e76f51; border-radius: 50%;
-  position: absolute; top: 88px; left: 49px;
+  position: absolute; top: 94px; left: 55px;
 }
 .hm-right-hand {
   width: 10px; height: 10px; border: 2px solid #e76f51; border-radius: 50%;
-  position: absolute; top: 88px; left: 131px;
+  position: absolute; top: 94px; left: 122px;
 }
 .hm-left-foot {
   width: 12px; height: 8px; border: 2px solid #e76f51; border-radius: 50%;
-  position: absolute; top: 126px; left: 48px;
+  position: absolute; top: 131px; left: 59px;
 }
 .hm-right-foot {
   width: 12px; height: 8px; border: 2px solid #e76f51; border-radius: 50%;
-  position: absolute; top: 126px; left: 122px;
+  position: absolute; top: 131px; left: 116px;
 }
 .hm-left-eye {
   width: 5px; height: 5px; background: #e76f51; border-radius: 50%;
@@ -2769,6 +2771,88 @@ body {
   .hm-figure-wrapper { width: 160px; height: 180px; transform: scale(0.85); }
   .hm-score-bar { gap: 12px; flex-wrap: wrap; }
 }
+/* ========== SPANISH MATH STYLES ========== */
+.sm-game-area {
+  width: 100%; max-width: 600px; margin: 0 auto;
+  display: flex; flex-direction: column; align-items: center; gap: 24px;
+}
+.sm-scoreboard {
+  display: flex; justify-content: space-around; align-items: center;
+  width: 100%; padding: 16px 0; border-bottom: 1px solid #2a3a5c;
+}
+.sm-score-block { text-align: center; }
+.sm-score-label {
+  font-size: 12px; color: #8a8a9a; text-transform: uppercase;
+  letter-spacing: 2px; margin-bottom: 4px;
+}
+.sm-score-value {
+  font-size: 36px; font-weight: 900; color: #06d6a0;
+}
+.sm-target {
+  font-size: 14px; color: #8a8a9a; padding: 8px 16px;
+  background: rgba(6, 214, 160, 0.1); border-radius: 6px;
+  border: 1px solid #06d6a0;
+}
+.sm-word-display {
+  font-size: 80px; font-weight: 900; color: #f4a261;
+  letter-spacing: 2px; text-align: center;
+  padding: 32px 16px; min-height: 120px;
+  display: flex; align-items: center; justify-content: center;
+  word-break: break-word; line-height: 1.1;
+}
+.sm-input {
+  padding: 16px 32px; font-size: 36px; font-weight: 900; text-align: center;
+  background: #0f1729; color: #06d6a0;
+  border: 2px solid #2a3a5c; border-radius: 12px;
+  width: 200px; font-family: 'Inter', sans-serif; outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.sm-input:focus {
+  border-color: #06d6a0; box-shadow: 0 0 0 4px rgba(6, 214, 160, 0.2);
+}
+.sm-input.locked { opacity: 0.4; pointer-events: none; }
+.sm-input.shake { animation: smShake 0.4s; }
+@keyframes smShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-8px); }
+  75% { transform: translateX(8px); }
+}
+.sm-status {
+  min-height: 32px; font-size: 16px; color: #8a8a9a;
+  text-align: center; font-weight: 600;
+}
+.sm-status.p1-win { color: #06d6a0; font-size: 22px; font-weight: 900; }
+.sm-status.p2-win { color: #f4a261; font-size: 22px; font-weight: 900; }
+.sm-win-modal {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: none; align-items: center; justify-content: center; z-index: 1000;
+}
+.sm-win-modal.visible { display: flex; }
+.sm-win-content {
+  background: #1a2744; border: 2px solid #06d6a0; border-radius: 16px;
+  padding: 48px; max-width: 480px; text-align: center;
+}
+.sm-win-title {
+  font-size: 48px; font-weight: 900; color: #06d6a0; margin-bottom: 16px;
+}
+.sm-win-subtitle {
+  font-size: 20px; color: #8a8a9a; margin-bottom: 32px;
+}
+.sm-win-actions { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+.sm-win-btn {
+  padding: 14px 32px; border: none; border-radius: 8px;
+  font-size: 16px; font-weight: 900; cursor: pointer;
+  text-transform: uppercase; letter-spacing: 1px;
+  transition: transform 0.15s, box-shadow 0.15s;
+  font-family: 'Inter', sans-serif;
+}
+.sm-win-btn:hover { transform: translateY(-2px); }
+.sm-win-btn.replay { background: #06d6a0; color: #1a2744; }
+.sm-win-btn.replay:hover { box-shadow: 0 4px 16px rgba(6, 214, 160, 0.4); }
+.sm-win-btn.hub { background: #5B7B94; color: white; }
+.sm-win-btn.hub:hover { box-shadow: 0 4px 16px rgba(91, 123, 148, 0.4); }
+
 </style>
 </head>
 <body>
@@ -2888,6 +2972,13 @@ body {
       <span class="game-icon">&#x1F575;</span>
       <div class="game-name">Cipher Challenge</div>
       <div class="game-tagline">Decode the secret message.</div>
+      <span class="game-status waiting">Join a room to play</span>
+    </div>
+
+    <div class="game-card disabled" data-game="spanishmath">
+      <span class="game-icon">&#x1F1EA;&#x1F1F8;</span>
+      <div class="game-name">Spanish Math</div>
+      <div class="game-tagline">Read it. Type it. First to 10 wins.</div>
       <span class="game-status waiting">Join a room to play</span>
     </div>
 
@@ -3583,6 +3674,54 @@ body {
   </div>
 </div>
 
+<!-- ========== SPANISH MATH VIEW ========== -->
+<div class="game-view" id="view-spanishmath">
+  <button class="back-to-hub" id="back-spanishmath">&#x2190; Back to Hub</button>
+
+  <!-- Pre-game Waiting -->
+  <div class="sm-waiting" id="sm-waiting" style="display:none;">
+    <h3 class="pulse">Waiting for opponent...</h3>
+    <p>First to 10 correct wins!</p>
+  </div>
+
+  <!-- Game Area -->
+  <div class="sm-game-area" id="sm-game-area" style="display:none;">
+    <!-- Scoreboard -->
+    <div class="sm-scoreboard">
+      <div class="sm-score-block">
+        <div class="sm-score-label" id="sm-p1-name">P1</div>
+        <div class="sm-score-value" id="sm-p1-score">0</div>
+      </div>
+      <div class="sm-target">First to 10</div>
+      <div class="sm-score-block">
+        <div class="sm-score-label" id="sm-p2-name">P2</div>
+        <div class="sm-score-value" id="sm-p2-score">0</div>
+      </div>
+    </div>
+
+    <!-- Spanish Word Display -->
+    <div class="sm-word-display" id="sm-word-display">cero</div>
+
+    <!-- Input -->
+    <input type="text" class="sm-input" id="sm-input" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off">
+
+    <!-- Status / Round Winner -->
+    <div class="sm-status" id="sm-status"></div>
+  </div>
+
+  <!-- Win Modal -->
+  <div class="sm-win-modal" id="sm-win-modal">
+    <div class="sm-win-content">
+      <div class="sm-win-title" id="sm-win-title">P1 WINS!</div>
+      <div class="sm-win-subtitle">First to 10 &mdash; &iexcl;Felicidades!</div>
+      <div class="sm-win-actions">
+        <button class="sm-win-btn replay" id="sm-replay">Play Again</button>
+        <button class="sm-win-btn hub" id="sm-back-hub">Back to Hub</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ========== FLOATING SOUND BOARD (persists across all views) ========== -->
 <div class="floating-soundboard collapsed" id="floating-soundboard">
   <div class="fsb-header" id="fsb-header">
@@ -3666,6 +3805,7 @@ function init() {
   ccInit();
   gcInit();
   gsInit();
+  smInit();
   fsbInit();
   chatInit();
 }
@@ -3733,6 +3873,7 @@ function bindUI() {
   document.getElementById('back-cipher').addEventListener('click', function() { ccLeaveGame(); });
   document.getElementById('back-goatcards').addEventListener('click', function() { gcLeaveGame(); });
   document.getElementById('back-wouldyourather').addEventListener('click', function() { wyrLeaveGame(); });
+  document.getElementById('back-spanishmath').addEventListener('click', function() { smLeaveGame(); });
 
   document.getElementById('proposal-accept').addEventListener('click', acceptProposal);
   document.getElementById('proposal-decline').addEventListener('click', declineProposal);
@@ -3877,6 +4018,9 @@ function listenToRoom() {
       if (game === 'goatstation') {
         gsStartGame();
       }
+      if (game === 'spanishmath') {
+        smStartGame();
+      }
     }
   });
   roomListeners.push({ ref: gameRef, event: 'value', fn: gameListener });
@@ -3995,6 +4139,7 @@ function leaveRoom() {
   ccCleanup();
   gcCleanup();
   gsCleanup();
+  smCleanup();
   fsbCleanup();
   chatCleanup();
 
@@ -9662,6 +9807,352 @@ function wyrSoundShuffle(ctx, vol) {
       osc.connect(gain); gain.connect(ctx.destination);
       osc.start(t); osc.stop(t + 0.08);
     })(i);
+  }
+}
+
+
+/* ==========================================================
+   SPANISH MATH MODULE — Wave 7
+   2-player race: Spanish word for 0-99 → type the digit
+   ========================================================== */
+
+// ── Spanish Math Data ────────────────────────────────────
+var SM_WORDS = [
+  'cero', 'uno', 'dos', 'tres', 'cuatro', 'cinco', 'seis', 'siete', 'ocho', 'nueve',
+  'diez', 'once', 'doce', 'trece', 'catorce', 'quince',
+  'dieciséis', 'diecisiete', 'dieciocho', 'diecinueve',
+  'veinte', 'veintiuno', 'veintidós', 'veintitrés', 'veinticuatro',
+  'veinticinco', 'veintiséis', 'veintisiete', 'veintiocho', 'veintinueve',
+  'treinta', 'treinta y uno', 'treinta y dos', 'treinta y tres', 'treinta y cuatro',
+  'treinta y cinco', 'treinta y seis', 'treinta y siete', 'treinta y ocho', 'treinta y nueve',
+  'cuarenta', 'cuarenta y uno', 'cuarenta y dos', 'cuarenta y tres', 'cuarenta y cuatro',
+  'cuarenta y cinco', 'cuarenta y seis', 'cuarenta y siete', 'cuarenta y ocho', 'cuarenta y nueve',
+  'cincuenta', 'cincuenta y uno', 'cincuenta y dos', 'cincuenta y tres', 'cincuenta y cuatro',
+  'cincuenta y cinco', 'cincuenta y seis', 'cincuenta y siete', 'cincuenta y ocho', 'cincuenta y nueve',
+  'sesenta', 'sesenta y uno', 'sesenta y dos', 'sesenta y tres', 'sesenta y cuatro',
+  'sesenta y cinco', 'sesenta y seis', 'sesenta y siete', 'sesenta y ocho', 'sesenta y nueve',
+  'setenta', 'setenta y uno', 'setenta y dos', 'setenta y tres', 'setenta y cuatro',
+  'setenta y cinco', 'setenta y seis', 'setenta y siete', 'setenta y ocho', 'setenta y nueve',
+  'ochenta', 'ochenta y uno', 'ochenta y dos', 'ochenta y tres', 'ochenta y cuatro',
+  'ochenta y cinco', 'ochenta y seis', 'ochenta y siete', 'ochenta y ocho', 'ochenta y nueve',
+  'noventa', 'noventa y uno', 'noventa y dos', 'noventa y tres', 'noventa y cuatro',
+  'noventa y cinco', 'noventa y seis', 'noventa y siete', 'noventa y ocho', 'noventa y nueve'
+];
+
+// ── Spanish Math State ───────────────────────────────────
+var smState = {
+  active: false,
+  cached: null,
+  listeners: [],
+  inputDebounce: null,
+  roundAdvanceTimer: null,
+  lastAdvancedIdx: -1
+};
+
+// ── Spanish Math Init (called once at page load) ─────────
+function smInit() {
+  var input = document.getElementById('sm-input');
+  var replayBtn = document.getElementById('sm-replay');
+  var backHubBtn = document.getElementById('sm-back-hub');
+
+  // Input handler with 0.3s debounce on auto-submit
+  input.addEventListener('input', function(e) {
+    if (smState.inputDebounce) clearTimeout(smState.inputDebounce);
+    var raw = e.target.value;
+    var cleaned = raw.replace(/[^0-9]/g, '');
+    if (cleaned !== raw) e.target.value = cleaned;
+    if (!cleaned) return;
+
+    var s = smState.cached;
+    if (!s || s.roundWinner || s.gameOver) return;
+    if (!s.deck || typeof s.idx !== 'number') return;
+
+    var expected = s.deck[s.idx];
+    if (typeof expected !== 'number') return;
+    var expectedStr = String(expected);
+
+    // Auto-submit when length matches expected digit count
+    if (cleaned.length === expectedStr.length) {
+      smState.inputDebounce = setTimeout(function() {
+        smSubmit(cleaned);
+      }, 300);
+    }
+  });
+
+  // Enter key fallback (manual submit)
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (smState.inputDebounce) {
+        clearTimeout(smState.inputDebounce);
+        smState.inputDebounce = null;
+      }
+      var val = e.target.value.replace(/[^0-9]/g, '');
+      if (val) smSubmit(val);
+    }
+  });
+
+  // Replay button (P1 only)
+  replayBtn.addEventListener('click', function() {
+    smReplay();
+  });
+
+  // Back to Hub from win modal
+  backHubBtn.addEventListener('click', function() {
+    smLeaveGame();
+  });
+
+  // Esc key to leave game (only when Spanish Math is active)
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && smState.active) {
+      smLeaveGame();
+    }
+  });
+}
+
+// ── Shuffle deck (Fisher-Yates) ──────────────────────────
+function smShuffleDeck() {
+  var arr = [];
+  for (var i = 0; i < 100; i++) arr.push(i);
+  for (var j = arr.length - 1; j > 0; j--) {
+    var k = Math.floor(Math.random() * (j + 1));
+    var tmp = arr[j]; arr[j] = arr[k]; arr[k] = tmp;
+  }
+  return arr;
+}
+
+// ── Start a Spanish Math game ────────────────────────────
+function smStartGame() {
+  if (smState.active) return;
+  smState.active = true;
+  smState.cached = null;
+  smState.lastAdvancedIdx = -1;
+
+  var smRef = roomRef.child('spanishMath');
+
+  // P1 initializes state if missing
+  if (playerId === 'p1') {
+    smRef.once('value').then(function(snap) {
+      if (!snap.exists()) {
+        smRef.set({
+          deck: smShuffleDeck(),
+          idx: 0,
+          p1Score: 0,
+          p2Score: 0,
+          roundWinner: null,
+          gameOver: false,
+          winner: null,
+          startedAt: firebase.database.ServerValue.TIMESTAMP
+        });
+      }
+    });
+  }
+
+  // Both players listen for state changes
+  var stateListener = smRef.on('value', function(snap) {
+    var s = snap.val();
+    if (!s) return;
+    smState.cached = s;
+    smRender(s);
+  });
+  smState.listeners.push({ ref: smRef, event: 'value', fn: stateListener });
+
+  // Show game area
+  document.getElementById('sm-waiting').style.display = 'none';
+  document.getElementById('sm-game-area').style.display = 'flex';
+  document.getElementById('sm-win-modal').classList.remove('visible');
+
+  // Set player labels from room data
+  roomRef.child('players').once('value').then(function(snap) {
+    var players = snap.val() || {};
+    var p1Name = (players.p1 && players.p1.name) || 'P1';
+    var p2Name = (players.p2 && players.p2.name) || 'P2';
+    document.getElementById('sm-p1-name').textContent = p1Name;
+    document.getElementById('sm-p2-name').textContent = p2Name;
+  });
+
+  // Focus input
+  setTimeout(function() {
+    var inp = document.getElementById('sm-input');
+    if (inp) inp.focus();
+  }, 100);
+}
+
+// ── Render UI from state ─────────────────────────────────
+function smRender(s) {
+  document.getElementById('sm-p1-score').textContent = s.p1Score || 0;
+  document.getElementById('sm-p2-score').textContent = s.p2Score || 0;
+
+  var input = document.getElementById('sm-input');
+  var status = document.getElementById('sm-status');
+  var wordEl = document.getElementById('sm-word-display');
+
+  // Game over: show win modal
+  if (s.gameOver) {
+    var p1Name = document.getElementById('sm-p1-name').textContent;
+    var p2Name = document.getElementById('sm-p2-name').textContent;
+    var winnerLabel = (s.winner === 'p1' ? p1Name : p2Name) + ' WINS!';
+    document.getElementById('sm-win-title').textContent = winnerLabel;
+    document.getElementById('sm-win-modal').classList.add('visible');
+    input.classList.add('locked');
+    input.disabled = true;
+    return;
+  }
+
+  // Show current Spanish word
+  if (s.deck && typeof s.idx === 'number') {
+    var num = s.deck[s.idx];
+    if (typeof num === 'number' && num >= 0 && num < SM_WORDS.length) {
+      wordEl.textContent = SM_WORDS[num];
+    }
+  }
+
+  // Round winner badge + auto-advance
+  if (s.roundWinner) {
+    var winnerName = s.roundWinner === 'p1'
+      ? document.getElementById('sm-p1-name').textContent
+      : document.getElementById('sm-p2-name').textContent;
+    status.textContent = winnerName + ' wins this round!';
+    status.className = 'sm-status ' + s.roundWinner + '-win';
+    input.classList.add('locked');
+    input.disabled = true;
+
+    // P1 advances the round after 1.5s (only once per round)
+    if (playerId === 'p1' && smState.lastAdvancedIdx !== s.idx) {
+      smState.lastAdvancedIdx = s.idx;
+      if (smState.roundAdvanceTimer) clearTimeout(smState.roundAdvanceTimer);
+      smState.roundAdvanceTimer = setTimeout(function() {
+        smAdvanceRound(s);
+      }, 1500);
+    }
+  } else {
+    status.textContent = '';
+    status.className = 'sm-status';
+    input.classList.remove('locked');
+    input.disabled = false;
+    input.value = '';
+    setTimeout(function() { input.focus(); }, 50);
+  }
+}
+
+// ── P1: Advance to next round ────────────────────────────
+function smAdvanceRound(s) {
+  var smRef = roomRef.child('spanishMath');
+  var nextIdx = (s.idx || 0) + 1;
+  if (nextIdx >= s.deck.length) {
+    // Reshuffle if exhausted (rare — would need 100 rounds without a win)
+    smRef.update({
+      deck: smShuffleDeck(),
+      idx: 0,
+      roundWinner: null
+    });
+  } else {
+    smRef.update({
+      idx: nextIdx,
+      roundWinner: null
+    });
+  }
+}
+
+// ── Submit answer ────────────────────────────────────────
+function smSubmit(val) {
+  if (!val) return;
+  var s = smState.cached;
+  if (!s || s.roundWinner || s.gameOver) return;
+  if (!s.deck || typeof s.idx !== 'number') return;
+
+  var expected = s.deck[s.idx];
+  var input = document.getElementById('sm-input');
+
+  if (parseInt(val, 10) === expected) {
+    // Correct — race: first transaction wins
+    var smRef = roomRef.child('spanishMath');
+    smRef.transaction(function(current) {
+      if (!current) return current;
+      // Already has a round winner — opponent beat me
+      if (current.roundWinner) return current;
+      current.roundWinner = playerId;
+      if (playerId === 'p1') {
+        current.p1Score = (current.p1Score || 0) + 1;
+        if (current.p1Score >= 10) {
+          current.gameOver = true;
+          current.winner = 'p1';
+        }
+      } else {
+        current.p2Score = (current.p2Score || 0) + 1;
+        if (current.p2Score >= 10) {
+          current.gameOver = true;
+          current.winner = 'p2';
+        }
+      }
+      return current;
+    });
+  } else {
+    // Wrong — shake input + clear
+    input.classList.add('shake');
+    setTimeout(function() { input.classList.remove('shake'); }, 400);
+    input.value = '';
+    input.focus();
+  }
+}
+
+// ── Replay (P1 resets and reshuffles) ────────────────────
+function smReplay() {
+  if (playerId !== 'p1') return;
+  var smRef = roomRef.child('spanishMath');
+  smRef.set({
+    deck: smShuffleDeck(),
+    idx: 0,
+    p1Score: 0,
+    p2Score: 0,
+    roundWinner: null,
+    gameOver: false,
+    winner: null,
+    startedAt: firebase.database.ServerValue.TIMESTAMP
+  });
+  document.getElementById('sm-win-modal').classList.remove('visible');
+  smState.lastAdvancedIdx = -1;
+}
+
+// ── Leave Game (back to Hub) ─────────────────────────────
+function smLeaveGame() {
+  smCleanup();
+  if (roomRef && playerId === 'p1') {
+    roomRef.child('currentGame').set(null);
+    roomRef.child('spanishMath').remove();
+  }
+  showView('hub');
+}
+
+// ── Cleanup ──────────────────────────────────────────────
+function smCleanup() {
+  smState.active = false;
+  smState.cached = null;
+  smState.lastAdvancedIdx = -1;
+  if (smState.inputDebounce) {
+    clearTimeout(smState.inputDebounce);
+    smState.inputDebounce = null;
+  }
+  if (smState.roundAdvanceTimer) {
+    clearTimeout(smState.roundAdvanceTimer);
+    smState.roundAdvanceTimer = null;
+  }
+  smState.listeners.forEach(function(l) {
+    l.ref.off(l.event, l.fn);
+  });
+  smState.listeners = [];
+
+  var area = document.getElementById('sm-game-area');
+  var waiting = document.getElementById('sm-waiting');
+  var modal = document.getElementById('sm-win-modal');
+  var input = document.getElementById('sm-input');
+  if (area) area.style.display = 'none';
+  if (waiting) waiting.style.display = 'none';
+  if (modal) modal.classList.remove('visible');
+  if (input) {
+    input.value = '';
+    input.classList.remove('locked', 'shake');
+    input.disabled = false;
   }
 }
 
