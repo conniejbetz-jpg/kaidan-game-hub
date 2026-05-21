@@ -2402,14 +2402,22 @@ body {
 .cc-morse-ref span { color: #8a8a9a; margin: 0 4px; }
 .cc-alpha-ref {
   display: grid; grid-template-columns: repeat(4, 1fr);
-  width: 100%; max-width: 420px; margin: 0 auto;
+  width: 100%; max-width: 500px; margin: 0 auto;
   background: #1a1a2e; border: 1px solid #2a3a5c; border-radius: 8px;
-  padding: 8px 12px; font-family: 'Courier New', monospace;
-  font-size: 13px; color: #8a8a9a; line-height: 1.8; text-align: center;
+  padding: 12px 16px; font-family: 'Courier New', monospace;
+  font-size: 20px; color: #8a8a9a; line-height: 1.5; text-align: center;
+}
+.cc-alpha-ref > div:nth-child(4n+1),
+.cc-alpha-ref > div:nth-child(4n+3) {
+  text-align: right; padding-right: 6px;
+}
+.cc-alpha-ref > div:nth-child(4n+2),
+.cc-alpha-ref > div:nth-child(4n) {
+  text-align: left; padding-left: 6px;
 }
 .cc-alpha-ref .cc-alpha-hdr {
   font-weight: 900; color: #F4A261; border-bottom: 1px solid #3a4a6c;
-  padding-bottom: 4px; margin-bottom: 4px;
+  padding-bottom: 6px; margin-bottom: 6px;
 }
 @media (max-width: 600px) {
   .cc-encoded { font-size: 18px; letter-spacing: 2px; }
@@ -2688,11 +2696,11 @@ body {
 /* Extended body parts (7-12) */
 .hm-left-hand {
   width: 10px; height: 10px; border: 2px solid #e76f51; border-radius: 50%;
-  position: absolute; top: 94px; left: 55px;
+  position: absolute; top: 65px; left: 55px;
 }
 .hm-right-hand {
   width: 10px; height: 10px; border: 2px solid #e76f51; border-radius: 50%;
-  position: absolute; top: 94px; left: 122px;
+  position: absolute; top: 65px; left: 122px;
 }
 .hm-left-foot {
   width: 12px; height: 8px; border: 2px solid #e76f51; border-radius: 50%;
@@ -2700,7 +2708,7 @@ body {
 }
 .hm-right-foot {
   width: 12px; height: 8px; border: 2px solid #e76f51; border-radius: 50%;
-  position: absolute; top: 131px; left: 116px;
+  position: absolute; top: 130px; left: 116px;
 }
 .hm-left-eye {
   width: 5px; height: 5px; background: #e76f51; border-radius: 50%;
@@ -7107,7 +7115,8 @@ function ccEncode(word, type) {
   return result;
 }
 
-function ccGenerateProblem(diff) {
+function ccGenerateProblem(diff, exclude) {
+  exclude = exclude || [];
   var pool, types;
   if (diff === 'easy') {
     pool = CC_WORDS.easy;
@@ -7119,7 +7128,9 @@ function ccGenerateProblem(diff) {
     pool = CC_WORDS.hard;
     types = ['caesarhard','atbash','morse','morse','caesar'];
   }
-  var word = pool[Math.floor(Math.random() * pool.length)];
+  var filteredPool = pool.filter(function(w) { return exclude.indexOf(w) === -1; });
+  if (filteredPool.length === 0) filteredPool = pool;
+  var word = filteredPool[Math.floor(Math.random() * filteredPool.length)];
   var type = types[Math.floor(Math.random() * types.length)];
   var encoded = ccEncode(word, type);
   var useAlpha = (type === 'letternum' || type === 'caesar' || type === 'caesarhard' || type === 'atbash');
@@ -7182,12 +7193,18 @@ function ccStartGame() {
   ccListenForState();
 
   if (playerId === 'p1') {
-    ccNextProblem();
+    roomRef.child('cipher/servedWords').once('value', function(snap) {
+      var raw = snap.val();
+      ccState.servedWords = Array.isArray(raw) ? raw : (raw && typeof raw === 'object' ? Object.keys(raw).map(function(k) { return raw[k]; }) : []);
+      ccNextProblem();
+    });
   }
 }
 
 function ccNextProblem() {
-  var problem = ccGenerateProblem(ccState.difficulty);
+  var served = ccState.servedWords || [];
+  var problem = ccGenerateProblem(ccState.difficulty, served);
+  var newServed = served.indexOf(problem.answer) === -1 ? served.concat([problem.answer]) : [problem.answer];
   var newQNum = ccState.questionNum + 1;
 
   roomRef.child('cipher').set({
@@ -7207,7 +7224,8 @@ function ccNextProblem() {
     p2Score: ccState.p2Score,
     winner: null,
     status: 'playing',
-    difficulty: ccState.difficulty
+    difficulty: ccState.difficulty,
+    servedWords: newServed
   });
 }
 
@@ -7222,6 +7240,8 @@ function ccListenForState() {
     ccState.p2Score = data.p2Score || 0;
     ccState.questionNum = data.questionNum || 0;
     ccState.currentAnswer = data.answer;
+    var rawServed = data.servedWords;
+    ccState.servedWords = Array.isArray(rawServed) ? rawServed : (rawServed && typeof rawServed === 'object' ? Object.keys(rawServed).map(function(k) { return rawServed[k]; }) : []);
 
     document.getElementById('cc-p1-score').textContent = ccState.p1Score;
     document.getElementById('cc-p2-score').textContent = ccState.p2Score;
