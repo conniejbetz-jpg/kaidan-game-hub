@@ -320,16 +320,101 @@ body {
 /* ========== STACK ATTACK STYLES ========== */
 .sa-wrap {
   display: flex; flex-direction: column; align-items: center;
-  gap: 16px; max-width: 720px; margin: 0 auto; padding: 20px;
+  gap: 12px; max-width: 760px; margin: 0 auto; padding: 16px;
 }
 .sa-header { text-align: center; }
-.sa-title { font-size: 28px; font-weight: 900; color: #fff; letter-spacing: 3px; }
+.sa-title { font-size: 24px; font-weight: 900; color: #fff; letter-spacing: 3px; }
 .sa-title .sa-accent { color: #c1121f; }
-.sa-subtitle { font-size: 14px; color: #8a8a9a; margin-top: 6px; font-style: italic; }
-.sa-coming-soon {
+.sa-subtitle { font-size: 12px; color: #8a8a9a; margin-top: 4px; font-style: italic; }
+.sa-waiting {
   background: #16213e; border: 2px solid #c1121f; border-radius: 12px;
-  padding: 32px 28px; text-align: center; color: #fff; max-width: 480px;
-  margin-top: 20px;
+  padding: 24px; text-align: center; color: #fff; max-width: 480px; margin-top: 12px;
+}
+.sa-scoreboard {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%; padding: 10px 14px; background: #16213e;
+  border-radius: 8px; border: 1px solid #2a3a5c;
+}
+.sa-score-block { display: flex; flex-direction: column; align-items: center; }
+.sa-score-name { font-size: 11px; color: #8a8a9a; text-transform: uppercase; letter-spacing: 1px; }
+.sa-score-val { font-size: 22px; font-weight: 900; color: #c1121f; }
+.sa-score-mini { font-size: 10px; color: #555; }
+.sa-turn-msg {
+  font-size: 14px; font-weight: 700; padding: 6px 14px; border-radius: 6px;
+  text-transform: uppercase; letter-spacing: 1px;
+}
+.sa-turn-msg.my-turn { background: rgba(45, 198, 83, 0.15); color: #2dc653; border: 1px solid #2dc653; }
+.sa-turn-msg.waiting { background: rgba(138, 138, 154, 0.1); color: #8a8a9a; border: 1px solid #555; }
+.sa-zone {
+  width: 100%; padding: 10px; background: #1a1a2e;
+  border: 1px solid #2a3a5c; border-radius: 8px;
+}
+.sa-zone-label { font-size: 11px; color: #8a8a9a; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+.sa-stacks-row { display: flex; flex-wrap: wrap; gap: 12px; min-height: 90px; align-items: flex-start; }
+.sa-stacks-empty { color: #555; font-style: italic; font-size: 13px; padding: 20px; text-align: center; width: 100%; }
+.sa-stack {
+  position: relative; min-width: 60px; min-height: 80px;
+  display: flex; flex-direction: column-reverse; align-items: center;
+}
+.sa-stack .sa-card { margin-top: -60px; }
+.sa-stack .sa-card:first-child { margin-top: 0; }
+.sa-card {
+  width: 56px; height: 78px; border-radius: 6px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  font-family: 'Inter', sans-serif; font-weight: 900;
+  border: 2px solid #1a1a2e; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  position: relative; flex-shrink: 0;
+}
+.sa-card-red { background: #e76f51; color: #fff; }
+.sa-card-blue { background: #48cae4; color: #fff; }
+.sa-card-green { background: #2dc653; color: #fff; }
+.sa-card-yellow { background: #ffd700; color: #1a1a2e; }
+.sa-card-action { background: linear-gradient(135deg, #c1121f, #6a0014); color: #fff; }
+.sa-card-wild { background: linear-gradient(135deg, #e76f51, #48cae4, #2dc653, #ffd700); color: #fff; }
+.sa-card-letter { position: absolute; top: 3px; left: 4px; font-size: 11px; }
+.sa-card-value { font-size: 26px; }
+.sa-card-action-name { font-size: 10px; text-align: center; padding: 0 2px; letter-spacing: 0.5px; }
+.sa-card.clickable { cursor: pointer; transition: transform 0.15s; }
+.sa-card.clickable:hover { transform: translateY(-6px); box-shadow: 0 6px 14px rgba(193, 18, 31, 0.4); }
+.sa-card.disabled { opacity: 0.4; cursor: not-allowed; }
+.sa-card.face-down {
+  background: repeating-linear-gradient(45deg, #16213e, #16213e 4px, #1a2744 4px, #1a2744 8px);
+  border: 2px solid #c1121f;
+}
+.sa-hand-row { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px; justify-content: center; }
+.sa-action-bar {
+  display: flex; gap: 10px; justify-content: center; padding: 8px; width: 100%;
+}
+.sa-btn {
+  padding: 10px 20px; border: 1px solid #c1121f; background: transparent;
+  color: #c1121f; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700;
+  border-radius: 6px; cursor: pointer; letter-spacing: 1px; text-transform: uppercase;
+  transition: all 0.2s;
+}
+.sa-btn:hover:not(:disabled) { background: #c1121f; color: #fff; }
+.sa-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.sa-deck-count { font-size: 12px; color: #8a8a9a; align-self: center; }
+.sa-log {
+  width: 100%; max-height: 90px; overflow-y: auto;
+  background: #1a1a2e; border: 1px solid #2a3a5c; border-radius: 6px;
+  padding: 6px 10px; font-size: 11px; color: #8a8a9a; line-height: 1.5;
+}
+.sa-log-entry { padding: 1px 0; }
+.sa-win-modal {
+  display: none; background: rgba(45, 198, 83, 0.12); border: 2px solid #2dc653;
+  border-radius: 12px; padding: 24px; text-align: center; color: #fff;
+  width: 100%; max-width: 480px; margin-top: 12px;
+}
+.sa-win-modal.active { display: block; animation: wyrRevealIn 0.5s ease-out; }
+.sa-win-modal.lost { background: rgba(231, 111, 81, 0.12); border-color: #e76f51; }
+.sa-win-title { font-size: 24px; font-weight: 900; letter-spacing: 2px; margin-bottom: 8px; }
+.sa-win-modal:not(.lost) .sa-win-title { color: #2dc653; }
+.sa-win-modal.lost .sa-win-title { color: #e76f51; }
+.sa-win-reason { font-size: 14px; color: #e0e0e0; margin-bottom: 16px; }
+@media (max-width: 600px) {
+  .sa-card { width: 44px; height: 64px; }
+  .sa-card-value { font-size: 20px; }
+  .sa-stack .sa-card { margin-top: -48px; }
 }
 
 .game-name {
@@ -4047,11 +4132,63 @@ body {
       <div class="sa-title">STACK <span class="sa-accent">ATTACK</span></div>
       <p class="sa-subtitle">Stack 'em. Steal 'em. Win.</p>
     </div>
-    <div class="sa-coming-soon">
-      <p style="font-size:18px;font-weight:700;margin-bottom:12px;">&#x1F6A7; Build in progress</p>
-      <p>Phase 1 scaffold deployed 2026-05-21. Game card + view shell are live.</p>
-      <p style="margin-top:14px;font-size:13px;color:#8a8a9a;line-height:1.5;">Next phases: deck + hand display, number-card play mechanics, 8 action cards, stack scoring, win conditions, sound effects.</p>
-      <p style="margin-top:14px;font-size:13px;color:#8a8a9a;">Est. 5-8 hrs total build across 4 more phases.</p>
+    <!-- Waiting state -->
+    <div class="sa-waiting" id="sa-waiting" style="display:none;">
+      <p style="font-size:16px;font-weight:700;margin-bottom:8px;">Setting up the deck...</p>
+      <p style="font-size:13px;color:#8a8a9a;">Waiting for both players to be ready</p>
+    </div>
+
+    <!-- Game board (shown when game state exists) -->
+    <div class="sa-board" id="sa-board" style="display:none;">
+      <!-- Scoreboard -->
+      <div class="sa-scoreboard">
+        <div class="sa-score-block">
+          <div class="sa-score-name" id="sa-p1-name">P1</div>
+          <div class="sa-score-val" id="sa-p1-scored">0</div>
+          <div class="sa-score-mini">stacks</div>
+        </div>
+        <div class="sa-turn-msg" id="sa-turn-msg">Waiting...</div>
+        <div class="sa-score-block">
+          <div class="sa-score-name" id="sa-p2-name">P2</div>
+          <div class="sa-score-val" id="sa-p2-scored">0</div>
+          <div class="sa-score-mini">stacks</div>
+        </div>
+      </div>
+
+      <!-- Opponent zone -->
+      <div class="sa-zone">
+        <div class="sa-zone-label">Opponent &mdash; <span id="sa-opponent-hand-count">Hand: 0</span></div>
+        <div class="sa-stacks-row" id="sa-opponent-stacks"></div>
+      </div>
+
+      <!-- Deck + actions -->
+      <div class="sa-action-bar">
+        <span class="sa-deck-count" id="sa-deck-count">Deck: 43</span>
+        <button class="sa-btn" id="sa-draw-btn" disabled>Draw Card</button>
+        <button class="sa-btn" id="sa-end-turn-btn" disabled>End Turn</button>
+      </div>
+
+      <!-- My zone -->
+      <div class="sa-zone">
+        <div class="sa-zone-label">My Stacks</div>
+        <div class="sa-stacks-row" id="sa-my-stacks"></div>
+      </div>
+
+      <!-- My hand -->
+      <div class="sa-zone">
+        <div class="sa-zone-label">My Hand</div>
+        <div class="sa-hand-row" id="sa-my-hand"></div>
+      </div>
+
+      <!-- Log -->
+      <div class="sa-log" id="sa-log"></div>
+
+      <!-- Win modal -->
+      <div class="sa-win-modal" id="sa-win-modal">
+        <div class="sa-win-title" id="sa-win-title">&mdash;</div>
+        <div class="sa-win-reason" id="sa-win-reason"></div>
+        <button class="sa-btn" id="sa-back-hub">Back to Hub</button>
+      </div>
     </div>
   </div>
 </div>
@@ -11356,26 +11493,137 @@ function hcEscape(s) {
 /* ==========================================================
    STACK ATTACK — 2-player chaotic card game
    Firebase path: /rooms/{roomId}/stackattack/
-   Phase 1 scaffold — visual shell only (no game logic yet)
-   Future phases: deck/hand display, number-card play, action cards,
-   stack scoring, win conditions
+   Phase 2 — number card play + stack management + turn flow
+   (Action cards = Phase 3; scoring + win conditions polish = Phase 4)
    ========================================================== */
+
+var SA_COLORS = ['red', 'blue', 'green', 'yellow'];
+var SA_WIN_STACKS = 3;
+var SA_HAND_SIZE = 7;
+
+// Deck template: 36 number cards + 21 action cards = 57 total
+// Cards looked up by ID; Firebase stores IDs only
+var SA_DECK_TEMPLATE = (function() {
+  var deck = [];
+  SA_COLORS.forEach(function(color) {
+    for (var v = 1; v <= 9; v++) {
+      deck.push({ id: deck.length, kind: 'number', color: color, value: v });
+    }
+  });
+  var actions = [
+    { action: 'STEAL', count: 3 },
+    { action: 'SWAP', count: 3 },
+    { action: 'FREEZE', count: 3 },
+    { action: 'WILD', count: 3 },
+    { action: 'SHUFFLE', count: 2 },
+    { action: 'DRAW3', count: 3 },
+    { action: 'REVERSE', count: 2 },
+    { action: 'DOUBLE', count: 2 }
+  ];
+  actions.forEach(function(a) {
+    for (var i = 0; i < a.count; i++) {
+      deck.push({ id: deck.length, kind: 'action', action: a.action });
+    }
+  });
+  return deck;
+})();
 
 var saState = {
   active: false,
+  cached: null,
   listeners: []
 };
 
+// Coerce Firebase array-or-object back to array (Firebase returns sparse arrays as objects)
+function saArr(val) {
+  if (!val) return [];
+  if (Array.isArray(val)) return val;
+  if (typeof val === 'object') {
+    return Object.keys(val).sort(function(a, b) { return parseInt(a) - parseInt(b); })
+                            .map(function(k) { return val[k]; });
+  }
+  return [];
+}
+
+function saShuffle(arr) {
+  var a = arr.slice();
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+
+function saCardById(id) {
+  if (typeof id === 'object' && id !== null) return id;  // already a card object (WILD with assignedColor)
+  return SA_DECK_TEMPLATE[id];
+}
+
+function saBuildDeck() {
+  var ids = [];
+  for (var i = 0; i < SA_DECK_TEMPLATE.length; i++) ids.push(i);
+  return saShuffle(ids);
+}
+
 function saInit() {
-  document.getElementById('back-stackattack').addEventListener('click', function() {
-    saLeaveGame();
-  });
+  document.getElementById('back-stackattack').addEventListener('click', saLeaveGame);
+  document.getElementById('sa-draw-btn').addEventListener('click', saHandleDrawCard);
+  document.getElementById('sa-end-turn-btn').addEventListener('click', saHandleEndTurn);
+  document.getElementById('sa-back-hub').addEventListener('click', saLeaveGame);
 }
 
 function saStartGame() {
   if (saState.active) return;
   saState.active = true;
   showView('stackattack');
+
+  document.getElementById('sa-waiting').style.display = 'block';
+  document.getElementById('sa-board').style.display = 'none';
+
+  // Name labels
+  var p1Name = playerId === 'p1' ? playerName : (opponentName || 'P1');
+  var p2Name = playerId === 'p2' ? playerName : (opponentName || 'P2');
+  document.getElementById('sa-p1-name').textContent = p1Name;
+  document.getElementById('sa-p2-name').textContent = p2Name;
+
+  saListenForState();
+
+  // P1 initializes game state if not present
+  if (playerId === 'p1') {
+    var saRef = roomRef.child('stackattack');
+    saRef.once('value', function(snap) {
+      if (snap.val()) return;
+      var deck = saBuildDeck();
+      var p1Hand = deck.slice(0, SA_HAND_SIZE);
+      var p2Hand = deck.slice(SA_HAND_SIZE, SA_HAND_SIZE * 2);
+      var remaining = deck.slice(SA_HAND_SIZE * 2);
+      saRef.set({
+        deck: remaining,
+        p1: { hand: p1Hand, stacks: [], scored: 0, frozen: false, pendingDraws: 0 },
+        p2: { hand: p2Hand, stacks: [], scored: 0, frozen: false, pendingDraws: 0 },
+        turn: 'p1',
+        hasPlayedThisTurn: false,
+        log: [{ ts: Date.now(), msg: 'Game started — ' + p1Name + ' goes first' }],
+        winner: null,
+        winReason: null,
+        version: 0,
+        startedAt: Date.now()
+      });
+    });
+  }
+}
+
+function saListenForState() {
+  var saRef = roomRef.child('stackattack');
+  var listener = saRef.on('value', function(snap) {
+    var s = snap.val();
+    if (!s || !saState.active) return;
+    saState.cached = s;
+    document.getElementById('sa-waiting').style.display = 'none';
+    document.getElementById('sa-board').style.display = 'block';
+    saRender(s);
+  });
+  saState.listeners.push({ ref: saRef, event: 'value', fn: listener });
 }
 
 function saLeaveGame() {
@@ -11385,10 +11633,267 @@ function saLeaveGame() {
 
 function saCleanup() {
   saState.active = false;
+  saState.cached = null;
   saState.listeners.forEach(function(l) {
     if (l.ref && l.event && l.fn) l.ref.off(l.event, l.fn);
   });
   saState.listeners = [];
+}
+
+// ── Render ───────────────────────────────────────────────
+function saRender(s) {
+  saRenderScoreboard(s);
+  saRenderTurnIndicator(s);
+  saRenderDeckCount(s);
+  saRenderMyHand(s);
+  saRenderOpponentHandCount(s);
+  saRenderMyStacks(s);
+  saRenderOpponentStacks(s);
+  saRenderLog(s);
+  saRenderWinModal(s);
+}
+
+function saRenderScoreboard(s) {
+  document.getElementById('sa-p1-scored').textContent = (s.p1 && s.p1.scored) || 0;
+  document.getElementById('sa-p2-scored').textContent = (s.p2 && s.p2.scored) || 0;
+}
+
+function saRenderTurnIndicator(s) {
+  var myTurn = s.turn === playerId && !s.winner;
+  var msg = document.getElementById('sa-turn-msg');
+  msg.textContent = s.winner ? 'GAME OVER' : (myTurn ? 'YOUR TURN' : 'WAITING');
+  msg.className = 'sa-turn-msg ' + (myTurn ? 'my-turn' : 'waiting');
+  document.getElementById('sa-draw-btn').disabled = !myTurn || s.hasPlayedThisTurn;
+  document.getElementById('sa-end-turn-btn').disabled = !myTurn;
+}
+
+function saRenderDeckCount(s) {
+  var deckLen = saArr(s.deck).length;
+  document.getElementById('sa-deck-count').textContent = 'Deck: ' + deckLen;
+}
+
+function saRenderMyHand(s) {
+  var me = s[playerId] || {};
+  var hand = saArr(me.hand);
+  var container = document.getElementById('sa-my-hand');
+  container.innerHTML = '';
+  var myTurn = s.turn === playerId && !s.hasPlayedThisTurn && !s.winner;
+  hand.forEach(function(cardId) {
+    var card = saCardById(cardId);
+    var el = saCardEl(card, myTurn);
+    if (myTurn) {
+      el.addEventListener('click', function() { saHandlePlayCard(cardId); });
+    }
+    container.appendChild(el);
+  });
+}
+
+function saRenderOpponentHandCount(s) {
+  var opKey = playerId === 'p1' ? 'p2' : 'p1';
+  var op = s[opKey] || {};
+  document.getElementById('sa-opponent-hand-count').textContent = 'Hand: ' + saArr(op.hand).length;
+}
+
+function saRenderMyStacks(s) {
+  saRenderStacksInto(s, playerId, 'sa-my-stacks');
+}
+
+function saRenderOpponentStacks(s) {
+  var opKey = playerId === 'p1' ? 'p2' : 'p1';
+  saRenderStacksInto(s, opKey, 'sa-opponent-stacks');
+}
+
+function saRenderStacksInto(s, ownerKey, containerId) {
+  var owner = s[ownerKey] || {};
+  var stacks = saArr(owner.stacks).map(saArr);
+  var container = document.getElementById(containerId);
+  container.innerHTML = '';
+  if (stacks.length === 0) {
+    container.innerHTML = '<div class="sa-stacks-empty">No stacks yet</div>';
+    return;
+  }
+  stacks.forEach(function(stack) {
+    var stackDiv = document.createElement('div');
+    stackDiv.className = 'sa-stack';
+    stack.forEach(function(cardIdOrObj) {
+      var card = saCardById(cardIdOrObj);
+      stackDiv.appendChild(saCardEl(card));
+    });
+    container.appendChild(stackDiv);
+  });
+}
+
+function saRenderLog(s) {
+  var logEl = document.getElementById('sa-log');
+  logEl.innerHTML = '';
+  var entries = saArr(s.log).slice(-6);
+  entries.forEach(function(e) {
+    var div = document.createElement('div');
+    div.className = 'sa-log-entry';
+    div.textContent = e.msg;
+    logEl.appendChild(div);
+  });
+}
+
+function saRenderWinModal(s) {
+  var modal = document.getElementById('sa-win-modal');
+  if (!s.winner) {
+    modal.classList.remove('active', 'lost');
+    return;
+  }
+  var iWon = s.winner === playerId;
+  modal.classList.add('active');
+  if (!iWon) modal.classList.add('lost'); else modal.classList.remove('lost');
+  document.getElementById('sa-win-title').textContent = iWon ? 'YOU WIN!' : 'YOU LOST';
+  var reasonMap = {
+    emptyHand: iWon ? 'You played your last card!' : 'Opponent played their last card.',
+    threeStacks: iWon ? 'You scored 3 stacks!' : 'Opponent scored 3 stacks.',
+    deckExhaustion: 'Deck ran out.'
+  };
+  document.getElementById('sa-win-reason').textContent = reasonMap[s.winReason] || 'Game over.';
+}
+
+function saCardEl(card, clickable) {
+  var div = document.createElement('div');
+  div.className = 'sa-card';
+  if (!card) {
+    div.classList.add('face-down');
+    return div;
+  }
+  if (card.kind === 'number') {
+    var color = card.assignedColor || card.color;
+    div.classList.add('sa-card-' + color);
+    div.innerHTML = '<div class="sa-card-letter">' + color.charAt(0).toUpperCase() + '</div>' +
+                    '<div class="sa-card-value">' + card.value + '</div>';
+  } else if (card.kind === 'action') {
+    if (card.action === 'WILD') {
+      div.classList.add('sa-card-wild');
+    } else {
+      div.classList.add('sa-card-action');
+    }
+    div.innerHTML = '<div class="sa-card-action-name">' + card.action + '</div>';
+  }
+  if (clickable) div.classList.add('clickable');
+  return div;
+}
+
+// ── Move handlers ────────────────────────────────────────
+function saHandlePlayCard(cardId) {
+  var s = saState.cached;
+  if (!s || s.winner) return;
+  if (s.turn !== playerId) { toast('Not your turn', 'error'); return; }
+  if (s.hasPlayedThisTurn) { toast('You already played this turn', 'error'); return; }
+
+  var card = saCardById(cardId);
+  if (!card) return;
+
+  if (card.kind === 'action') {
+    toast('Action cards land in Phase 3 — try a number card', 'info');
+    return;
+  }
+
+  // Number card: find matching-color stacks
+  var me = s[playerId] || {};
+  var myStacks = saArr(me.stacks).map(saArr);
+  var matchingIdx = -1;
+  for (var i = 0; i < myStacks.length; i++) {
+    var top = myStacks[i][myStacks[i].length - 1];
+    var topCard = saCardById(top);
+    var topColor = topCard && (topCard.assignedColor || topCard.color);
+    if (topColor === card.color) { matchingIdx = i; break; }
+  }
+  saPlayNumber(cardId, matchingIdx);
+}
+
+function saPlayNumber(cardId, stackIdx) {
+  var s = saState.cached;
+  if (!s) return;
+  var me = s[playerId];
+  var hand = saArr(me.hand);
+  var handIdx = hand.indexOf(cardId);
+  if (handIdx === -1) return;
+
+  var newHand = hand.slice();
+  newHand.splice(handIdx, 1);
+
+  var stacks = saArr(me.stacks).map(saArr);
+  if (stackIdx === -1 || !stacks[stackIdx]) {
+    stacks.push([cardId]);
+  } else {
+    stacks[stackIdx] = stacks[stackIdx].concat([cardId]);
+  }
+
+  var card = saCardById(cardId);
+  var newLog = saArr(s.log).concat([{
+    ts: Date.now(),
+    msg: (playerName || playerId.toUpperCase()) + ' played ' + card.color.toUpperCase() + ' ' + card.value
+  }]);
+  if (newLog.length > 30) newLog = newLog.slice(-30);
+
+  var updates = {};
+  updates[playerId + '/hand'] = newHand;
+  updates[playerId + '/stacks'] = stacks;
+  updates.hasPlayedThisTurn = true;
+  updates.log = newLog;
+  updates.version = (s.version || 0) + 1;
+
+  if (newHand.length === 0) {
+    updates.winner = playerId;
+    updates.winReason = 'emptyHand';
+    newLog.push({ ts: Date.now(), msg: (playerName || playerId.toUpperCase()) + ' WINS — empty hand!' });
+    updates.log = newLog;
+  }
+  roomRef.child('stackattack').update(updates);
+}
+
+function saHandleDrawCard() {
+  var s = saState.cached;
+  if (!s || s.winner) return;
+  if (s.turn !== playerId) return;
+  if (s.hasPlayedThisTurn) return;
+
+  var deck = saArr(s.deck);
+  if (deck.length === 0) {
+    var loser = playerId;
+    var winner = playerId === 'p1' ? 'p2' : 'p1';
+    var newLog = saArr(s.log).concat([{ ts: Date.now(), msg: 'Deck empty — ' + winner.toUpperCase() + ' WINS!' }]);
+    roomRef.child('stackattack').update({
+      winner: winner, winReason: 'deckExhaustion', log: newLog, version: (s.version || 0) + 1
+    });
+    return;
+  }
+
+  var me = s[playerId];
+  var newDeck = deck.slice();
+  var drawnId = newDeck.shift();
+  var newHand = saArr(me.hand).concat([drawnId]);
+  var newLog = saArr(s.log).concat([{ ts: Date.now(), msg: (playerName || playerId.toUpperCase()) + ' drew a card' }]);
+  if (newLog.length > 30) newLog = newLog.slice(-30);
+
+  var updates = {};
+  updates[playerId + '/hand'] = newHand;
+  updates.deck = newDeck;
+  updates.hasPlayedThisTurn = true;
+  updates.log = newLog;
+  updates.version = (s.version || 0) + 1;
+  roomRef.child('stackattack').update(updates);
+}
+
+function saHandleEndTurn() {
+  var s = saState.cached;
+  if (!s || s.winner) return;
+  if (s.turn !== playerId) return;
+
+  var nextTurn = playerId === 'p1' ? 'p2' : 'p1';
+  var newLog = saArr(s.log).concat([{ ts: Date.now(), msg: 'Turn passed to ' + nextTurn.toUpperCase() }]);
+  if (newLog.length > 30) newLog = newLog.slice(-30);
+
+  roomRef.child('stackattack').update({
+    turn: nextTurn,
+    hasPlayedThisTurn: false,
+    log: newLog,
+    version: (s.version || 0) + 1
+  });
 }
 
 
