@@ -4182,7 +4182,48 @@ function createRoom() {
     }).then(function() {
       enterRoom();
       toast('Room created! Share the code.', 'success');
+      cleanupAbandonedRooms();
     });
+  });
+}
+
+// ── Cleanup Abandoned Rooms ──────────────────────────────
+// Runs piggyback on room create/join. Deletes any room with:
+//   - no online players
+//   - created more than 24 hours ago
+// Skips the current room. Skips rooms missing the 'created' timestamp
+// (defensive — never nuke unknowns). Silently no-ops if Firebase rules
+// block the /rooms read (i.e., the rule relax has not been published yet).
+function cleanupAbandonedRooms() {
+  if (!db) return;
+  var cutoff = Date.now() - (24 * 60 * 60 * 1000);
+  db.ref('rooms').once('value').then(function(snap) {
+    var rooms = snap.val() || {};
+    var deletions = [];
+    Object.keys(rooms).forEach(function(code) {
+      if (code === roomId) return;
+      var r = rooms[code];
+      if (!r || typeof r.created !== 'number') return;
+      var hasOnline = false;
+      if (r.players) {
+        if (r.players.p1 && r.players.p1.online === true) hasOnline = true;
+        if (r.players.p2 && r.players.p2.online === true) hasOnline = true;
+      }
+      if (!hasOnline && r.created < cutoff) {
+        deletions.push(db.ref('rooms/' + code).remove());
+      }
+    });
+    if (deletions.length > 0) {
+      Promise.all(deletions).then(function() {
+        console.log('Cleaned up ' + deletions.length + ' abandoned room(s)');
+      }).catch(function(e) {
+        // Per-room delete failures are non-fatal; just log
+        console.log('Cleanup partial failure:', e && e.message);
+      });
+    }
+  }).catch(function(e) {
+    // Read may be blocked by Firebase rules until the rules relax is published.
+    // Silent no-op — never break room create/join because of housekeeping.
   });
 }
 
@@ -4217,6 +4258,7 @@ function joinRoom(code) {
       roomRef.child('status').set('ready');
       enterRoom();
       toast('Joined room ' + code + '!', 'success');
+      cleanupAbandonedRooms();
     });
   });
 }
