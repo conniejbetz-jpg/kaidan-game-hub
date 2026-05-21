@@ -411,7 +411,60 @@ body {
 .sa-win-modal:not(.lost) .sa-win-title { color: #2dc653; }
 .sa-win-modal.lost .sa-win-title { color: #e76f51; }
 .sa-win-reason { font-size: 14px; color: #e0e0e0; margin-bottom: 16px; }
+.sa-help-btn {
+  background: transparent; border: 1px solid #8a8a9a; color: #8a8a9a;
+  font-size: 13px; padding: 6px 12px; border-radius: 6px; cursor: pointer;
+  font-family: 'Inter', sans-serif; transition: all 0.2s;
+}
+.sa-help-btn:hover { border-color: #F4A261; color: #F4A261; }
+.sa-help-modal {
+  display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.85); z-index: 2000;
+  align-items: center; justify-content: center; padding: 20px;
+}
+.sa-help-modal.active { display: flex; }
+.sa-help-content {
+  background: #16213e; border: 2px solid #c1121f; border-radius: 12px;
+  padding: 24px 28px; max-width: 560px; width: 100%;
+  max-height: 85vh; overflow-y: auto; color: #e0e0e0; line-height: 1.6;
+}
+.sa-help-content h3 { color: #c1121f; font-size: 22px; margin-bottom: 12px; letter-spacing: 1px; }
+.sa-help-content h4 { color: #F4A261; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; margin-top: 16px; margin-bottom: 6px; }
+.sa-help-content p { font-size: 13px; margin-bottom: 8px; }
+.sa-help-content ul { margin-left: 18px; font-size: 13px; }
+.sa-help-content li { margin-bottom: 4px; }
+.sa-help-content strong { color: #fff; }
+.sa-help-close {
+  background: #c1121f; color: #fff; border: none; padding: 10px 24px;
+  border-radius: 6px; font-weight: 700; cursor: pointer; margin-top: 16px;
+  font-family: 'Inter', sans-serif;
+}
+.sa-cheatsheet {
+  width: 100%; background: #1a1a2e; border: 1px solid #c1121f; border-radius: 8px;
+}
+.sa-cheatsheet-toggle {
+  width: 100%; background: transparent; border: none; color: #c1121f;
+  padding: 8px 12px; font-family: 'Inter', sans-serif; font-weight: 700;
+  font-size: 11px; cursor: pointer; display: flex; justify-content: space-between;
+  align-items: center; text-transform: uppercase; letter-spacing: 1px;
+}
+.sa-cheatsheet-toggle:hover { color: #F4A261; }
+.sa-cheatsheet-content { padding: 0 12px 10px; display: none; }
+.sa-cheatsheet.expanded .sa-cheatsheet-content { display: block; }
+.sa-cheatsheet-chevron { transition: transform 0.2s; display: inline-block; }
+.sa-cheatsheet.expanded .sa-cheatsheet-chevron { transform: rotate(180deg); }
+.sa-cheat-goal {
+  font-size: 11px; color: #F4A261; padding: 5px 8px; margin-bottom: 6px;
+  background: rgba(244, 162, 97, 0.08); border-radius: 4px; text-align: center; font-weight: 700;
+}
+.sa-cheat-cards {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 3px 14px;
+  font-size: 11px; color: #c0c0c0;
+}
+.sa-cheat-cards span { padding: 1px 0; }
+.sa-cheat-cards strong { color: #c1121f; margin-right: 4px; font-weight: 800; }
 @media (max-width: 600px) {
+  .sa-cheat-cards { grid-template-columns: 1fr; }
   .sa-card { width: 44px; height: 64px; }
   .sa-card-value { font-size: 20px; }
   .sa-stack .sa-card { margin-top: -48px; }
@@ -4166,12 +4219,93 @@ body {
         <span class="sa-deck-count" id="sa-deck-count">Deck: 43</span>
         <button class="sa-btn" id="sa-draw-btn" disabled>Draw Card</button>
         <button class="sa-btn" id="sa-end-turn-btn" disabled>End Turn</button>
+        <button class="sa-help-btn" id="sa-help-btn">? How to Play</button>
+      </div>
+
+      <!-- How to Play modal -->
+      <div class="sa-help-modal" id="sa-help-modal">
+        <div class="sa-help-content">
+          <h3>How to Play Stack Attack</h3>
+
+          <h4>Goal</h4>
+          <p>Be the first to either <strong>empty your hand</strong> OR <strong>score three stacks</strong> of cards.</p>
+
+          <h4>Setup</h4>
+          <p>You start with 7 cards. The deck has number cards in 4 colors (red, blue, green, yellow, numbered 1-9) plus action cards that let you mess with your opponent.</p>
+
+          <h4>Your turn</h4>
+          <ol style="margin-left:18px;font-size:13px;">
+            <li>Play one card from your hand, OR draw a card if you can't or don't want to play</li>
+            <li>After playing, you can score a stack if any of your stacks has 3 or more cards</li>
+            <li>End your turn</li>
+          </ol>
+
+          <h4>Playing number cards</h4>
+          <p>When you play a number card, it goes into a stack of the same color in front of you. You can add it to an existing stack of that color, or start a new stack. Stacks belong to you &mdash; your opponent can't add to them, but they can attack them.</p>
+
+          <h4>Action cards (coming in Phase 3)</h4>
+          <ul>
+            <li><strong>STEAL</strong> &mdash; Take the top card off one of their stacks</li>
+            <li><strong>SWAP</strong> &mdash; Exchange your entire hand with theirs</li>
+            <li><strong>FREEZE</strong> &mdash; They skip their next turn completely</li>
+            <li><strong>WILD</strong> &mdash; Play as a number of any color you choose</li>
+            <li><strong>SHUFFLE</strong> &mdash; Their stacks get reorganized randomly by color</li>
+            <li><strong>DRAW 3</strong> &mdash; They must draw 3 cards before their next play</li>
+            <li><strong>REVERSE</strong> &mdash; Flip any stack upside down (top becomes bottom)</li>
+            <li><strong>DOUBLE</strong> &mdash; Play another card this turn</li>
+          </ul>
+          <p style="font-style:italic;color:#8a8a9a;font-size:12px;">Action cards appear in your hand but don't do anything yet &mdash; clicking shows a message. They'll fully work after Phase 3.</p>
+
+          <h4>Scoring a stack (coming in Phase 4)</h4>
+          <p>When one of your stacks has 3 or more cards, you can choose to score it after playing. The stack gets discarded and you get 1 score point. You need 3 score points to win. Only one score per turn.</p>
+
+          <h4>Winning</h4>
+          <p>Win by reaching 3 scored stacks, OR by playing your last card so your hand is empty. Currently (Phase 2): empty-hand win works, deck-exhaustion loss works, 3-stacks win comes in Phase 4.</p>
+
+          <h4>Watch out for</h4>
+          <ul>
+            <li><strong>SWAP</strong> can flip a winning position fast &mdash; keep some cards in hand even when you're close to empty</li>
+            <li><strong>FREEZE + DRAW 3</strong> combo is brutal &mdash; opponent loses a turn AND draws 3 cards</li>
+            <li><strong>SHUFFLE</strong> can wreck a carefully built stack &mdash; score important stacks before they get hit</li>
+            <li><strong>DOUBLE</strong> lets you chain &mdash; playing a DOUBLE then another action can swing the game</li>
+          </ul>
+
+          <h4>Tips for new players</h4>
+          <ul>
+            <li>Don't hoard. If you can play, play.</li>
+            <li>Score a stack when you can. Holding stacks makes them targets.</li>
+            <li>Save action cards for when they hurt the most &mdash; STEAL is worth more late than early.</li>
+          </ul>
+
+          <button class="sa-help-close" id="sa-help-close">Got it!</button>
+        </div>
       </div>
 
       <!-- My zone -->
       <div class="sa-zone">
         <div class="sa-zone-label">My Stacks</div>
         <div class="sa-stacks-row" id="sa-my-stacks"></div>
+      </div>
+
+      <!-- Cheat sheet (always-visible quick reference) -->
+      <div class="sa-cheatsheet expanded" id="sa-cheatsheet">
+        <button class="sa-cheatsheet-toggle" id="sa-cheatsheet-toggle">
+          <span>Quick Reference</span>
+          <span class="sa-cheatsheet-chevron">&#x25BC;</span>
+        </button>
+        <div class="sa-cheatsheet-content">
+          <div class="sa-cheat-goal">GOAL: Empty your hand OR score 3 stacks (3+ cards each)</div>
+          <div class="sa-cheat-cards">
+            <span><strong>STEAL</strong>top of their stack</span>
+            <span><strong>SWAP</strong>trade hands</span>
+            <span><strong>FREEZE</strong>they skip 1 turn</span>
+            <span><strong>WILD</strong>any color</span>
+            <span><strong>SHUFFLE</strong>their stacks regroup</span>
+            <span><strong>DRAW 3</strong>they draw 3</span>
+            <span><strong>REVERSE</strong>flip a stack</span>
+            <span><strong>DOUBLE</strong>play another card</span>
+          </div>
+        </div>
       </div>
 
       <!-- My hand -->
@@ -11570,6 +11704,18 @@ function saInit() {
   document.getElementById('sa-draw-btn').addEventListener('click', saHandleDrawCard);
   document.getElementById('sa-end-turn-btn').addEventListener('click', saHandleEndTurn);
   document.getElementById('sa-back-hub').addEventListener('click', saLeaveGame);
+  document.getElementById('sa-help-btn').addEventListener('click', function() {
+    document.getElementById('sa-help-modal').classList.add('active');
+  });
+  document.getElementById('sa-help-close').addEventListener('click', function() {
+    document.getElementById('sa-help-modal').classList.remove('active');
+  });
+  document.getElementById('sa-help-modal').addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('active');
+  });
+  document.getElementById('sa-cheatsheet-toggle').addEventListener('click', function() {
+    document.getElementById('sa-cheatsheet').classList.toggle('expanded');
+  });
 }
 
 function saStartGame() {
