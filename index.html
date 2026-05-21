@@ -294,6 +294,8 @@ body {
 .game-card[data-game="goatcards"]:hover { box-shadow: 0 8px 24px rgba(39, 174, 96, 0.3); }
 .game-card[data-game="spanishmath"] { border-color: #06d6a0; }
 .game-card[data-game="spanishmath"]:hover { box-shadow: 0 8px 24px rgba(6, 214, 160, 0.3); }
+.game-card[data-game="colorsandclues"] { border-color: #ff4d8d; }
+.game-card[data-game="colorsandclues"]:hover { box-shadow: 0 8px 24px rgba(255, 77, 141, 0.3); }
 
 .game-icon {
   font-size: 48px;
@@ -310,6 +312,7 @@ body {
 .game-card[data-game="mathbattle"] .game-icon { color: #48cae4; }
 .game-card[data-game="cipher"] .game-icon { color: #ffd700; }
 .game-card[data-game="goatcards"] .game-icon { color: #27ae60; }
+.game-card[data-game="colorsandclues"] .game-icon { color: #ff4d8d; }
 
 .game-name {
   font-size: 18px;
@@ -2853,6 +2856,183 @@ body {
 .sm-win-btn.hub { background: #5B7B94; color: white; }
 .sm-win-btn.hub:hover { box-shadow: 0 4px 16px rgba(91, 123, 148, 0.4); }
 
+/* ========== COLORS AND CLUES STYLES ========== */
+.hc-wrap {
+  width: 100%; max-width: 980px; margin: 0 auto;
+  display: flex; flex-direction: column; align-items: center; gap: 18px;
+  padding: 12px;
+}
+.hc-scoreboard {
+  display: flex; justify-content: space-around; align-items: center;
+  width: 100%; padding: 12px 0; border-bottom: 1px solid #2a3a5c;
+}
+.hc-score-block { text-align: center; }
+.hc-score-label {
+  font-size: 12px; color: #8a8a9a; text-transform: uppercase;
+  letter-spacing: 2px; margin-bottom: 4px;
+}
+.hc-score-value { font-size: 32px; font-weight: 900; color: #ff4d8d; }
+.hc-target-info {
+  font-size: 13px; color: #8a8a9a; padding: 6px 14px;
+  background: rgba(255, 77, 141, 0.1); border-radius: 6px;
+  border: 1px solid #ff4d8d; text-align: center;
+}
+.hc-round-banner {
+  width: 100%; padding: 10px 16px; border-radius: 8px;
+  background: rgba(255, 77, 141, 0.08); border: 1px solid rgba(255, 77, 141, 0.3);
+  text-align: center; font-size: 14px; color: #e0e0e0; font-weight: 600;
+}
+.hc-clue-display {
+  display: flex; flex-direction: column; gap: 6px; align-items: center;
+  min-height: 50px; margin: 4px 0;
+}
+.hc-clue-row {
+  display: flex; gap: 10px; align-items: baseline;
+  font-size: 17px; color: #e0e0e0;
+}
+.hc-clue-tag {
+  font-size: 11px; color: #ff4d8d; text-transform: uppercase;
+  letter-spacing: 1px; font-weight: 700;
+}
+.hc-clue-word { font-weight: 900; color: #f4a261; font-size: 22px; }
+.hc-board-wrap {
+  display: grid; grid-template-columns: 24px 1fr;
+  gap: 4px; width: 100%; max-width: 900px;
+}
+.hc-row-labels {
+  display: grid; grid-template-rows: repeat(16, 1fr);
+  gap: 2px; padding-top: 22px;
+}
+.hc-row-label {
+  font-size: 10px; color: #8a8a9a; text-align: right; padding-right: 4px;
+  display: flex; align-items: center; justify-content: flex-end;
+  font-weight: 600;
+}
+.hc-board-area { display: flex; flex-direction: column; gap: 2px; }
+.hc-col-labels {
+  display: grid; grid-template-columns: repeat(30, 1fr); gap: 2px;
+  margin-bottom: 4px;
+}
+.hc-col-label {
+  font-size: 9px; color: #8a8a9a; text-align: center; font-weight: 600;
+}
+.hc-board {
+  display: grid; grid-template-columns: repeat(30, 1fr);
+  grid-template-rows: repeat(16, 1fr);
+  gap: 2px; width: 100%; aspect-ratio: 30 / 16;
+  border: 2px solid #2a3a5c; padding: 4px; border-radius: 8px;
+  background: #0f1729;
+}
+.hc-cell {
+  cursor: pointer; border-radius: 2px;
+  transition: transform 0.1s, box-shadow 0.1s;
+  position: relative;
+}
+.hc-cell:hover {
+  transform: scale(1.4); z-index: 10;
+  box-shadow: 0 0 0 2px white, 0 4px 12px rgba(0,0,0,0.6);
+}
+.hc-cell.disabled { cursor: not-allowed; }
+.hc-cell.disabled:hover { transform: none; box-shadow: none; }
+.hc-cell.target {
+  outline: 3px solid #ffd700; outline-offset: 1px; z-index: 5;
+  animation: hcTargetPulse 1.5s infinite;
+}
+@keyframes hcTargetPulse {
+  0%, 100% { outline-color: #ffd700; }
+  50% { outline-color: #ff4d8d; }
+}
+.hc-cell.guess1 {
+  outline: 3px solid #48cae4; outline-offset: 1px; z-index: 6;
+}
+.hc-cell.guess2 {
+  outline: 3px solid #c77dff; outline-offset: 1px; z-index: 7;
+}
+.hc-cell.reveal-target {
+  outline: 4px solid #ffd700; outline-offset: 2px; z-index: 8;
+  animation: hcRevealPulse 0.6s infinite alternate;
+}
+@keyframes hcRevealPulse {
+  from { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.6); }
+  to { box-shadow: 0 0 0 6px rgba(255, 215, 0, 0); }
+}
+.hc-controls {
+  display: flex; flex-direction: column; gap: 10px;
+  width: 100%; max-width: 600px; align-items: center;
+}
+.hc-input-row {
+  display: flex; gap: 10px; width: 100%; justify-content: center;
+}
+.hc-input {
+  padding: 12px 18px; font-size: 18px; font-weight: 700;
+  background: #0f1729; color: #ff4d8d;
+  border: 2px solid #2a3a5c; border-radius: 8px;
+  width: 280px; font-family: 'Inter', sans-serif; outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.hc-input:focus {
+  border-color: #ff4d8d; box-shadow: 0 0 0 3px rgba(255, 77, 141, 0.2);
+}
+.hc-input.shake { animation: hcShake 0.4s; }
+@keyframes hcShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}
+.hc-btn {
+  padding: 12px 24px; border: none; border-radius: 8px;
+  font-size: 15px; font-weight: 900; cursor: pointer;
+  text-transform: uppercase; letter-spacing: 1px;
+  transition: transform 0.15s, box-shadow 0.15s;
+  font-family: 'Inter', sans-serif;
+}
+.hc-btn:hover:not(:disabled) { transform: translateY(-2px); }
+.hc-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.hc-btn.primary { background: #ff4d8d; color: white; }
+.hc-btn.primary:hover:not(:disabled) { box-shadow: 0 4px 16px rgba(255, 77, 141, 0.4); }
+.hc-btn.secondary { background: #5B7B94; color: white; }
+.hc-btn.secondary:hover:not(:disabled) { box-shadow: 0 4px 16px rgba(91, 123, 148, 0.4); }
+.hc-instructions {
+  font-size: 14px; color: #b0b0c0; text-align: center;
+  max-width: 600px; line-height: 1.5;
+}
+.hc-instructions strong { color: #ff4d8d; }
+.hc-reveal-info {
+  display: flex; gap: 18px; justify-content: center; flex-wrap: wrap;
+  font-size: 14px; color: #e0e0e0; padding: 10px;
+  background: rgba(255, 215, 0, 0.08); border-radius: 8px;
+  border: 1px solid rgba(255, 215, 0, 0.3);
+}
+.hc-reveal-info .hc-dot {
+  display: inline-block; width: 12px; height: 12px; border-radius: 50%;
+  margin-right: 6px; vertical-align: middle;
+}
+.hc-win-modal {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: none; align-items: center; justify-content: center; z-index: 1000;
+}
+.hc-win-modal.visible { display: flex; }
+.hc-win-content {
+  background: #1a2744; border: 2px solid #ff4d8d; border-radius: 16px;
+  padding: 40px; max-width: 460px; text-align: center;
+}
+.hc-win-title { font-size: 44px; font-weight: 900; color: #ff4d8d; margin-bottom: 12px; }
+.hc-win-subtitle { font-size: 18px; color: #b0b0c0; margin-bottom: 28px; }
+.hc-win-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+.hc-waiting {
+  width: 100%; max-width: 600px; text-align: center;
+  padding: 40px 20px;
+}
+.hc-waiting h3 { color: #ff4d8d; margin-bottom: 12px; }
+.hc-waiting p { color: #b0b0c0; }
+@media (max-width: 700px) {
+  .hc-board-wrap { grid-template-columns: 16px 1fr; }
+  .hc-col-label, .hc-row-label { font-size: 8px; }
+  .hc-input { width: 220px; font-size: 16px; }
+  .hc-clue-word { font-size: 18px; }
+}
+
 </style>
 </head>
 <body>
@@ -2979,6 +3159,13 @@ body {
       <span class="game-icon">&#x1F1EA;&#x1F1F8;</span>
       <div class="game-name">Spanish Math</div>
       <div class="game-tagline">Read it. Type it. First to 10 wins.</div>
+      <span class="game-status waiting">Join a room to play</span>
+    </div>
+
+    <div class="game-card disabled" data-game="colorsandclues">
+      <span class="game-icon">&#x1F308;</span>
+      <div class="game-name">Colors and Clues</div>
+      <div class="game-tagline">One word. Two words. Find the color.</div>
       <span class="game-status waiting">Join a room to play</span>
     </div>
 
@@ -3722,6 +3909,74 @@ body {
   </div>
 </div>
 
+<!-- ========== COLORS AND CLUES VIEW ========== -->
+<div class="game-view" id="view-colorsandclues">
+  <button class="back-to-hub" id="back-colorsandclues">&#x2190; Back to Hub</button>
+
+  <!-- Pre-game Waiting -->
+  <div class="hc-waiting" id="hc-waiting" style="display:none;">
+    <h3 class="pulse">Loading the rainbow...</h3>
+    <p>One player picks a secret color, gives a 1-word clue, then a 2-word clue. The other player guesses on the board. Closer guess = more points. First to 20 wins.</p>
+  </div>
+
+  <!-- Game Area -->
+  <div class="hc-wrap" id="hc-wrap" style="display:none;">
+
+    <!-- Scoreboard -->
+    <div class="hc-scoreboard">
+      <div class="hc-score-block">
+        <div class="hc-score-label" id="hc-p1-name">P1</div>
+        <div class="hc-score-value" id="hc-p1-score">0</div>
+      </div>
+      <div class="hc-target-info">
+        <div>Round <span id="hc-round-num">1</span></div>
+        <div style="font-size: 11px; margin-top: 2px;">First to 20</div>
+      </div>
+      <div class="hc-score-block">
+        <div class="hc-score-label" id="hc-p2-name">P2</div>
+        <div class="hc-score-value" id="hc-p2-score">0</div>
+      </div>
+    </div>
+
+    <!-- Round Banner -->
+    <div class="hc-round-banner" id="hc-round-banner">Loading...</div>
+
+    <!-- Clue Display (visible during guess phases + reveal) -->
+    <div class="hc-clue-display" id="hc-clue-display"></div>
+
+    <!-- Color Board -->
+    <div class="hc-board-wrap">
+      <div class="hc-row-labels" id="hc-row-labels"></div>
+      <div class="hc-board-area">
+        <div class="hc-col-labels" id="hc-col-labels"></div>
+        <div class="hc-board" id="hc-board"></div>
+      </div>
+    </div>
+
+    <!-- Reveal Info (visible only during reveal phase) -->
+    <div class="hc-reveal-info" id="hc-reveal-info" style="display:none;"></div>
+
+    <!-- Controls (input/button area, changes per phase) -->
+    <div class="hc-controls" id="hc-controls"></div>
+
+    <!-- Instructions (phase-specific guidance) -->
+    <div class="hc-instructions" id="hc-instructions"></div>
+
+  </div>
+
+  <!-- Win Modal -->
+  <div class="hc-win-modal" id="hc-win-modal">
+    <div class="hc-win-content">
+      <div class="hc-win-title" id="hc-win-title">P1 WINS!</div>
+      <div class="hc-win-subtitle" id="hc-win-subtitle">First to 20 points!</div>
+      <div class="hc-win-actions">
+        <button class="hc-btn primary" id="hc-replay">Play Again</button>
+        <button class="hc-btn secondary" id="hc-back-hub-modal">Back to Hub</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ========== FLOATING SOUND BOARD (persists across all views) ========== -->
 <div class="floating-soundboard collapsed" id="floating-soundboard">
   <div class="fsb-header" id="fsb-header">
@@ -3806,6 +4061,7 @@ function init() {
   gcInit();
   gsInit();
   smInit();
+  hcInit();
   fsbInit();
   chatInit();
 }
@@ -3874,6 +4130,7 @@ function bindUI() {
   document.getElementById('back-goatcards').addEventListener('click', function() { gcLeaveGame(); });
   document.getElementById('back-wouldyourather').addEventListener('click', function() { wyrLeaveGame(); });
   document.getElementById('back-spanishmath').addEventListener('click', function() { smLeaveGame(); });
+  document.getElementById('back-colorsandclues').addEventListener('click', function() { hcLeaveGame(); });
 
   document.getElementById('proposal-accept').addEventListener('click', acceptProposal);
   document.getElementById('proposal-decline').addEventListener('click', declineProposal);
@@ -4021,6 +4278,9 @@ function listenToRoom() {
       if (game === 'spanishmath') {
         smStartGame();
       }
+      if (game === 'colorsandclues') {
+        hcStartGame();
+      }
     }
   });
   roomListeners.push({ ref: gameRef, event: 'value', fn: gameListener });
@@ -4059,7 +4319,7 @@ function updateGameCards(players) {
     }
 
     // Coming soon games stay disabled
-    if (game !== 'battleship' && game !== 'wouldyourather' && game !== 'hangman' && game !== 'codebreaker' && game !== 'mathbattle' && game !== 'cipher' && game !== 'goatcards' && game !== 'goatstation') {
+    if (game !== 'battleship' && game !== 'wouldyourather' && game !== 'hangman' && game !== 'codebreaker' && game !== 'mathbattle' && game !== 'cipher' && game !== 'goatcards' && game !== 'goatstation' && game !== 'spanishmath' && game !== 'colorsandclues') {
       card.classList.add('disabled');
       return;
     }
@@ -4168,7 +4428,7 @@ function leaveRoom() {
     card.classList.add('disabled');
     var statusEl = card.querySelector('.game-status');
     var game = card.getAttribute('data-game');
-    if (game === 'battleship' || game === 'wouldyourather' || game === 'hangman' || game === 'codebreaker' || game === 'mathbattle' || game === 'cipher' || game === 'goatcards' || game === 'goatstation') {
+    if (game === 'battleship' || game === 'wouldyourather' || game === 'hangman' || game === 'codebreaker' || game === 'mathbattle' || game === 'cipher' || game === 'goatcards' || game === 'goatstation' || game === 'spanishmath' || game === 'colorsandclues') {
       statusEl.textContent = 'Join a room to play';
       statusEl.className = 'game-status waiting';
     }
@@ -10154,6 +10414,575 @@ function smCleanup() {
     input.classList.remove('locked', 'shake');
     input.disabled = false;
   }
+}
+
+
+/* ==========================================================
+   COLORS AND CLUES MODULE — Wave 7
+   2-player adapted: roles swap each round.
+   Cue Giver picks a color, gives 1-word then 2-word clue.
+   Guesser places a marker after each clue.
+   Scoring (per marker): exact=4, 1 cell=3, 2 cells=2, 3 cells=1, 4+=0.
+   Both players earn the same per round. First to 20 wins.
+   ========================================================== */
+
+// ── Colors and Clues Constants ──────────────────────────────
+var HC_COLS = 30;
+var HC_ROWS = 16;
+var HC_WIN_SCORE = 20;
+var HC_REVEAL_DELAY_MS = 4500;
+var HC_ROW_LETTERS = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'];
+
+// ── Colors and Clues State ──────────────────────────────────
+var hcState = {
+  active: false,
+  cached: null,
+  listeners: [],
+  boardBuilt: false,
+  lastAdvancedRound: -1,
+  advanceTimer: null
+};
+
+// ── Color generation (HSL spectrum) ──────────────────────
+function hcColorFor(col, row) {
+  var h = (col / HC_COLS) * 360;
+  var l = 85 - (row / (HC_ROWS - 1)) * 70;  // row 0 = 85%, row 15 = 15%
+  var s = 90;
+  return 'hsl(' + h.toFixed(1) + ', ' + s + '%, ' + l.toFixed(1) + '%)';
+}
+
+// ── Distance (Chebyshev) + Scoring ───────────────────────
+function hcDistance(c1, r1, c2, r2) {
+  return Math.max(Math.abs(c1 - c2), Math.abs(r1 - r2));
+}
+function hcPoints(distance) {
+  return Math.max(0, 4 - distance);
+}
+
+// ── Build board DOM (once) ───────────────────────────────
+function hcBuildBoard() {
+  if (hcState.boardBuilt) return;
+  var board = document.getElementById('hc-board');
+  var colLabels = document.getElementById('hc-col-labels');
+  var rowLabels = document.getElementById('hc-row-labels');
+
+  // Column labels 1-30
+  for (var c = 0; c < HC_COLS; c++) {
+    var cl = document.createElement('div');
+    cl.className = 'hc-col-label';
+    cl.textContent = (c + 1);
+    colLabels.appendChild(cl);
+  }
+  // Row labels A-P
+  for (var r = 0; r < HC_ROWS; r++) {
+    var rl = document.createElement('div');
+    rl.className = 'hc-row-label';
+    rl.textContent = HC_ROW_LETTERS[r];
+    rowLabels.appendChild(rl);
+  }
+  // 480 cells
+  for (var rr = 0; rr < HC_ROWS; rr++) {
+    for (var cc = 0; cc < HC_COLS; cc++) {
+      var cell = document.createElement('div');
+      cell.className = 'hc-cell';
+      cell.style.background = hcColorFor(cc, rr);
+      cell.setAttribute('data-col', cc);
+      cell.setAttribute('data-row', rr);
+      cell.addEventListener('click', hcOnCellClick);
+      board.appendChild(cell);
+    }
+  }
+  hcState.boardBuilt = true;
+}
+
+// ── Init (called once at page load) ──────────────────────
+function hcInit() {
+  // Replay + back-hub-modal buttons
+  document.getElementById('hc-replay').addEventListener('click', hcReplay);
+  document.getElementById('hc-back-hub-modal').addEventListener('click', hcLeaveGame);
+
+  // Esc key to leave game
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && hcState.active) {
+      hcLeaveGame();
+    }
+  });
+}
+
+// ── My role helper ───────────────────────────────────────
+function hcMyRole(s) {
+  if (!s) return null;
+  if (s.cueGiver === playerId) return 'cueGiver';
+  if (s.guesser === playerId) return 'guesser';
+  return null;
+}
+
+// ── Start a game (called when currentGame = colorsandclues) ──
+function hcStartGame() {
+  if (hcState.active) return;
+  hcState.active = true;
+  hcState.cached = null;
+  hcState.lastAdvancedRound = -1;
+
+  hcBuildBoard();
+
+  var hcRef = roomRef.child('colorsandclues');
+
+  // P1 initializes state if missing
+  if (playerId === 'p1') {
+    hcRef.once('value').then(function(snap) {
+      if (!snap.exists()) {
+        hcRef.set({
+          cueGiver: 'p1',
+          guesser: 'p2',
+          secretCol: null,
+          secretRow: null,
+          clue1: null,
+          clue2: null,
+          phase: 'pickColor',
+          guess1: null,
+          guess2: null,
+          p1Score: 0,
+          p2Score: 0,
+          roundNum: 1,
+          gameOver: false,
+          winner: null,
+          lastRoundPoints: null,
+          startedAt: firebase.database.ServerValue.TIMESTAMP
+        });
+      }
+    });
+  }
+
+  // Both listen
+  var stateListener = hcRef.on('value', function(snap) {
+    var s = snap.val();
+    if (!s) return;
+    hcState.cached = s;
+    hcRender(s);
+  });
+  hcState.listeners.push({ ref: hcRef, event: 'value', fn: stateListener });
+
+  // Show UI
+  document.getElementById('hc-waiting').style.display = 'none';
+  document.getElementById('hc-wrap').style.display = 'flex';
+  document.getElementById('hc-win-modal').classList.remove('visible');
+
+  // Player labels from room
+  roomRef.child('players').once('value').then(function(snap) {
+    var players = snap.val() || {};
+    var p1Name = (players.p1 && players.p1.name) || 'P1';
+    var p2Name = (players.p2 && players.p2.name) || 'P2';
+    document.getElementById('hc-p1-name').textContent = p1Name;
+    document.getElementById('hc-p2-name').textContent = p2Name;
+  });
+}
+
+// ── Master render ────────────────────────────────────────
+function hcRender(s) {
+  // Scores + round
+  document.getElementById('hc-p1-score').textContent = s.p1Score || 0;
+  document.getElementById('hc-p2-score').textContent = s.p2Score || 0;
+  document.getElementById('hc-round-num').textContent = s.roundNum || 1;
+
+  // Game over: show win modal
+  if (s.gameOver) {
+    var p1Name = document.getElementById('hc-p1-name').textContent;
+    var p2Name = document.getElementById('hc-p2-name').textContent;
+    var winnerLabel = (s.winner === 'p1' ? p1Name : p2Name) + ' WINS!';
+    document.getElementById('hc-win-title').textContent = winnerLabel;
+    document.getElementById('hc-win-subtitle').textContent =
+      'Final: ' + p1Name + ' ' + (s.p1Score || 0) + ' — ' + p2Name + ' ' + (s.p2Score || 0);
+    document.getElementById('hc-win-modal').classList.add('visible');
+    hcRenderBoard(s, hcMyRole(s));
+    return;
+  }
+
+  var myRole = hcMyRole(s);
+
+  // Banner
+  hcRenderBanner(s, myRole);
+  // Clue display
+  hcRenderClueDisplay(s, myRole);
+  // Board outlines
+  hcRenderBoard(s, myRole);
+  // Controls (input/buttons per phase)
+  hcRenderControls(s, myRole);
+  // Reveal info
+  hcRenderRevealInfo(s);
+
+  // P1 advances after reveal
+  if (s.phase === 'reveal' && playerId === 'p1' && hcState.lastAdvancedRound !== s.roundNum) {
+    hcState.lastAdvancedRound = s.roundNum;
+    if (hcState.advanceTimer) clearTimeout(hcState.advanceTimer);
+    hcState.advanceTimer = setTimeout(function() {
+      hcAdvanceRound(s);
+    }, HC_REVEAL_DELAY_MS);
+  }
+}
+
+// ── Banner (whose turn, what to do) ──────────────────────
+function hcRenderBanner(s, myRole) {
+  var banner = document.getElementById('hc-round-banner');
+  var instr = document.getElementById('hc-instructions');
+  var cueName = s.cueGiver === 'p1'
+    ? document.getElementById('hc-p1-name').textContent
+    : document.getElementById('hc-p2-name').textContent;
+  var guessName = s.guesser === 'p1'
+    ? document.getElementById('hc-p1-name').textContent
+    : document.getElementById('hc-p2-name').textContent;
+
+  var msg = '';
+  var help = '';
+  if (s.phase === 'pickColor') {
+    msg = cueName + ' is picking a secret color';
+    help = myRole === 'cueGiver'
+      ? 'Click any cell on the board. That becomes your secret color.'
+      : 'Wait while ' + cueName + ' picks a color.';
+  } else if (s.phase === 'clue1') {
+    msg = cueName + ' is writing a 1-word clue';
+    help = myRole === 'cueGiver'
+      ? 'Type ONE word that hints at your color. No proper nouns. No compound words.'
+      : 'Wait for the 1-word clue.';
+  } else if (s.phase === 'guess1') {
+    msg = guessName + ' is making the first guess';
+    help = myRole === 'guesser'
+      ? 'Click the color on the board you think matches the clue.'
+      : 'Wait while ' + guessName + ' guesses.';
+  } else if (s.phase === 'clue2') {
+    msg = cueName + ' is writing a 2-word clue';
+    help = myRole === 'cueGiver'
+      ? 'Type TWO words that narrow it down further.'
+      : 'Wait for the 2-word clue.';
+  } else if (s.phase === 'guess2') {
+    msg = guessName + ' is making the second guess';
+    help = myRole === 'guesser'
+      ? 'Click a second color (or the same one if you are sure).'
+      : 'Wait while ' + guessName + ' makes the second guess.';
+  } else if (s.phase === 'reveal') {
+    msg = 'Round ' + s.roundNum + ' results — next round in a few seconds';
+    help = 'Roles will swap. Cue giver becomes guesser.';
+  }
+  banner.textContent = msg;
+  instr.innerHTML = help;
+}
+
+// ── Clue display ─────────────────────────────────────────
+function hcRenderClueDisplay(s, myRole) {
+  var el = document.getElementById('hc-clue-display');
+  el.innerHTML = '';
+  // Cue giver always sees their own clues. Guesser sees them as they're submitted.
+  if (s.clue1) {
+    var r1 = document.createElement('div');
+    r1.className = 'hc-clue-row';
+    r1.innerHTML = '<span class="hc-clue-tag">1-Word</span> <span class="hc-clue-word">' +
+      hcEscape(s.clue1) + '</span>';
+    el.appendChild(r1);
+  }
+  if (s.clue2) {
+    var r2 = document.createElement('div');
+    r2.className = 'hc-clue-row';
+    r2.innerHTML = '<span class="hc-clue-tag">2-Word</span> <span class="hc-clue-word">' +
+      hcEscape(s.clue2) + '</span>';
+    el.appendChild(r2);
+  }
+}
+
+// ── Board outlines (target + guesses) ────────────────────
+function hcRenderBoard(s, myRole) {
+  // Clear all outlines
+  var cells = document.querySelectorAll('#hc-board .hc-cell');
+  cells.forEach(function(c) {
+    c.classList.remove('target', 'guess1', 'guess2', 'reveal-target', 'disabled');
+  });
+
+  // Target visible to: cue giver always, both during reveal
+  var showTarget = false;
+  if (typeof s.secretCol === 'number' && typeof s.secretRow === 'number') {
+    if (myRole === 'cueGiver') showTarget = true;
+    if (s.phase === 'reveal') showTarget = true;
+  }
+  if (showTarget) {
+    var idx = s.secretRow * HC_COLS + s.secretCol;
+    var tcell = cells[idx];
+    if (tcell) {
+      tcell.classList.add(s.phase === 'reveal' ? 'reveal-target' : 'target');
+    }
+  }
+
+  // Guess markers visible to all once placed
+  if (s.guess1) {
+    var g1idx = s.guess1.row * HC_COLS + s.guess1.col;
+    if (cells[g1idx]) cells[g1idx].classList.add('guess1');
+  }
+  if (s.guess2) {
+    var g2idx = s.guess2.row * HC_COLS + s.guess2.col;
+    if (cells[g2idx]) cells[g2idx].classList.add('guess2');
+  }
+
+  // Disable cells when not the active actor for a click phase
+  var canClick = false;
+  if (s.phase === 'pickColor' && myRole === 'cueGiver') canClick = true;
+  if (s.phase === 'guess1' && myRole === 'guesser') canClick = true;
+  if (s.phase === 'guess2' && myRole === 'guesser') canClick = true;
+  if (!canClick) {
+    cells.forEach(function(c) { c.classList.add('disabled'); });
+  }
+}
+
+// ── Controls (input/buttons per phase + role) ────────────
+function hcRenderControls(s, myRole) {
+  var el = document.getElementById('hc-controls');
+  el.innerHTML = '';
+
+  if (s.phase === 'pickColor' && myRole === 'cueGiver') {
+    var btn = document.createElement('button');
+    btn.className = 'hc-btn secondary';
+    btn.textContent = 'Pick Random For Me';
+    btn.addEventListener('click', function() {
+      var col = Math.floor(Math.random() * HC_COLS);
+      var row = Math.floor(Math.random() * HC_ROWS);
+      hcSubmitColor(col, row);
+    });
+    el.appendChild(btn);
+    return;
+  }
+
+  if (s.phase === 'clue1' && myRole === 'cueGiver') {
+    hcRenderClueInput(el, 1);
+    return;
+  }
+  if (s.phase === 'clue2' && myRole === 'cueGiver') {
+    hcRenderClueInput(el, 2);
+    return;
+  }
+}
+
+function hcRenderClueInput(parent, n) {
+  var row = document.createElement('div');
+  row.className = 'hc-input-row';
+  var inp = document.createElement('input');
+  inp.type = 'text';
+  inp.className = 'hc-input';
+  inp.id = 'hc-clue-input';
+  inp.maxLength = 40;
+  inp.placeholder = (n === 1) ? 'One word...' : 'Two words...';
+  inp.autocomplete = 'off';
+  var btn = document.createElement('button');
+  btn.className = 'hc-btn primary';
+  btn.textContent = 'Send Clue';
+  var submit = function() {
+    var v = (inp.value || '').trim();
+    if (!v) {
+      inp.classList.add('shake');
+      setTimeout(function() { inp.classList.remove('shake'); }, 400);
+      return;
+    }
+    var words = v.split(/\s+/).filter(function(w) { return w.length > 0; });
+    if (n === 1 && words.length !== 1) {
+      inp.classList.add('shake');
+      setTimeout(function() { inp.classList.remove('shake'); }, 400);
+      toast('1-word clue must be ONE word', 'error');
+      return;
+    }
+    if (n === 2 && words.length !== 2) {
+      inp.classList.add('shake');
+      setTimeout(function() { inp.classList.remove('shake'); }, 400);
+      toast('2-word clue must be exactly TWO words', 'error');
+      return;
+    }
+    hcSubmitClue(v, n);
+  };
+  btn.addEventListener('click', submit);
+  inp.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); submit(); }
+  });
+  row.appendChild(inp);
+  row.appendChild(btn);
+  parent.appendChild(row);
+  setTimeout(function() { inp.focus(); }, 50);
+}
+
+// ── Reveal info panel ────────────────────────────────────
+function hcRenderRevealInfo(s) {
+  var el = document.getElementById('hc-reveal-info');
+  if (s.phase !== 'reveal' || !s.lastRoundPoints) {
+    el.style.display = 'none';
+    el.innerHTML = '';
+    return;
+  }
+  var lp = s.lastRoundPoints;
+  el.style.display = 'flex';
+  el.innerHTML =
+    '<div><span class="hc-dot" style="background:#48cae4"></span>1st guess: ' +
+      lp.pts1 + ' pt' + (lp.pts1 === 1 ? '' : 's') + ' (' + lp.dist1 + ' away)</div>' +
+    '<div><span class="hc-dot" style="background:#c77dff"></span>2nd guess: ' +
+      lp.pts2 + ' pt' + (lp.pts2 === 1 ? '' : 's') + ' (' + lp.dist2 + ' away)</div>' +
+    '<div><span class="hc-dot" style="background:#ffd700"></span>Both earn ' +
+      lp.total + ' pt' + (lp.total === 1 ? '' : 's') + ' this round</div>';
+}
+
+// ── Cell click handler ───────────────────────────────────
+function hcOnCellClick(e) {
+  var s = hcState.cached;
+  if (!s || s.gameOver) return;
+  var cell = e.currentTarget;
+  if (cell.classList.contains('disabled')) return;
+  var col = parseInt(cell.getAttribute('data-col'), 10);
+  var row = parseInt(cell.getAttribute('data-row'), 10);
+  var myRole = hcMyRole(s);
+
+  if (s.phase === 'pickColor' && myRole === 'cueGiver') {
+    hcSubmitColor(col, row);
+  } else if (s.phase === 'guess1' && myRole === 'guesser') {
+    hcSubmitGuess(col, row, 1);
+  } else if (s.phase === 'guess2' && myRole === 'guesser') {
+    hcSubmitGuess(col, row, 2);
+  }
+}
+
+// ── Cue Giver: submit secret color ───────────────────────
+function hcSubmitColor(col, row) {
+  var hcRef = roomRef.child('colorsandclues');
+  hcRef.update({
+    secretCol: col,
+    secretRow: row,
+    phase: 'clue1'
+  });
+}
+
+// ── Cue Giver: submit clue 1 or 2 ────────────────────────
+function hcSubmitClue(text, n) {
+  var hcRef = roomRef.child('colorsandclues');
+  if (n === 1) {
+    hcRef.update({ clue1: text, phase: 'guess1' });
+  } else {
+    hcRef.update({ clue2: text, phase: 'guess2' });
+  }
+}
+
+// ── Guesser: submit guess 1 or 2 ─────────────────────────
+function hcSubmitGuess(col, row, n) {
+  var hcRef = roomRef.child('colorsandclues');
+  if (n === 1) {
+    hcRef.update({ guess1: { col: col, row: row }, phase: 'clue2' });
+    return;
+  }
+  // n === 2 → compute points, set reveal
+  var s = hcState.cached;
+  if (!s) return;
+  var tc = s.secretCol, tr = s.secretRow;
+  var g1 = s.guess1 || { col: col, row: row };
+  var dist1 = hcDistance(g1.col, g1.row, tc, tr);
+  var dist2 = hcDistance(col, row, tc, tr);
+  var pts1 = hcPoints(dist1);
+  var pts2 = hcPoints(dist2);
+  var total = pts1 + pts2;
+
+  // Both players earn the same points
+  hcRef.transaction(function(current) {
+    if (!current) return current;
+    current.guess2 = { col: col, row: row };
+    current.phase = 'reveal';
+    current.lastRoundPoints = { dist1: dist1, dist2: dist2, pts1: pts1, pts2: pts2, total: total };
+    current.p1Score = (current.p1Score || 0) + total;
+    current.p2Score = (current.p2Score || 0) + total;
+    if (current.p1Score >= HC_WIN_SCORE || current.p2Score >= HC_WIN_SCORE) {
+      current.gameOver = true;
+      // Whoever has more wins; tie → guesser wins (last to act)
+      if (current.p1Score > current.p2Score) current.winner = 'p1';
+      else if (current.p2Score > current.p1Score) current.winner = 'p2';
+      else current.winner = current.guesser;
+    }
+    return current;
+  });
+}
+
+// ── P1: advance to next round (swap roles, clear) ────────
+function hcAdvanceRound(s) {
+  if (s.gameOver) return;
+  var hcRef = roomRef.child('colorsandclues');
+  hcRef.update({
+    cueGiver: s.cueGiver === 'p1' ? 'p2' : 'p1',
+    guesser: s.guesser === 'p1' ? 'p2' : 'p1',
+    secretCol: null,
+    secretRow: null,
+    clue1: null,
+    clue2: null,
+    guess1: null,
+    guess2: null,
+    phase: 'pickColor',
+    roundNum: (s.roundNum || 1) + 1,
+    lastRoundPoints: null
+  });
+}
+
+// ── P1: replay (reset everything) ────────────────────────
+function hcReplay() {
+  if (playerId !== 'p1') return;
+  var hcRef = roomRef.child('colorsandclues');
+  hcRef.set({
+    cueGiver: 'p1',
+    guesser: 'p2',
+    secretCol: null,
+    secretRow: null,
+    clue1: null,
+    clue2: null,
+    phase: 'pickColor',
+    guess1: null,
+    guess2: null,
+    p1Score: 0,
+    p2Score: 0,
+    roundNum: 1,
+    gameOver: false,
+    winner: null,
+    lastRoundPoints: null,
+    startedAt: firebase.database.ServerValue.TIMESTAMP
+  });
+  document.getElementById('hc-win-modal').classList.remove('visible');
+  hcState.lastAdvancedRound = -1;
+}
+
+// ── Leave Game (back to Hub) ─────────────────────────────
+function hcLeaveGame() {
+  hcCleanup();
+  if (roomRef && playerId === 'p1') {
+    roomRef.child('currentGame').set(null);
+    roomRef.child('colorsandclues').remove();
+  }
+  showView('hub');
+}
+
+// ── Cleanup ──────────────────────────────────────────────
+function hcCleanup() {
+  hcState.active = false;
+  hcState.cached = null;
+  hcState.lastAdvancedRound = -1;
+  if (hcState.advanceTimer) {
+    clearTimeout(hcState.advanceTimer);
+    hcState.advanceTimer = null;
+  }
+  hcState.listeners.forEach(function(l) {
+    l.ref.off(l.event, l.fn);
+  });
+  hcState.listeners = [];
+
+  var wrap = document.getElementById('hc-wrap');
+  var waiting = document.getElementById('hc-waiting');
+  var modal = document.getElementById('hc-win-modal');
+  if (wrap) wrap.style.display = 'none';
+  if (waiting) waiting.style.display = 'none';
+  if (modal) modal.classList.remove('visible');
+}
+
+// ── HTML escape (for user-typed clues) ───────────────────
+function hcEscape(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 
