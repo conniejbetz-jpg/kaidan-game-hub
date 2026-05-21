@@ -2767,7 +2767,16 @@ body {
 }
 .hm-gameover.won .hm-gameover-title { color: #2dc653; }
 .hm-gameover.lost .hm-gameover-title { color: #e76f51; }
-.hm-gameover-word { font-size: 18px; color: #fff; font-weight: 700; margin-bottom: 16px; }
+.hm-gameover-word { font-size: 18px; color: #fff; font-weight: 700; margin-bottom: 12px; }
+.hm-gameover-definition {
+  font-size: 14px; color: #e0e0e0; font-style: italic; line-height: 1.5;
+  background: rgba(244, 162, 97, 0.08); border-left: 3px solid #F4A261;
+  padding: 10px 14px; border-radius: 4px; margin: 0 auto 16px;
+  max-width: 460px; text-align: left;
+}
+.hm-gameover-definition::before {
+  content: "Did you know? "; font-weight: 700; color: #F4A261; font-style: normal;
+}
 .hm-next-round-btn {
   padding: 12px 32px; border: none; border-radius: 8px; background: #f4a261;
   color: #1a1a2e; font-family: 'Inter', sans-serif; font-size: 16px;
@@ -3386,6 +3395,7 @@ body {
           <button class="hm-cat-btn" data-cat="videogames">Video Games</button>
           <button class="hm-cat-btn" data-cat="obscurecountries">Obscure Countries</button>
           <button class="hm-cat-btn" data-cat="medical">Medical</button>
+          <button class="hm-cat-btn" data-cat="bodyparts">Body Parts</button>
         </div>
         <input type="text" class="hm-word-input" id="hm-word-input" placeholder="Type a word or phrase..." maxlength="100" autocomplete="off" spellcheck="false">
         <div class="hm-or-divider">— OR —</div>
@@ -3439,6 +3449,7 @@ body {
     <div class="hm-gameover" id="hm-gameover">
       <div class="hm-gameover-title" id="hm-gameover-title">—</div>
       <div class="hm-gameover-word" id="hm-gameover-word"></div>
+      <div class="hm-gameover-definition" id="hm-gameover-definition" style="display:none;"></div>
       <button class="hm-next-round-btn" id="hm-next-round">Next Round &#x27A1;</button>
     </div>
   </div>
@@ -8830,7 +8841,82 @@ var HM_WORDS = {
   science: ["GRAVITY","VOLCANO","NEUTRON","ECLIPSE","PROTEIN","ELEMENT","QUANTUM","CRYSTAL","PLASMA","MAGNET","GENOME","PHOTON","FUSION","PRISM","ENZYME","GALAXY","NEBULA","COMET","QUASAR","FOSSIL"],
   videogames: ["ZELDA","MARIO","MINECRAFT","FORTNITE","ROBLOX","POKEMON","KIRBY","TETRIS","SONIC","LUIGI","BOWSER","PIKACHU","CREEPER","YOSHI","DONKEY","SPLATOON","METROID","PACMAN","MEGAMAN","TOAD"],
   obscurecountries: ["TUVALU","BHUTAN","KIRIBATI","ESWATINI","COMOROS","VANUATU","NAURU","SURINAME","ANDORRA","MOLDOVA","LIECHTENSTEIN","DJIBOUTI","BRUNEI","PALAU","LESOTHO","SUDAN","TAJIKISTAN","TURKMENISTAN","UZBEKISTAN","YUGOSLAVIA","TRINIDAD AND TOBAGO","UNITED ARAB EMIRATES","UNITED KINGDOM"],
-  medical: ["BRONCHITIS","MIGRAINE","ARTHRITIS","ECZEMA","ANEMIA","INSOMNIA","ASTHMA","DIABETES","VERTIGO","HEARTBURN","PSORIASIS","TINNITUS","DEHYDRATION","CATARACTS","SHINGLES","GOUT","SCIATICA","HEADACHE","TONSILLITIS","LARYNGITIS","VEISALGIA"]
+  medical: ["BRONCHITIS","MIGRAINE","ARTHRITIS","ECZEMA","ANEMIA","INSOMNIA","ASTHMA","DIABETES","VERTIGO","HEARTBURN","PSORIASIS","TINNITUS","DEHYDRATION","CATARACTS","SHINGLES","GOUT","SCIATICA","HEADACHE","TONSILLITIS","LARYNGITIS","VEISALGIA"],
+  bodyparts: ["GLABELLA","PHILTRUM","TRAGUS","COLUMELLA NASI","GNATHION","CANTHUS","PLICA SEMILUNARIS","FRENULUM","UVULA","VIBRISSAE","INION","ANATOMICAL SNUFFBOX","LUNULA","HALLUX","POLLEX","POPLITEAL FOSSA","THENAR EMINENCE","HYPOTHENAR EMINENCE","EPONYCHIUM","HYPONYCHIUM","INTERDIGITAL WEBS","AXILLA","OMPHALOS","OLECRANON","XIPHOID PROCESS","DIMPLES OF VENUS","SUPRASTERNAL NOTCH","PHALANGETTES","PATELLA","CLAVICLE","COCCYX","STAPES","MASSETER","GASTROCNEMIUS","ARRECTOR PILI","SARTORIUS","HYOID","MASTOID PROCESS","ZYGOMATICUS","CALCANEUS","CERUMEN","LACRYMAL PUNCTUM","PAPILLAE","MEISSNERS CORPUSCLES","RUFFINI ENDINGS","PACINIAN CORPUSCLES","SCLERA","SEBACEOUS GLANDS","PURKINJE FIBERS","ALVEOLI"]
+};
+
+var HM_DEFINITIONS = {
+  "BRONCHITIS": "Inflammation of the breathing tubes in your lungs. Makes you cough a lot. From Greek bronchos (windpipe) + -itis (inflammation).",
+  "MIGRAINE": "A really bad headache, often with flashing lights or nausea. From Greek hemi (half) + kranion (skull) — it usually hits one side of the head.",
+  "ARTHRITIS": "Sore, stiff joints. From Greek arthron (joint) + -itis (inflammation).",
+  "ECZEMA": "Itchy red rash on the skin. From Greek ekzein — \"to boil out\" — because the rash looks like the skin is boiling over.",
+  "ANEMIA": "Low red blood cell count, which makes you tired. From Greek an- (without) + haima (blood).",
+  "INSOMNIA": "Trouble falling or staying asleep. From Latin in- (not) + somnus (sleep).",
+  "ASTHMA": "Trouble breathing because your airways tighten up. From Greek asthma (panting).",
+  "DIABETES": "Body can't manage blood sugar. From Greek diabainein (to pass through) — named after a symptom of drinking lots of water and passing it through quickly.",
+  "VERTIGO": "Feeling like the room is spinning even when you're standing still. From Latin vertere (to turn).",
+  "HEARTBURN": "Burning feeling in your chest after eating, when stomach acid sneaks up your throat. Has nothing to do with your heart — just feels nearby.",
+  "PSORIASIS": "Skin condition with red, scaly patches. From Greek psora (itch).",
+  "TINNITUS": "Constant ringing or buzzing in your ears that nobody else can hear. From Latin tinnire (to ring).",
+  "DEHYDRATION": "Not enough water in your body. From Latin de- (removal of) + Greek hydor (water).",
+  "CATARACTS": "Cloudy lens in your eye that makes vision blurry. From Greek katarrhaktes (waterfall) — it looks like a misty curtain falling over the eye.",
+  "SHINGLES": "Painful blistering rash, usually wraps around one side of the body. Caused by the chickenpox virus waking up years later. From Latin cingulus (belt).",
+  "GOUT": "Sudden sharp joint pain, usually in the big toe, from too much uric acid. From Latin gutta (drop).",
+  "SCIATICA": "Sharp pain running from your lower back down your leg. Named after the sciatic nerve — the longest nerve in the body.",
+  "HEADACHE": "Pain in your head. From Old English heafod (head) + ece (ache).",
+  "TONSILLITIS": "Inflammation of the tonsils — the two lumps in the back of your throat. From Latin tonsillae (tonsils) + -itis (inflammation).",
+  "LARYNGITIS": "Inflammation of the voice box. Makes your voice scratchy or gone. From Greek larynx (throat) + -itis (inflammation).",
+  "VEISALGIA": "Hangover. From Norwegian kveis (uneasiness after debauchery) + Greek algia (pain).",
+  "GLABELLA": "The smooth, flat skin right between your eyebrows.",
+  "PHILTRUM": "The vertical groove between the bottom of your nose and your upper lip.",
+  "TRAGUS": "The little hard, fleshy bump on the inside of your ear that sits right over the ear canal.",
+  "COLUMELLA NASI": "The fleshy strip of skin between your nostrils that separates them.",
+  "GNATHION": "The lowest central point of your chin.",
+  "CANTHUS": "The corner of your eye where the upper and lower eyelids meet — you have an inner and outer one.",
+  "PLICA SEMILUNARIS": "The small fold of pink flesh in the inner corner of your eye. It's actually a leftover remnant of a third eyelid!",
+  "FRENULUM": "The tiny string-like band of tissue under your tongue that anchors it to the bottom of your mouth.",
+  "UVULA": "The punching-bag-shaped tissue hanging down in the back of your throat.",
+  "VIBRISSAE": "The technical name for your nose hairs.",
+  "INION": "The sharp bump you can feel on the very back of your skull, right where your neck muscles attach.",
+  "ANATOMICAL SNUFFBOX": "The triangular depression on the side of your wrist/thumb that pops out when you hitchhike.",
+  "LUNULA": "The white, crescent-moon-shaped area at the base of your fingernails.",
+  "HALLUX": "The medical name for your big toe.",
+  "POLLEX": "The medical name for your thumb.",
+  "POPLITEAL FOSSA": "The soft, squishy diamond-shaped space behind your knee.",
+  "THENAR EMINENCE": "The thick, fleshy muscle pad at the base of your thumb on your palm.",
+  "HYPOTHENAR EMINENCE": "The fleshy muscle pad on your palm right below your pinky finger.",
+  "EPONYCHIUM": "The technical name for your fingernail cuticle.",
+  "HYPONYCHIUM": "The thickened skin right underneath the free edge of your fingernail.",
+  "INTERDIGITAL WEBS": "The skin between your fingers and toes.",
+  "AXILLA": "The scientific name for your armpit.",
+  "OMPHALOS": "The formal, ancient-rooted term for your belly button.",
+  "OLECRANON": "The pointy, hard bone at the tip of your elbow.",
+  "XIPHOID PROCESS": "The tiny, sword-shaped cartilage structure at the very bottom of your breastbone.",
+  "DIMPLES OF VENUS": "The two small indentations sometimes visible on a person's lower back, right above the glutes.",
+  "SUPRASTERNAL NOTCH": "The dip or V-shaped depression at the base of your throat, right between your collarbones.",
+  "PHALANGETTES": "A fun, old-fashioned term for the very tips of your fingers or toes.",
+  "PATELLA": "The medical term for your kneecap.",
+  "CLAVICLE": "The scientific name for your collarbone.",
+  "COCCYX": "The technical name for your tailbone.",
+  "STAPES": "The stirrup-shaped bone inside your ear. It is the smallest bone in the human body.",
+  "MASSETER": "The main muscle in your jaw used for chewing. It is the strongest muscle in the body based on its weight!",
+  "GASTROCNEMIUS": "The large, bulging muscle that makes up the back of your calf.",
+  "ARRECTOR PILI": "The microscopic muscles attached to your hair follicles that contract to give you goosebumps.",
+  "SARTORIUS": "The longest muscle in the human body, running from your hip down to the inside of your knee.",
+  "HYOID": "A U-shaped bone in your neck that supports your tongue. It is the only bone in the body not connected to any other bone.",
+  "MASTOID PROCESS": "The hard bone lump you can feel directly behind your earlobe.",
+  "ZYGOMATICUS": "The facial muscles responsible for pulling the corners of your mouth up when you smile.",
+  "CALCANEUS": "The medical name for your heel bone.",
+  "CERUMEN": "The scientific word for earwax.",
+  "LACRYMAL PUNCTUM": "The microscopic holes in the inner corners of your eyelids where tears drain out.",
+  "PAPILLAE": "The tiny bumps all over your tongue that house your tastebuds.",
+  "MEISSNERS CORPUSCLES": "Microscopic nerve endings in your fingertips that let you feel even the lightest touch.",
+  "RUFFINI ENDINGS": "Tiny sensors in your skin that specifically detect warmth and stretching.",
+  "PACINIAN CORPUSCLES": "Nerve endings deep in your skin that detect high-frequency vibration — like holding a buzzing phone.",
+  "SCLERA": "The white part of your eyeball.",
+  "SEBACEOUS GLANDS": "The tiny glands in your skin that produce natural oils to keep you from drying out.",
+  "PURKINJE FIBERS": "Special electrical fibers in your heart that tell it exactly when to pump.",
+  "ALVEOLI": "The microscopic, balloon-like air sacs at the end of your lungs where oxygen enters your blood."
 };
 
 var hmState = {
@@ -9034,6 +9120,16 @@ function hmListenForState() {
       }
       document.getElementById('hm-gameover-word').textContent = 'The word was: ' + (data.word || '');
       document.getElementById('hm-status-msg').textContent = '';
+
+      // Show educational definition if word has one in HM_DEFINITIONS
+      // (currently medical-only; future body-parts category just needs HM_DEFINITIONS entries)
+      var defEl = document.getElementById('hm-gameover-definition');
+      if (data.word && HM_DEFINITIONS[data.word]) {
+        defEl.textContent = HM_DEFINITIONS[data.word];
+        defEl.style.display = 'block';
+      } else {
+        defEl.style.display = 'none';
+      }
 
       // Reveal unrevealed letters in red — rebuild from word if revealed is incomplete
       if (data.word) {
