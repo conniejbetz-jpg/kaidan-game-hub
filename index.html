@@ -2946,7 +2946,17 @@ body {
   outline: 3px solid #48cae4; outline-offset: 1px; z-index: 6;
 }
 .hc-cell.guess2 {
+  outline: 3px solid #06d6a0; outline-offset: 1px; z-index: 6;
+}
+.hc-cell.guess3 {
   outline: 3px solid #c77dff; outline-offset: 1px; z-index: 7;
+}
+.hc-cell.guess4 {
+  outline: 3px solid #ff8c42; outline-offset: 1px; z-index: 7;
+}
+.hc-cell.best-guess {
+  outline-width: 4px; outline-offset: 2px;
+  box-shadow: 0 0 8px 2px rgba(255, 215, 0, 0.6);
 }
 .hc-cell.reveal-target {
   outline: 4px solid #ffd700; outline-offset: 2px; z-index: 8;
@@ -7070,7 +7080,8 @@ function ccGenerateProblem(diff) {
   var word = pool[Math.floor(Math.random() * pool.length)];
   var type = types[Math.floor(Math.random() * types.length)];
   var encoded = ccEncode(word, type);
-  return { answer: word, encoded: encoded.encoded, cipherType: encoded.cipherType, hint: encoded.hint, isMorse: type === 'morse', isLetterNum: type === 'letternum' };
+  var useAlpha = (type === 'letternum' || type === 'caesar' || type === 'caesarhard' || type === 'atbash');
+  return { answer: word, encoded: encoded.encoded, cipherType: encoded.cipherType, hint: encoded.hint, isMorse: type === 'morse', isLetterNum: type === 'letternum', useAlpha: useAlpha };
 }
 
 function ccInit() {
@@ -7144,6 +7155,7 @@ function ccNextProblem() {
     hint: problem.hint,
     isMorse: problem.isMorse || false,
     isLetterNum: problem.isLetterNum || false,
+    useAlpha: problem.useAlpha || false,
     questionNum: newQNum,
     p1Answer: null,
     p2Answer: null,
@@ -7182,7 +7194,7 @@ function ccListenForState() {
       document.getElementById('cc-answer-area').style.display = 'flex';
       document.getElementById('cc-round-summary').classList.remove('active');
       document.getElementById('cc-morse-ref').style.display = data.isMorse ? 'block' : 'none';
-      document.getElementById('cc-alpha-ref').style.display = data.isLetterNum ? 'grid' : 'none';
+      document.getElementById('cc-alpha-ref').style.display = data.useAlpha ? 'grid' : 'none';
 
       var myAnswerKey = playerId === 'p1' ? 'p1Answer' : 'p2Answer';
       if (data[myAnswerKey] !== null && data[myAnswerKey] !== undefined) {
@@ -10537,11 +10549,15 @@ function hcStartGame() {
           guesser: 'p2',
           secretCol: null,
           secretRow: null,
-          clue1: null,
-          clue2: null,
+          clue1a: null,
+          clue1b: null,
+          clue2a: null,
+          clue2b: null,
           phase: 'pickColor',
           guess1: null,
           guess2: null,
+          guess3: null,
+          guess4: null,
           p1Score: 0,
           p2Score: 0,
           roundNum: 1,
@@ -10589,7 +10605,14 @@ function hcRender(s) {
   if (s.gameOver) {
     var p1Name = document.getElementById('hc-p1-name').textContent;
     var p2Name = document.getElementById('hc-p2-name').textContent;
-    var winnerLabel = (s.winner === 'p1' ? p1Name : p2Name) + ' WINS!';
+    var winnerLabel;
+    if (s.winner === 'tie') {
+      winnerLabel = "IT'S A TIE!";
+    } else if (s.winner === 'p1') {
+      winnerLabel = p1Name + ' WINS!';
+    } else {
+      winnerLabel = p2Name + ' WINS!';
+    }
     document.getElementById('hc-win-title').textContent = winnerLabel;
     document.getElementById('hc-win-subtitle').textContent =
       'Final: ' + p1Name + ' ' + (s.p1Score || 0) + ' — ' + p2Name + ' ' + (s.p2Score || 0);
@@ -10639,26 +10662,46 @@ function hcRenderBanner(s, myRole) {
     help = myRole === 'cueGiver'
       ? 'Click any cell on the board. That becomes your secret color.'
       : 'Wait while ' + cueName + ' picks a color.';
-  } else if (s.phase === 'clue1') {
-    msg = cueName + ' is writing a 1-word clue';
+  } else if (s.phase === 'clue1a') {
+    msg = cueName + ' is writing the FIRST 1-word clue';
     help = myRole === 'cueGiver'
       ? 'Type ONE word that hints at your color. No proper nouns. No compound words.'
-      : 'Wait for the 1-word clue.';
+      : 'Wait for the first 1-word clue.';
   } else if (s.phase === 'guess1') {
-    msg = guessName + ' is making the first guess';
+    msg = guessName + ' is making guess 1 of 4';
     help = myRole === 'guesser'
       ? 'Click the color on the board you think matches the clue.'
       : 'Wait while ' + guessName + ' guesses.';
-  } else if (s.phase === 'clue2') {
-    msg = cueName + ' is writing a 2-word clue';
+  } else if (s.phase === 'clue1b') {
+    msg = cueName + ' is writing the SECOND 1-word clue';
     help = myRole === 'cueGiver'
-      ? 'Type TWO words that narrow it down further.'
-      : 'Wait for the 2-word clue.';
+      ? 'Type a DIFFERENT ONE-word clue to help narrow it down.'
+      : 'Wait for the second 1-word clue.';
   } else if (s.phase === 'guess2') {
-    msg = guessName + ' is making the second guess';
+    msg = guessName + ' is making guess 2 of 4';
     help = myRole === 'guesser'
-      ? 'Click a second color (or the same one if you are sure).'
-      : 'Wait while ' + guessName + ' makes the second guess.';
+      ? 'Click a second cell. You can stay close or try somewhere new.'
+      : 'Wait while ' + guessName + ' guesses.';
+  } else if (s.phase === 'clue2a') {
+    msg = cueName + ' is writing the FIRST 2-word clue';
+    help = myRole === 'cueGiver'
+      ? 'Type TWO words that narrow the color further.'
+      : 'Wait for the first 2-word clue.';
+  } else if (s.phase === 'guess3') {
+    msg = guessName + ' is making guess 3 of 4';
+    help = myRole === 'guesser'
+      ? 'Use the new clue to place a third marker.'
+      : 'Wait while ' + guessName + ' guesses.';
+  } else if (s.phase === 'clue2b') {
+    msg = cueName + ' is writing the SECOND 2-word clue';
+    help = myRole === 'cueGiver'
+      ? 'Last chance — type TWO more words.'
+      : 'Wait for the final clue.';
+  } else if (s.phase === 'guess4') {
+    msg = guessName + ' is making the FINAL guess (4 of 4)';
+    help = myRole === 'guesser'
+      ? 'Place your last marker. Your closest of the 4 markers will score.'
+      : 'Wait while ' + guessName + ' makes the last guess.';
   } else if (s.phase === 'reveal') {
     msg = 'Round ' + s.roundNum + ' results — next round in a few seconds';
     help = 'Roles will swap. Cue giver becomes guesser.';
@@ -10672,20 +10715,21 @@ function hcRenderClueDisplay(s, myRole) {
   var el = document.getElementById('hc-clue-display');
   el.innerHTML = '';
   // Cue giver always sees their own clues. Guesser sees them as they're submitted.
-  if (s.clue1) {
-    var r1 = document.createElement('div');
-    r1.className = 'hc-clue-row';
-    r1.innerHTML = '<span class="hc-clue-tag">1-Word</span> <span class="hc-clue-word">' +
-      hcEscape(s.clue1) + '</span>';
-    el.appendChild(r1);
-  }
-  if (s.clue2) {
-    var r2 = document.createElement('div');
-    r2.className = 'hc-clue-row';
-    r2.innerHTML = '<span class="hc-clue-tag">2-Word</span> <span class="hc-clue-word">' +
-      hcEscape(s.clue2) + '</span>';
-    el.appendChild(r2);
-  }
+  var clueDefs = [
+    { val: s.clue1a, tag: '1-Word #1' },
+    { val: s.clue1b, tag: '1-Word #2' },
+    { val: s.clue2a, tag: '2-Word #1' },
+    { val: s.clue2b, tag: '2-Word #2' }
+  ];
+  clueDefs.forEach(function(c) {
+    if (c.val) {
+      var row = document.createElement('div');
+      row.className = 'hc-clue-row';
+      row.innerHTML = '<span class="hc-clue-tag">' + c.tag + '</span> <span class="hc-clue-word">' +
+        hcEscape(c.val) + '</span>';
+      el.appendChild(row);
+    }
+  });
 }
 
 // ── Board outlines (target + guesses) ────────────────────
@@ -10693,7 +10737,7 @@ function hcRenderBoard(s, myRole) {
   // Clear all outlines
   var cells = document.querySelectorAll('#hc-board .hc-cell');
   cells.forEach(function(c) {
-    c.classList.remove('target', 'guess1', 'guess2', 'reveal-target', 'disabled');
+    c.classList.remove('target', 'guess1', 'guess2', 'guess3', 'guess4', 'reveal-target', 'best-guess', 'disabled');
   });
 
   // Target visible to: cue giver always, both during reveal
@@ -10711,20 +10755,32 @@ function hcRenderBoard(s, myRole) {
   }
 
   // Guess markers visible to all once placed
-  if (s.guess1) {
-    var g1idx = s.guess1.row * HC_COLS + s.guess1.col;
-    if (cells[g1idx]) cells[g1idx].classList.add('guess1');
-  }
-  if (s.guess2) {
-    var g2idx = s.guess2.row * HC_COLS + s.guess2.col;
-    if (cells[g2idx]) cells[g2idx].classList.add('guess2');
+  var guessList = [
+    { g: s.guess1, cls: 'guess1' },
+    { g: s.guess2, cls: 'guess2' },
+    { g: s.guess3, cls: 'guess3' },
+    { g: s.guess4, cls: 'guess4' }
+  ];
+  guessList.forEach(function(gd) {
+    if (gd.g) {
+      var idx = gd.g.row * HC_COLS + gd.g.col;
+      if (cells[idx]) cells[idx].classList.add(gd.cls);
+    }
+  });
+
+  // Highlight the best guess during reveal
+  if (s.phase === 'reveal' && s.lastRoundPoints && typeof s.lastRoundPoints.bestIdx === 'number') {
+    var best = guessList[s.lastRoundPoints.bestIdx];
+    if (best && best.g) {
+      var bidx = best.g.row * HC_COLS + best.g.col;
+      if (cells[bidx]) cells[bidx].classList.add('best-guess');
+    }
   }
 
   // Disable cells when not the active actor for a click phase
   var canClick = false;
   if (s.phase === 'pickColor' && myRole === 'cueGiver') canClick = true;
-  if (s.phase === 'guess1' && myRole === 'guesser') canClick = true;
-  if (s.phase === 'guess2' && myRole === 'guesser') canClick = true;
+  if ((s.phase === 'guess1' || s.phase === 'guess2' || s.phase === 'guess3' || s.phase === 'guess4') && myRole === 'guesser') canClick = true;
   if (!canClick) {
     cells.forEach(function(c) { c.classList.add('disabled'); });
   }
@@ -10748,17 +10804,16 @@ function hcRenderControls(s, myRole) {
     return;
   }
 
-  if (s.phase === 'clue1' && myRole === 'cueGiver') {
-    hcRenderClueInput(el, 1);
-    return;
-  }
-  if (s.phase === 'clue2' && myRole === 'cueGiver') {
-    hcRenderClueInput(el, 2);
-    return;
-  }
+  if (myRole !== 'cueGiver') return;
+
+  // Cue Giver input phases
+  if (s.phase === 'clue1a') { hcRenderClueInput(el, 'clue1a', 1); return; }
+  if (s.phase === 'clue1b') { hcRenderClueInput(el, 'clue1b', 1); return; }
+  if (s.phase === 'clue2a') { hcRenderClueInput(el, 'clue2a', 2); return; }
+  if (s.phase === 'clue2b') { hcRenderClueInput(el, 'clue2b', 2); return; }
 }
 
-function hcRenderClueInput(parent, n) {
+function hcRenderClueInput(parent, phaseKey, wordCount) {
   var row = document.createElement('div');
   row.className = 'hc-input-row';
   var inp = document.createElement('input');
@@ -10766,7 +10821,7 @@ function hcRenderClueInput(parent, n) {
   inp.className = 'hc-input';
   inp.id = 'hc-clue-input';
   inp.maxLength = 40;
-  inp.placeholder = (n === 1) ? 'One word...' : 'Two words...';
+  inp.placeholder = (wordCount === 1) ? 'One word...' : 'Two words...';
   inp.autocomplete = 'off';
   var btn = document.createElement('button');
   btn.className = 'hc-btn primary';
@@ -10779,19 +10834,19 @@ function hcRenderClueInput(parent, n) {
       return;
     }
     var words = v.split(/\s+/).filter(function(w) { return w.length > 0; });
-    if (n === 1 && words.length !== 1) {
+    if (wordCount === 1 && words.length !== 1) {
       inp.classList.add('shake');
       setTimeout(function() { inp.classList.remove('shake'); }, 400);
       toast('1-word clue must be ONE word', 'error');
       return;
     }
-    if (n === 2 && words.length !== 2) {
+    if (wordCount === 2 && words.length !== 2) {
       inp.classList.add('shake');
       setTimeout(function() { inp.classList.remove('shake'); }, 400);
       toast('2-word clue must be exactly TWO words', 'error');
       return;
     }
-    hcSubmitClue(v, n);
+    hcSubmitClue(v, phaseKey);
   };
   btn.addEventListener('click', submit);
   inp.addEventListener('keydown', function(e) {
@@ -10812,14 +10867,21 @@ function hcRenderRevealInfo(s) {
     return;
   }
   var lp = s.lastRoundPoints;
+  var colors = ['#48cae4', '#06d6a0', '#c77dff', '#ff8c42'];
+  var labels = ['Guess 1', 'Guess 2', 'Guess 3', 'Guess 4'];
   el.style.display = 'flex';
-  el.innerHTML =
-    '<div><span class="hc-dot" style="background:#48cae4"></span>1st guess: ' +
-      lp.pts1 + ' pt' + (lp.pts1 === 1 ? '' : 's') + ' (' + lp.dist1 + ' away)</div>' +
-    '<div><span class="hc-dot" style="background:#c77dff"></span>2nd guess: ' +
-      lp.pts2 + ' pt' + (lp.pts2 === 1 ? '' : 's') + ' (' + lp.dist2 + ' away)</div>' +
-    '<div><span class="hc-dot" style="background:#ffd700"></span>Both earn ' +
-      lp.total + ' pt' + (lp.total === 1 ? '' : 's') + ' this round</div>';
+  var html = '';
+  for (var i = 0; i < 4; i++) {
+    var d = (lp.dists && typeof lp.dists[i] === 'number') ? lp.dists[i] : '—';
+    var bestMark = (i === lp.bestIdx) ? ' <strong style="color:#ffd700">★ BEST</strong>' : '';
+    html += '<div><span class="hc-dot" style="background:' + colors[i] + '"></span>' +
+      labels[i] + ': ' + d + ' away' + bestMark + '</div>';
+  }
+  var cuePts = (typeof lp.cuePts === 'number') ? lp.cuePts : Math.ceil(lp.pts / 2);
+  html += '<div><span class="hc-dot" style="background:#ffd700"></span>Guesser earns <strong>' +
+    lp.pts + ' pt' + (lp.pts === 1 ? '' : 's') + '</strong>, Cue Giver earns <strong>' +
+    cuePts + ' pt' + (cuePts === 1 ? '' : 's') + '</strong> (half, rounded up)</div>';
+  el.innerHTML = html;
 }
 
 // ── Cell click handler ───────────────────────────────────
@@ -10834,10 +10896,11 @@ function hcOnCellClick(e) {
 
   if (s.phase === 'pickColor' && myRole === 'cueGiver') {
     hcSubmitColor(col, row);
-  } else if (s.phase === 'guess1' && myRole === 'guesser') {
-    hcSubmitGuess(col, row, 1);
-  } else if (s.phase === 'guess2' && myRole === 'guesser') {
-    hcSubmitGuess(col, row, 2);
+  } else if (myRole === 'guesser') {
+    if (s.phase === 'guess1') hcSubmitGuess(col, row, 1);
+    else if (s.phase === 'guess2') hcSubmitGuess(col, row, 2);
+    else if (s.phase === 'guess3') hcSubmitGuess(col, row, 3);
+    else if (s.phase === 'guess4') hcSubmitGuess(col, row, 4);
   }
 }
 
@@ -10847,52 +10910,67 @@ function hcSubmitColor(col, row) {
   hcRef.update({
     secretCol: col,
     secretRow: row,
-    phase: 'clue1'
+    phase: 'clue1a'
   });
 }
 
-// ── Cue Giver: submit clue 1 or 2 ────────────────────────
-function hcSubmitClue(text, n) {
+// ── Cue Giver: submit clue (clue1a/clue1b/clue2a/clue2b) ──
+function hcSubmitClue(text, phaseKey) {
   var hcRef = roomRef.child('colorsandclues');
-  if (n === 1) {
-    hcRef.update({ clue1: text, phase: 'guess1' });
-  } else {
-    hcRef.update({ clue2: text, phase: 'guess2' });
-  }
+  var nextPhase = {
+    'clue1a': 'guess1',
+    'clue1b': 'guess2',
+    'clue2a': 'guess3',
+    'clue2b': 'guess4'
+  }[phaseKey];
+  if (!nextPhase) return;
+  var update = { phase: nextPhase };
+  update[phaseKey] = text;
+  hcRef.update(update);
 }
 
-// ── Guesser: submit guess 1 or 2 ─────────────────────────
+// ── Guesser: submit guess 1-4 ────────────────────────────
 function hcSubmitGuess(col, row, n) {
   var hcRef = roomRef.child('colorsandclues');
-  if (n === 1) {
-    hcRef.update({ guess1: { col: col, row: row }, phase: 'clue2' });
-    return;
-  }
-  // n === 2 → compute points, set reveal
+  if (n === 1) { hcRef.update({ guess1: { col: col, row: row }, phase: 'clue1b' }); return; }
+  if (n === 2) { hcRef.update({ guess2: { col: col, row: row }, phase: 'clue2a' }); return; }
+  if (n === 3) { hcRef.update({ guess3: { col: col, row: row }, phase: 'clue2b' }); return; }
+
+  // n === 4 → final guess, compute score (best of 4 markers)
   var s = hcState.cached;
   if (!s) return;
   var tc = s.secretCol, tr = s.secretRow;
-  var g1 = s.guess1 || { col: col, row: row };
-  var dist1 = hcDistance(g1.col, g1.row, tc, tr);
-  var dist2 = hcDistance(col, row, tc, tr);
-  var pts1 = hcPoints(dist1);
-  var pts2 = hcPoints(dist2);
-  var total = pts1 + pts2;
+  var g4 = { col: col, row: row };
+  var g1 = s.guess1, g2 = s.guess2, g3 = s.guess3;
 
-  // Both players earn the same points
   hcRef.transaction(function(current) {
     if (!current) return current;
-    current.guess2 = { col: col, row: row };
+    current.guess4 = g4;
     current.phase = 'reveal';
-    current.lastRoundPoints = { dist1: dist1, dist2: dist2, pts1: pts1, pts2: pts2, total: total };
-    current.p1Score = (current.p1Score || 0) + total;
-    current.p2Score = (current.p2Score || 0) + total;
+    // Compute all 4 distances from the transaction state to be authoritative
+    var allG = [current.guess1, current.guess2, current.guess3, g4];
+    var dists = allG.map(function(g) {
+      if (!g) return 999;
+      return hcDistance(g.col, g.row, tc, tr);
+    });
+    var minDist = Math.min.apply(null, dists);
+    var bestIdx = dists.indexOf(minDist);
+    var pts = hcPoints(minDist);
+    var cuePts = Math.ceil(pts / 2);  // Cue giver earns half, rounded up
+    current.lastRoundPoints = { dists: dists, pts: pts, cuePts: cuePts, bestIdx: bestIdx };
+    // Hybrid scoring: guesser gets full pts, cue giver gets half (rounded up)
+    if (current.guesser === 'p1') {
+      current.p1Score = (current.p1Score || 0) + pts;
+      current.p2Score = (current.p2Score || 0) + cuePts;
+    } else {
+      current.p2Score = (current.p2Score || 0) + pts;
+      current.p1Score = (current.p1Score || 0) + cuePts;
+    }
     if (current.p1Score >= HC_WIN_SCORE || current.p2Score >= HC_WIN_SCORE) {
       current.gameOver = true;
-      // Whoever has more wins; tie → guesser wins (last to act)
       if (current.p1Score > current.p2Score) current.winner = 'p1';
       else if (current.p2Score > current.p1Score) current.winner = 'p2';
-      else current.winner = current.guesser;
+      else current.winner = 'tie';
     }
     return current;
   });
@@ -10907,10 +10985,14 @@ function hcAdvanceRound(s) {
     guesser: s.guesser === 'p1' ? 'p2' : 'p1',
     secretCol: null,
     secretRow: null,
-    clue1: null,
-    clue2: null,
+    clue1a: null,
+    clue1b: null,
+    clue2a: null,
+    clue2b: null,
     guess1: null,
     guess2: null,
+    guess3: null,
+    guess4: null,
     phase: 'pickColor',
     roundNum: (s.roundNum || 1) + 1,
     lastRoundPoints: null
@@ -10926,11 +11008,15 @@ function hcReplay() {
     guesser: 'p2',
     secretCol: null,
     secretRow: null,
-    clue1: null,
-    clue2: null,
+    clue1a: null,
+    clue1b: null,
+    clue2a: null,
+    clue2b: null,
     phase: 'pickColor',
     guess1: null,
     guess2: null,
+    guess3: null,
+    guess4: null,
     p1Score: 0,
     p2Score: 0,
     roundNum: 1,
