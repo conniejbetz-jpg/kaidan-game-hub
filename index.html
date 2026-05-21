@@ -3384,6 +3384,8 @@ body {
           <button class="hm-cat-btn" data-cat="sports">Sports</button>
           <button class="hm-cat-btn" data-cat="science">Science</button>
           <button class="hm-cat-btn" data-cat="videogames">Video Games</button>
+          <button class="hm-cat-btn" data-cat="obscurecountries">Obscure Countries</button>
+          <button class="hm-cat-btn" data-cat="medical">Medical</button>
         </div>
         <input type="text" class="hm-word-input" id="hm-word-input" placeholder="Type a word or phrase..." maxlength="100" autocomplete="off" spellcheck="false">
         <div class="hm-or-divider">— OR —</div>
@@ -3798,12 +3800,18 @@ body {
       <button class="wyr-cat-btn active" data-cat="all">All</button>
       <button class="wyr-cat-btn" data-cat="silly">Silly</button>
       <button class="wyr-cat-btn" data-cat="superpower">Superpower</button>
+      <button class="wyr-cat-btn" data-cat="weirdpowers">Weird Powers</button>
       <button class="wyr-cat-btn" data-cat="food">Food</button>
       <button class="wyr-cat-btn" data-cat="animal">Animal</button>
       <button class="wyr-cat-btn" data-cat="adventure">Adventure</button>
       <button class="wyr-cat-btn" data-cat="gross">Gross</button>
       <button class="wyr-cat-btn" data-cat="thisorthat">This or That</button>
       <button class="wyr-cat-btn" data-cat="family">Family</button>
+      <button class="wyr-cat-btn" data-cat="grosscringe">Gross &amp; Cringe</button>
+      <button class="wyr-cat-btn" data-cat="obnoxious">Obnoxious</button>
+      <button class="wyr-cat-btn" data-cat="scifi">Sci-Fi</button>
+      <button class="wyr-cat-btn" data-cat="rulebending">Rule-Bending</button>
+      <button class="wyr-cat-btn" data-cat="mischief">Mischief</button>
     </div>
 
     <div class="wyr-card" id="wyr-card">
@@ -8820,7 +8828,9 @@ var HM_WORDS = {
   movies: ["BATMAN","FROZEN","MOANA","SHREK","AVATAR","MULAN","ENCANTO","TOTORO","JAWS","ROCKY","COCO","RATATOUILLE","BOLT","BRAVE","LUCA","ONWARD","SOUL","TURBO","SING","TANGLED"],
   sports: ["SOCCER","TENNIS","HOCKEY","BOWLING","SURFING","ARCHERY","FENCING","KARATE","RUGBY","BOXING","CRICKET","LACROSSE","SKATING","DIVING","ROWING","CYCLING","POLO","JAVELIN","SPRINT","DISCUS"],
   science: ["GRAVITY","VOLCANO","NEUTRON","ECLIPSE","PROTEIN","ELEMENT","QUANTUM","CRYSTAL","PLASMA","MAGNET","GENOME","PHOTON","FUSION","PRISM","ENZYME","GALAXY","NEBULA","COMET","QUASAR","FOSSIL"],
-  videogames: ["ZELDA","MARIO","MINECRAFT","FORTNITE","ROBLOX","POKEMON","KIRBY","TETRIS","SONIC","LUIGI","BOWSER","PIKACHU","CREEPER","YOSHI","DONKEY","SPLATOON","METROID","PACMAN","MEGAMAN","TOAD"]
+  videogames: ["ZELDA","MARIO","MINECRAFT","FORTNITE","ROBLOX","POKEMON","KIRBY","TETRIS","SONIC","LUIGI","BOWSER","PIKACHU","CREEPER","YOSHI","DONKEY","SPLATOON","METROID","PACMAN","MEGAMAN","TOAD"],
+  obscurecountries: ["TUVALU","BHUTAN","KIRIBATI","ESWATINI","COMOROS","VANUATU","NAURU","SURINAME","ANDORRA","MOLDOVA","LIECHTENSTEIN","DJIBOUTI","BRUNEI","PALAU","LESOTHO","SUDAN","TAJIKISTAN","TURKMENISTAN","UZBEKISTAN","YUGOSLAVIA","TRINIDAD AND TOBAGO","UNITED ARAB EMIRATES","UNITED KINGDOM"],
+  medical: ["BRONCHITIS","MIGRAINE","ARTHRITIS","ECZEMA","ANEMIA","INSOMNIA","ASTHMA","DIABETES","VERTIGO","HEARTBURN","PSORIASIS","TINNITUS","DEHYDRATION","CATARACTS","SHINGLES","GOUT","SCIATICA","HEADACHE","TONSILLITIS","LARYNGITIS","VEISALGIA"]
 };
 
 var hmState = {
@@ -9419,6 +9429,14 @@ var WYR_QUESTIONS = [
   { cat: "superpower", q: "Would you rather...", a: "Control the weather", b: "Control gravity" },
   { cat: "superpower", q: "Would you rather...", a: "Never need to sleep", b: "Never need to eat" },
   { cat: "superpower", q: "Would you rather...", a: "Shoot webs like Spider-Man", b: "Have claws like Wolverine" },
+  // === WEIRD POWERS (7) ===
+  { cat: "weirdpowers", q: "Would you rather...", a: "Summon a swarm of pigeons on command", b: "Have magnetic toenails" },
+  { cat: "weirdpowers", q: "Would you rather...", a: "Have shoelaces that never untie", b: "Have infinite-ammo rubber bands" },
+  { cat: "weirdpowers", q: "Would you rather...", a: "Be able to whisper super loud", b: "Have glow-in-the-dark teeth" },
+  { cat: "weirdpowers", q: "Would you rather...", a: "Always predict the next commercial", b: "Be able to teleport — but only to the couch" },
+  { cat: "weirdpowers", q: "Would you rather...", a: "Have elastic elbows", b: "Control weather, but only raindrops" },
+  { cat: "weirdpowers", q: "Would you rather...", a: "Have sonic-boom hiccups", b: "Have absolute night vision" },
+  { cat: "weirdpowers", q: "Would you rather...", a: "Have titanium fingernails", b: "Have a permanent underwater breathing mask" },
   // === FOOD (10) ===
   { cat: "food", q: "Would you rather...", a: "Only eat pizza forever", b: "Never eat pizza again" },
   { cat: "food", q: "Would you rather...", a: "Drink ketchup like a smoothie", b: "Put mustard on your cereal" },
@@ -9483,7 +9501,62 @@ var WYR_QUESTIONS = [
   { cat: "family", q: "Would you rather...", a: "Go on a family road trip across the country", b: "Go on a family cruise" },
   { cat: "family", q: "Would you rather...", a: "Swap lives with Yaya for a day", b: "Swap lives with your teacher for a day" },
   { cat: "family", q: "Would you rather...", a: "Have a family talent show", b: "Have a family cooking competition" },
-  { cat: "family", q: "Would you rather...", a: "Tell Yaya every secret you have", b: "Have Yaya tell you every secret she has" }
+  { cat: "family", q: "Would you rather...", a: "Tell Yaya every secret you have", b: "Have Yaya tell you every secret she has" },
+  // === GROSS & CRINGE (10) — scenario-style, added 2026-05-21 ===
+  { cat: "grosscringe", q: "You are at a fancy restaurant and take a massive bite of your food, only to realize a giant, juicy beetle is cooked right into it. The waiter is looking at you expectantly. Do you:", a: "Swallow it whole without chewing, smile, and pretend everything is totally fine.", b: "Spit it out dramatically onto the table, yell \"BUG!\", and demand a free meal." },
+  { cat: "grosscringe", q: "You accidentally drop your phone directly into a heavily used public toilet. Do you:", a: "Reach your bare hand right in there immediately to rescue it before it sinks.", b: "Leave it behind forever, walk away, and accept that you no longer have a phone." },
+  { cat: "grosscringe", q: "You realize mid-conversation that the person you are talking to has a massive, distracting booger hanging out of their nose. Do you:", a: "Stare directly at it and casually flick your own nose to give them a subtle hint.", b: "Interrupt them mid-sentence and say, \"Hey, you've got a giant rocket in the hangar.\"" },
+  { cat: "grosscringe", q: "You are forced to eat a bizarre dish for dinner to win a prize. Do you choose:", a: "A bowl of live, squiggling earthworms covered in chocolate syrup.", b: "A large, crispy slice of pizza topped with crunchy, roasted cockroaches." },
+  { cat: "grosscringe", q: "You accidentally take a huge swig of milk, only to realize it expired three weeks ago and is completely chunky. Do you:", a: "Force yourself to swallow it so you don't make a mess on the floor.", b: "Instantly spray-spit it across the kitchen like a human water fountain." },
+  { cat: "grosscringe", q: "You are hanging out at a friend's house and realize their drooling dog has been licking your bare ankle for the last ten minutes. Do you:", a: "Let it keep happening because you don't want to hurt the dog's feelings.", b: "Pull your leg away fast and loudly shout, \"Why is your dog trying to eat me?!\"" },
+  { cat: "grosscringe", q: "You sniff your favorite shoes and realize they smell like absolute rotting garbage, but you have to wear them to a big family event. Do you:", a: "Pour half a bottle of cologne/perfume into them and hope for the best.", b: "Wrap your feet in plastic grocery bags first so the smell can't escape." },
+  { cat: "grosscringe", q: "You have to sacrifice one part of your daily hygiene routine for the next six months. Do you choose:", a: "Never brush your teeth again (but you can chew mint gum).", b: "Never wash your hair or take a shower again (but you can wear hats)." },
+  { cat: "grosscringe", q: "You take a big bite of an apple in the dark, hear a loud crunch, and turn on the light to see only half of a fat worm left inside the apple. Do you:", a: "Panic, run to the bathroom, and try to make yourself throw up the other half.", b: "Shrug your shoulders, say \"extra protein,\" and finish eating the rest of the apple." },
+  { cat: "grosscringe", q: "Someone offers you $1,000 in cash on the spot to lick a shoe. Do you choose:", a: "Lick the bottom of a sneaker that has been walked around a shopping mall all day.", b: "Lick the inside heel of a work boot that someone wore with no socks for a week." },
+  // === OBNOXIOUS & LOUD (10) ===
+  { cat: "obnoxious", q: "A magical curse forces you to make a loud sound every single time someone says the word \"the\" for an entire day. Do you choose:", a: "Loudly shout \"YAHOO!\" like a video game character.", b: "Let out a loud, realistic turkey gobble." },
+  { cat: "obnoxious", q: "You are in a dead-silent library and your stomach lets out a roar that sounds like a dying motorcycle. Everyone turns to look at you. Do you:", a: "Look at the person sitting next to you with an offended face and shake your head.", b: "Own it, look around proudly, and say, \"Don't worry, the beast has been fed.\"" },
+  { cat: "obnoxious", q: "You have to walk through a crowded grocery store to buy milk. Do you choose to do it:", a: "Wearing a giant, neon clown suit with shoes that loudly squeak with every single step.", b: "Singing everything you want to say at the top of your lungs like an opera singer." },
+  { cat: "obnoxious", q: "Your favorite hype song comes on in the middle of a very quiet, serious movie theater. You have an overwhelming urge to dance. Do you:", a: "Stand right up in the aisle and do a terrible, aggressive robot dance for 30 seconds.", b: "Stay in your seat but aggressively dance with just your arms and head while making intense eye contact with the row behind you." },
+  { cat: "obnoxious", q: "You are forced to talk like a specific character for a full week, including during school or serious meetings. Do you choose:", a: "A gritty, aggressive high-seas pirate (\"Ahoy, mateys!\").", b: "A fancy royal king/queen talking about themselves in the third person." },
+  { cat: "obnoxious", q: "A magical button gives you a special effect every time you high-five someone. Do you choose:", a: "A loud, echoing, realistic fart sound blasts through the room.", b: "A shower of sticky, wet confetti shoots out of your sleeve directly onto their face." },
+  { cat: "obnoxious", q: "You wake up and your hair has styled itself into a massive, neon-pink Mohawk that cannot be washed out or covered up for 48 hours. Do you:", a: "Stay inside your house, lock the doors, and pretend you don't exist until it's gone.", b: "Walk around town with a leather jacket and act like you are a famous rock star." },
+  { cat: "obnoxious", q: "You are given a magical button that hands you $100 every time you press it, but it has a funny side effect. Do you choose:", a: "A random stranger somewhere in the world instantly stubs their toe.", b: "The person closest to you instantly forgets what they were about to say." },
+  { cat: "obnoxious", q: "You must wear your outfit completely incorrectly to a major, fancy family gathering. Do you choose:", a: "Put your clothes on completely inside-out and backwards.", b: "Wear socks on your hands and shoes on your hands like a crab." },
+  { cat: "obnoxious", q: "Someone gifts you a pet parrot that only knows how to yell embarrassing things whenever you talk to someone. Do you choose the parrot that yells:", a: "\"THAT'S A TOTAL LIE!\" every time you finish a sentence.", b: "\"PHEW, SOMEONE SMELLS BAD!\" every time you shake someone's hand." },
+  // === SCI-FI (10) ===
+  { cat: "scifi", q: "You wake up with the ability to fly, but the power has strict limits. Do you choose:", a: "You can only fly as fast as a bicycle moves, but you can go as high as you want.", b: "You can fly at jet speeds, but you can never go higher than 3 feet off the ground." },
+  { cat: "scifi", q: "A scientist offers to let you talk to animals, but there is a major catch. Do you choose:", a: "You can talk to all mammals, but dogs will constantly complain to you about their food.", b: "You can talk to all sea creatures, but all insects can now read your thoughts from a mile away." },
+  { cat: "scifi", q: "You discover a hidden door in the back of your closet that leads directly into a different time period. Do you choose to step into:", a: "The year 3026 to see flying cars, robots, and the extreme future.", b: "The year 1326 to live in a medieval castle with knights and castles." },
+  { cat: "scifi", q: "You find a TV remote that can control real life, but using it drains your phone battery to 1% instantly. Do you use it to:", a: "Pause time so you can freeze everyone around you whenever you want.", b: "Rewind time by 5 minutes so you can instantly fix any mistake you just made." },
+  { cat: "scifi", q: "An alien spaceship lands in your backyard. The alien asks you to show them the single best thing about Earth. Do you show them:", a: "An amusement park with massive, looping rollercoasters.", b: "A double cheeseburger with extra bacon and a side of fries." },
+  { cat: "scifi", q: "You wake up tomorrow morning and find out you have swapped bodies with each other (Grandparent is 12, Grandson is the Grandparent) for 24 hours. Do you spend the day:", a: "Trying to act exactly like the other person so nobody suspects a thing.", b: "Doing absolutely ridiculous things to ruin the other person's reputation for fun." },
+  { cat: "scifi", q: "You find a wallet on the ground containing $10,000 in cash and a note that says, \"Property of a time traveler.\" Do you:", a: "Pocket the cash immediately and go on a massive shopping spree.", b: "Leave it exactly where it is because you are terrified they will rewrite history to make you disappear." },
+  { cat: "scifi", q: "You are offered a high-paying job to live on a luxury moon base for five full years. Do you choose:", a: "Go to the moon, look at the stars, but accept you have zero internet access the entire time.", b: "Stay on Earth in your normal routine, but you can never leave your hometown again." },
+  { cat: "scifi", q: "You suddenly develop the ability to read minds, but you can only hear one specific type of thought. Do you choose to hear:", a: "Exactly what people think about you when they look at you.", b: "Exactly what food people are craving and thinking about at that exact moment." },
+  { cat: "scifi", q: "You are granted one incredible superpower, but it only works under ridiculous conditions. Do you choose:", a: "Absolute invisibility, but only while you are actively singing the national anthem at the top of your lungs.", b: "Super strength and invincibility, but only while you are wearing a fluffy pink tutu." },
+  // === RULE-BENDING (10) ===
+  { cat: "rulebending", q: "You are locked in a massive shopping mall overnight and have free rein of every single store. Do you spend your night:", a: "Setting up a massive gaming station in the electronics store and playing on the biggest TV screen.", b: "Building a massive fort out of mattresses in the department store and eating snacks from the food court." },
+  { cat: "rulebending", q: "You are offered $1 million cash, but a very annoyed goose will follow you for the rest of your life. Do you:", a: "Take the money and accept that the goose will constantly hiss at you from 5 feet away forever.", b: "Reject the money because dealing with a lifelong stalker goose sounds like a living nightmare." },
+  { cat: "rulebending", q: "You are given a magical artifact that can manipulate time knowledge. Do you choose to:", a: "Know the exact date and time of every major event that will happen in the future.", b: "Be given three tokens that allow you to completely undo any three mistakes from your past." },
+  { cat: "rulebending", q: "You are given the chance to design a brand-new video game that is guaranteed to become the most popular game in the world. Do you make:", a: "An epic open-world survival game where you build giant fortresses and fight mythical beasts.", b: "A hilarious, chaotic multiplayer game where everyone plays as clumsy animals trying to steal hats." },
+  { cat: "rulebending", q: "You can instantly become an absolute legend at something without a single minute of practice. Do you choose to become:", a: "A master at every single musical instrument on Earth, but you lose the ability to play video games forever.", b: "A professional athlete in any sport you want, but you lose the ability to eat fast food forever." },
+  { cat: "rulebending", q: "You find out your pet dog or cat can actually speak fluent English, but they have a demand. Do you:", a: "Cook them a gourmet steak dinner every single night so they don't tell the family all your deepest secrets.", b: "Tell them \"No deal,\" and risk them telling everyone that you sing goofy songs in the shower." },
+  { cat: "rulebending", q: "You have to spend 24 hours inside a genuinely haunted house to win a prize. Do you choose to bring:", a: "A high-tech night-vision suit, a flashlight with infinite batteries, and a walkie-talkie.", b: "A massive guard dog, a massive box of pizza, and a boombox to blast loud music to scare the ghosts away." },
+  { cat: "rulebending", q: "You are elected President of the United States for exactly one hour, and any law you pass stays forever. Do you pass a law that:", a: "Makes three-day weekends permanent for schools and offices nationwide.", b: "Outlaws homework completely and replaces it with mandatory video game or hobby time." },
+  { cat: "rulebending", q: "You win a lifetime supply of one breakfast food, but it is the only thing you are allowed to eat for breakfast forever. Do you choose:", a: "Warm, sugary, glazed donuts fresh from the bakery.", b: "Extra crispy bacon, scrambled eggs, and golden hashbrowns." },
+  { cat: "rulebending", q: "You get to change one rule of physics just inside your bedroom. Do you choose to turn on:", a: "Absolute zero gravity so you can float around like an astronaut.", b: "Super-trampoline floors so you can bounce off the walls and ceiling safely." },
+  // === MISCHIEF (10) ===
+  { cat: "mischief", q: "You accidentally spill a bright red sports drink all over a brand-new, expensive white couch while home alone. Do you:", a: "Flip the cushion over, hide the evidence, and pray nobody ever moves it.", b: "Spill the drink over the entire couch so it looks like it was always meant to be a red couch." },
+  { cat: "mischief", q: "You are given a magical megaphone and told you have to shout one sentence that the entire world will hear simultaneously in their heads. Do you shout:", a: "\"The simulation is ending in 10 minutes, please prepare.\"", b: "\"Hey, you left your stove on! Better go check it!\"" },
+  { cat: "mischief", q: "You find out your school or neighborhood is being taken over by an army of hyper-intelligent squirrels. Do you:", a: "Join them, feed them acorns, and become their human king/queen.", b: "Build an elaborate defense fortress in your backyard using water balloons and lawn chairs to fight back." },
+  { cat: "mischief", q: "You accidentally send an incredibly mean text message complaining about someone to that exact person. Do you:", a: "Immediately text them back saying, \"Sorry, that was a test to see if you were paying attention!\"", b: "Throw your phone into a bush, change your name, and move to Canada." },
+  { cat: "mischief", q: "You are invited to a party where the dress code is \"Extremely Formal,\" but you accidentally show up wearing cartoon pajamas. Do you:", a: "Own it proudly, tell everyone it's the new \"sleepwear-chic\" trend, and walk the red carpet.", b: "Turn right around, sprint back to your car, and pretend you got lost on the way." },
+  { cat: "mischief", q: "You are given a machine that can duplicate any item you own, but every time you use it, your loudest neighbor gets a clone of it too. Do you use it to duplicate:", a: "Your gaming console/computer so you can build a massive setup, even if the neighbor gets one too.", b: "A giant, obnoxious, neon-colored lawn statue just to see if your neighbor puts theirs in their front yard." },
+  { cat: "mischief", q: "You find a secret basement under your house filled with vintage spy gear from the 1960s that still works perfectly. Do you:", a: "Use the tracking devices and hidden cameras to spy on your family members' goofy habits.", b: "Use the smoke bombs and laser gadgets to create the ultimate prank video channel." },
+  { cat: "mischief", q: "You get stuck in an elevator for two hours with an incredibly annoying person. Do you choose to get stuck with:", a: "Someone who won't stop singing kid show theme songs terribly out of tune.", b: "Someone who wants to give you a detailed, minute-by-minute explanation of their weirdest dreams." },
+  { cat: "mischief", q: "You hit a baseball right through a neighbor's window and see them running out the front door looking absolutely furious. Do you:", a: "Stand your ground, point at your friend, and say, \"He threw it, not me!\"", b: "Instantly hit the deck, crawl away through the bushes, and pretend you were never there." },
+  { cat: "mischief", q: "You are forced to permanently replace your legs with mechanical parts. Do you choose:", a: "Having wheels instead of feet, making you incredibly fast on smooth roads but terrible on stairs.", b: "Having powerful springs instead of legs, meaning you constantly bounce everywhere you go." }
 ];
 
 var wyrState = {
@@ -9776,9 +9849,11 @@ function wyrDisplayQuestion(q, idx) {
 
 function wyrCategoryLabel(cat) {
   var labels = {
-    silly: 'SILLY', superpower: 'SUPERPOWER', food: 'FOOD',
-    animal: 'ANIMAL', adventure: 'ADVENTURE', gross: 'GROSS',
-    thisorthat: 'THIS OR THAT', family: 'FAMILY'
+    silly: 'SILLY', superpower: 'SUPERPOWER', weirdpowers: 'WEIRD POWERS',
+    food: 'FOOD', animal: 'ANIMAL', adventure: 'ADVENTURE', gross: 'GROSS',
+    thisorthat: 'THIS OR THAT', family: 'FAMILY',
+    grosscringe: 'GROSS & CRINGE', obnoxious: 'OBNOXIOUS & LOUD', scifi: 'SCI-FI',
+    rulebending: 'RULE-BENDING', mischief: 'MISCHIEF'
   };
   return labels[cat] || cat.toUpperCase();
 }
