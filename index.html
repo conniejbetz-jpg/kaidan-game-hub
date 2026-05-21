@@ -296,6 +296,8 @@ body {
 .game-card[data-game="spanishmath"]:hover { box-shadow: 0 8px 24px rgba(6, 214, 160, 0.3); }
 .game-card[data-game="colorsandclues"] { border-color: #ff4d8d; }
 .game-card[data-game="colorsandclues"]:hover { box-shadow: 0 8px 24px rgba(255, 77, 141, 0.3); }
+.game-card[data-game="stackattack"] { border-color: #c1121f; }
+.game-card[data-game="stackattack"]:hover { box-shadow: 0 8px 24px rgba(193, 18, 31, 0.3); }
 
 .game-icon {
   font-size: 48px;
@@ -313,6 +315,22 @@ body {
 .game-card[data-game="cipher"] .game-icon { color: #ffd700; }
 .game-card[data-game="goatcards"] .game-icon { color: #27ae60; }
 .game-card[data-game="colorsandclues"] .game-icon { color: #ff4d8d; }
+.game-card[data-game="stackattack"] .game-icon { color: #c1121f; }
+
+/* ========== STACK ATTACK STYLES ========== */
+.sa-wrap {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 16px; max-width: 720px; margin: 0 auto; padding: 20px;
+}
+.sa-header { text-align: center; }
+.sa-title { font-size: 28px; font-weight: 900; color: #fff; letter-spacing: 3px; }
+.sa-title .sa-accent { color: #c1121f; }
+.sa-subtitle { font-size: 14px; color: #8a8a9a; margin-top: 6px; font-style: italic; }
+.sa-coming-soon {
+  background: #16213e; border: 2px solid #c1121f; border-radius: 12px;
+  padding: 32px 28px; text-align: center; color: #fff; max-width: 480px;
+  margin-top: 20px;
+}
 
 .game-name {
   font-size: 18px;
@@ -3196,6 +3214,13 @@ body {
       <span class="game-status waiting">Join a room to play</span>
     </div>
 
+    <div class="game-card disabled" data-game="stackattack">
+      <span class="game-icon">&#x2694;</span>
+      <div class="game-name">Stack Attack</div>
+      <div class="game-tagline">Stack 'em. Steal 'em. Win.</div>
+      <span class="game-status waiting">Join a room to play</span>
+    </div>
+
     <div class="game-card disabled" data-game="chess">
       <span class="game-icon">&#x265E;</span>
       <div class="game-name">Chess</div>
@@ -4014,6 +4039,23 @@ body {
   </div>
 </div>
 
+<!-- ========== STACK ATTACK VIEW ========== -->
+<div class="game-view" id="view-stackattack">
+  <button class="back-to-hub" id="back-stackattack">&#x2190; Back to Hub</button>
+  <div class="sa-wrap">
+    <div class="sa-header">
+      <div class="sa-title">STACK <span class="sa-accent">ATTACK</span></div>
+      <p class="sa-subtitle">Stack 'em. Steal 'em. Win.</p>
+    </div>
+    <div class="sa-coming-soon">
+      <p style="font-size:18px;font-weight:700;margin-bottom:12px;">&#x1F6A7; Build in progress</p>
+      <p>Phase 1 scaffold deployed 2026-05-21. Game card + view shell are live.</p>
+      <p style="margin-top:14px;font-size:13px;color:#8a8a9a;line-height:1.5;">Next phases: deck + hand display, number-card play mechanics, 8 action cards, stack scoring, win conditions, sound effects.</p>
+      <p style="margin-top:14px;font-size:13px;color:#8a8a9a;">Est. 5-8 hrs total build across 4 more phases.</p>
+    </div>
+  </div>
+</div>
+
 <!-- ========== FLOATING SOUND BOARD (persists across all views) ========== -->
 <div class="floating-soundboard collapsed" id="floating-soundboard">
   <div class="fsb-header" id="fsb-header">
@@ -4099,6 +4141,7 @@ function init() {
   gsInit();
   smInit();
   hcInit();
+  saInit();
   fsbInit();
   chatInit();
 }
@@ -4360,6 +4403,9 @@ function listenToRoom() {
       if (game === 'colorsandclues') {
         hcStartGame();
       }
+      if (game === 'stackattack') {
+        saStartGame();
+      }
     }
   });
   roomListeners.push({ ref: gameRef, event: 'value', fn: gameListener });
@@ -4398,7 +4444,7 @@ function updateGameCards(players) {
     }
 
     // Coming soon games stay disabled
-    if (game !== 'battleship' && game !== 'wouldyourather' && game !== 'hangman' && game !== 'codebreaker' && game !== 'mathbattle' && game !== 'cipher' && game !== 'goatcards' && game !== 'goatstation' && game !== 'spanishmath' && game !== 'colorsandclues') {
+    if (game !== 'battleship' && game !== 'wouldyourather' && game !== 'hangman' && game !== 'codebreaker' && game !== 'mathbattle' && game !== 'cipher' && game !== 'goatcards' && game !== 'goatstation' && game !== 'spanishmath' && game !== 'colorsandclues' && game !== 'stackattack') {
       card.classList.add('disabled');
       return;
     }
@@ -4479,6 +4525,7 @@ function leaveRoom() {
   gcCleanup();
   gsCleanup();
   smCleanup();
+  saCleanup();
   fsbCleanup();
   chatCleanup();
 
@@ -11302,6 +11349,45 @@ function hcEscape(s) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+}
+
+
+/* ==========================================================
+   STACK ATTACK — 2-player chaotic card game
+   Firebase path: /rooms/{roomId}/stackattack/
+   Phase 1 scaffold — visual shell only (no game logic yet)
+   Future phases: deck/hand display, number-card play, action cards,
+   stack scoring, win conditions
+   ========================================================== */
+
+var saState = {
+  active: false,
+  listeners: []
+};
+
+function saInit() {
+  document.getElementById('back-stackattack').addEventListener('click', function() {
+    saLeaveGame();
+  });
+}
+
+function saStartGame() {
+  if (saState.active) return;
+  saState.active = true;
+  showView('stackattack');
+}
+
+function saLeaveGame() {
+  saCleanup();
+  showView('hub');
+}
+
+function saCleanup() {
+  saState.active = false;
+  saState.listeners.forEach(function(l) {
+    if (l.ref && l.event && l.fn) l.ref.off(l.event, l.fn);
+  });
+  saState.listeners = [];
 }
 
 
