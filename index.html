@@ -2320,46 +2320,43 @@ body {
   .gs-fb-btn { width: 100px; height: 100px; font-size: 40px; }
 }
 
-/* Floating Sound Board (persists across all games) */
+/* Floating Sound Board — always-visible left-side vertical strip */
 .floating-soundboard {
-  position: fixed; bottom: 0; left: 16px;
-  background: #16213e; border: 2px solid #3a4a6c; border-bottom: none;
-  border-radius: 12px 12px 0 0; z-index: 900;
-  box-shadow: 0 -4px 24px rgba(0,0,0,0.4); transition: transform 0.3s ease;
+  position: fixed; left: 0; top: 70px; bottom: 20px;
+  background: #16213e; border: 2px solid #3a4a6c; border-left: none;
+  border-radius: 0 12px 12px 0; z-index: 900;
+  box-shadow: 4px 0 24px rgba(0,0,0,0.4);
   display: none;
+  flex-direction: column; overflow: hidden;
 }
-.floating-soundboard.visible { display: block; }
-.floating-soundboard.collapsed { transform: translateY(calc(100% - 40px)); }
+.floating-soundboard.visible { display: flex; }
+.floating-soundboard.collapsed { /* legacy class — no longer used for hide, kept for compat */ }
 .fsb-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 8px 14px; background: #1a1a2e; border-radius: 12px 12px 0 0;
-  cursor: pointer; border-bottom: 1px solid #2a3a5c; user-select: none;
+  display: flex; align-items: center; justify-content: center;
+  padding: 6px 10px; background: #1a1a2e;
+  border-bottom: 1px solid #2a3a5c; user-select: none;
 }
-.fsb-header-title { font-size: 14px; font-weight: 700; color: #e0e0e0; letter-spacing: 1px; }
-.fsb-toggle-icon { font-size: 16px; color: #8a8a9a; transition: transform 0.3s; }
-.floating-soundboard.collapsed .fsb-toggle-icon { transform: rotate(180deg); }
+.fsb-header-title { font-size: 9px; font-weight: 700; color: #8a8a9a; letter-spacing: 1px; text-transform: uppercase; }
+.fsb-toggle-icon { display: none; }
 .fsb-buttons {
-  display: flex; gap: 6px; padding: 10px 12px; justify-content: center;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 8px;
+  overflow-y: auto; flex: 1;
 }
 .fsb-btn {
-  width: 50px; height: 50px; border-radius: 10px; border: 2px solid #3a4a6c;
+  width: 46px; height: 46px; border-radius: 8px; border: 2px solid #3a4a6c;
   background: #1a1a2e; cursor: pointer; transition: all 0.15s;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 2px; user-select: none;
+  gap: 1px; user-select: none;
 }
 .fsb-btn:hover { transform: scale(1.08); border-color: #2dc653; }
 .fsb-btn:active { transform: scale(0.92); }
-.fsb-btn .fsb-icon { font-size: 20px; }
-.fsb-btn .fsb-label { font-size: 7px; font-weight: 700; color: #555; font-family: 'Inter', sans-serif; }
+.fsb-btn .fsb-icon { font-size: 18px; }
+.fsb-btn .fsb-label { font-size: 6px; font-weight: 700; color: #888; font-family: 'Inter', sans-serif; letter-spacing: 0.3px; text-align: center; line-height: 1; }
 .fsb-btn.flash { border-color: #2dc653; box-shadow: 0 0 16px rgba(45,198,83,0.4); }
 @media (max-width: 600px) {
-  .floating-soundboard { left: 8px; }
-  .fsb-btn { width: 42px; height: 42px; }
-  .fsb-btn .fsb-icon { font-size: 16px; }
-}
-@media (max-width: 400px) {
-  .floating-soundboard { left: 8px; right: 8px; }
-  .fsb-buttons { flex-wrap: wrap; }
+  .floating-soundboard { top: 60px; bottom: 10px; }
+  .fsb-btn { width: 40px; height: 40px; }
+  .fsb-btn .fsb-icon { font-size: 15px; }
 }
 
 /* ========== GOAT CARDS STYLES ========== */
@@ -4562,7 +4559,14 @@ body {
     <div class="fsb-btn" data-fsound="sadtrombone"><span class="fsb-icon">&#x1F3BA;</span><span class="fsb-label">SAD</span></div>
     <div class="fsb-btn" data-fsound="applause"><span class="fsb-icon">&#x1F44F;</span><span class="fsb-label">CLAP</span></div>
     <div class="fsb-btn" data-fsound="goatscream"><span class="fsb-icon">&#x1F410;</span><span class="fsb-label">GOAT</span></div>
-    <div class="fsb-btn" data-fsound="burp"><span class="fsb-icon">&#x1F375;</span><span class="fsb-label">BURP</span></div>
+    <div class="fsb-btn" data-fsound="laugh"><span class="fsb-icon">&#x1F602;</span><span class="fsb-label">LAUGH</span></div>
+    <div class="fsb-btn" data-fsound="cheer"><span class="fsb-icon">&#x1F389;</span><span class="fsb-label">CHEER</span></div>
+    <div class="fsb-btn" data-fsound="boom"><span class="fsb-icon">&#x1F4A5;</span><span class="fsb-label">BOOM</span></div>
+    <div class="fsb-btn" data-fsound="animal"><span class="fsb-icon">&#x1F981;</span><span class="fsb-label">ANIMAL</span></div>
+    <div class="fsb-btn" data-fsound="siren"><span class="fsb-icon">&#x1F6A8;</span><span class="fsb-label">SIREN</span></div>
+    <div class="fsb-btn" data-fsound="creepy"><span class="fsb-icon">&#x1F47B;</span><span class="fsb-label">CREEPY</span></div>
+    <div class="fsb-btn" data-fsound="gameover"><span class="fsb-icon">&#x1F480;</span><span class="fsb-label">GAME OVER</span></div>
+    <div class="fsb-btn" data-fsound="suspense"><span class="fsb-icon">&#x23F3;</span><span class="fsb-label">SUSPENSE</span></div>
   </div>
 </div>
 
@@ -6862,398 +6866,26 @@ function gsPlaySoundEffect(type) {
     var ctx = gsGetAudioCtx();
     var vol = 0.4;
     switch (type) {
-      case 'fart':
-        var fartType = Math.floor(Math.random() * 12);
-        var t = ctx.currentTime;
-        if (fartType === 0) {
-          // Quick toot
-          var fo = ctx.createOscillator(); var fg = ctx.createGain();
-          fo.type = 'sawtooth'; fo.frequency.setValueAtTime(160, t);
-          fo.frequency.linearRampToValueAtTime(100, t + 0.15);
-          fg.gain.setValueAtTime(vol * 0.35, t);
-          fg.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
-          fo.connect(fg); fg.connect(ctx.destination);
-          fo.start(t); fo.stop(t + 0.2);
-        } else if (fartType === 1) {
-          // Long rumbler
-          var fo2 = ctx.createOscillator(); var fg2 = ctx.createGain();
-          fo2.type = 'sawtooth'; fo2.frequency.setValueAtTime(90, t);
-          fo2.frequency.linearRampToValueAtTime(50, t + 0.4);
-          fo2.frequency.linearRampToValueAtTime(70, t + 0.7);
-          fo2.frequency.linearRampToValueAtTime(40, t + 1.0);
-          fg2.gain.setValueAtTime(vol * 0.3, t);
-          fg2.gain.setValueAtTime(vol * 0.35, t + 0.3);
-          fg2.gain.exponentialRampToValueAtTime(0.001, t + 1.1);
-          fo2.connect(fg2); fg2.connect(ctx.destination);
-          fo2.start(t); fo2.stop(t + 1.1);
-          // Add rumble noise
-          var nb = ctx.createBuffer(1, ctx.sampleRate * 1, ctx.sampleRate);
-          var nd = nb.getChannelData(0);
-          for (var ni = 0; ni < nd.length; ni++) nd[ni] = (Math.random() * 2 - 1) * 0.3;
-          var ns = ctx.createBufferSource(); ns.buffer = nb;
-          var nf = ctx.createBiquadFilter(); nf.type = 'lowpass'; nf.frequency.value = 200;
-          var ng = ctx.createGain();
-          ng.gain.setValueAtTime(vol * 0.15, t);
-          ng.gain.exponentialRampToValueAtTime(0.001, t + 1.0);
-          ns.connect(nf); nf.connect(ng); ng.connect(ctx.destination);
-          ns.start(t); ns.stop(t + 1.0);
-        } else if (fartType === 2) {
-          // Squeaker (high pitch)
-          var fo3 = ctx.createOscillator(); var fg3 = ctx.createGain();
-          fo3.type = 'sawtooth'; fo3.frequency.setValueAtTime(300, t);
-          fo3.frequency.linearRampToValueAtTime(400, t + 0.1);
-          fo3.frequency.linearRampToValueAtTime(250, t + 0.25);
-          fo3.frequency.linearRampToValueAtTime(350, t + 0.35);
-          fg3.gain.setValueAtTime(vol * 0.2, t);
-          fg3.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
-          fo3.connect(fg3); fg3.connect(ctx.destination);
-          fo3.start(t); fo3.stop(t + 0.4);
-        } else if (fartType === 3) {
-          // Wet one (noise heavy)
-          var nb2 = ctx.createBuffer(1, ctx.sampleRate * 0.8, ctx.sampleRate);
-          var nd2 = nb2.getChannelData(0);
-          for (var ni2 = 0; ni2 < nd2.length; ni2++) nd2[ni2] = (Math.random() * 2 - 1);
-          var ns2 = ctx.createBufferSource(); ns2.buffer = nb2;
-          var nf2 = ctx.createBiquadFilter(); nf2.type = 'lowpass'; nf2.frequency.value = 300;
-          nf2.frequency.linearRampToValueAtTime(150, t + 0.6);
-          var ng2x = ctx.createGain();
-          ng2x.gain.setValueAtTime(vol * 0.25, t);
-          ng2x.gain.setValueAtTime(vol * 0.3, t + 0.1);
-          ng2x.gain.exponentialRampToValueAtTime(0.001, t + 0.8);
-          ns2.connect(nf2); nf2.connect(ng2x); ng2x.connect(ctx.destination);
-          ns2.start(t); ns2.stop(t + 0.8);
-          // Sub bass underneath
-          var fo4 = ctx.createOscillator(); var fg4 = ctx.createGain();
-          fo4.type = 'sine'; fo4.frequency.value = 60;
-          fg4.gain.setValueAtTime(vol * 0.3, t);
-          fg4.gain.exponentialRampToValueAtTime(0.001, t + 0.7);
-          fo4.connect(fg4); fg4.connect(ctx.destination);
-          fo4.start(t); fo4.stop(t + 0.7);
-        } else if (fartType === 4) {
-          // Machine gun (rapid bursts)
-          for (var mi = 0; mi < 6; mi++) {
-            (function(idx) {
-              var delay = idx * 0.08;
-              var fo5 = ctx.createOscillator(); var fg5 = ctx.createGain();
-              fo5.type = 'sawtooth';
-              fo5.frequency.setValueAtTime(130 - idx * 8, t + delay);
-              fg5.gain.setValueAtTime(vol * 0.3, t + delay);
-              fg5.gain.exponentialRampToValueAtTime(0.001, t + delay + 0.06);
-              fo5.connect(fg5); fg5.connect(ctx.destination);
-              fo5.start(t + delay); fo5.stop(t + delay + 0.06);
-            })(mi);
-          }
-        } else if (fartType === 5) {
-          // The crescendo (builds up then releases)
-          var fo6 = ctx.createOscillator(); var fg6 = ctx.createGain();
-          fo6.type = 'sawtooth';
-          fo6.frequency.setValueAtTime(80, t);
-          fo6.frequency.linearRampToValueAtTime(140, t + 0.3);
-          fo6.frequency.linearRampToValueAtTime(60, t + 0.8);
-          fg6.gain.setValueAtTime(vol * 0.1, t);
-          fg6.gain.linearRampToValueAtTime(vol * 0.4, t + 0.3);
-          fg6.gain.exponentialRampToValueAtTime(0.001, t + 0.9);
-          fo6.connect(fg6); fg6.connect(ctx.destination);
-          fo6.start(t); fo6.stop(t + 0.9);
-          // Add flutter
-          var fo7 = ctx.createOscillator(); var fg7 = ctx.createGain();
-          fo7.type = 'square'; fo7.frequency.value = 15;
-          fg7.gain.value = 30;
-          fo7.connect(fg7); fg7.connect(fo6.frequency);
-          fo7.start(t + 0.2); fo7.stop(t + 0.8);
-        } else if (fartType === 6) {
-          // Echo fart — initial pop then delayed quieter repeat
-          [0, 0.3, 0.55].forEach(function(delay, idx) {
-            var fo8 = ctx.createOscillator(); var fg8 = ctx.createGain();
-            fo8.type = 'sawtooth';
-            fo8.frequency.setValueAtTime(140 - idx * 20, t + delay);
-            fo8.frequency.linearRampToValueAtTime(80 - idx * 15, t + delay + 0.15);
-            fg8.gain.setValueAtTime(vol * (0.35 - idx * 0.1), t + delay);
-            fg8.gain.exponentialRampToValueAtTime(0.001, t + delay + 0.2);
-            fo8.connect(fg8); fg8.connect(ctx.destination);
-            fo8.start(t + delay); fo8.stop(t + delay + 0.2);
-          });
-        } else if (fartType === 7) {
-          // Whistle fart — rising whistle that turns into a toot
-          var fo9 = ctx.createOscillator(); var fg9 = ctx.createGain();
-          fo9.type = 'sine';
-          fo9.frequency.setValueAtTime(280, t);
-          fo9.frequency.linearRampToValueAtTime(720, t + 0.35);
-          fo9.frequency.linearRampToValueAtTime(120, t + 0.55);
-          fg9.gain.setValueAtTime(vol * 0.25, t);
-          fg9.gain.linearRampToValueAtTime(vol * 0.4, t + 0.35);
-          fg9.gain.exponentialRampToValueAtTime(0.001, t + 0.6);
-          fo9.connect(fg9); fg9.connect(ctx.destination);
-          fo9.start(t); fo9.stop(t + 0.6);
-        } else if (fartType === 8) {
-          // Bubble pop — short high-pitched pop with bubble noise
-          var fo10 = ctx.createOscillator(); var fg10 = ctx.createGain();
-          fo10.type = 'sawtooth';
-          fo10.frequency.setValueAtTime(450, t);
-          fo10.frequency.exponentialRampToValueAtTime(180, t + 0.1);
-          fg10.gain.setValueAtTime(vol * 0.4, t);
-          fg10.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
-          fo10.connect(fg10); fg10.connect(ctx.destination);
-          fo10.start(t); fo10.stop(t + 0.12);
-          // Bubble noise tail
-          var nb3 = ctx.createBuffer(1, ctx.sampleRate * 0.15, ctx.sampleRate);
-          var nd3 = nb3.getChannelData(0);
-          for (var ni3 = 0; ni3 < nd3.length; ni3++) nd3[ni3] = (Math.random() * 2 - 1) * 0.5;
-          var ns3 = ctx.createBufferSource(); ns3.buffer = nb3;
-          var nf3 = ctx.createBiquadFilter(); nf3.type = 'bandpass'; nf3.frequency.value = 800;
-          var ng3 = ctx.createGain();
-          ng3.gain.setValueAtTime(vol * 0.18, t);
-          ng3.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
-          ns3.connect(nf3); nf3.connect(ng3); ng3.connect(ctx.destination);
-          ns3.start(t + 0.05); ns3.stop(t + 0.2);
-        } else if (fartType === 9) {
-          // Trumpet fart — low brass-like sustained tone
-          var fo11 = ctx.createOscillator(); var fg11 = ctx.createGain();
-          fo11.type = 'sawtooth';
-          fo11.frequency.setValueAtTime(110, t);
-          fo11.frequency.linearRampToValueAtTime(95, t + 0.6);
-          fg11.gain.setValueAtTime(vol * 0.35, t);
-          fg11.gain.setValueAtTime(vol * 0.4, t + 0.2);
-          fg11.gain.exponentialRampToValueAtTime(0.001, t + 0.75);
-          fo11.connect(fg11); fg11.connect(ctx.destination);
-          fo11.start(t); fo11.stop(t + 0.75);
-          // Add harmonic overtone for brassiness
-          var fo12 = ctx.createOscillator(); var fg12 = ctx.createGain();
-          fo12.type = 'square'; fo12.frequency.value = 220;
-          fg12.gain.setValueAtTime(vol * 0.08, t);
-          fg12.gain.exponentialRampToValueAtTime(0.001, t + 0.7);
-          fo12.connect(fg12); fg12.connect(ctx.destination);
-          fo12.start(t); fo12.stop(t + 0.7);
-        } else if (fartType === 10) {
-          // Squeaky chair — high-pitched friction squeak
-          var fo13 = ctx.createOscillator(); var fg13 = ctx.createGain();
-          fo13.type = 'sawtooth';
-          fo13.frequency.setValueAtTime(520, t);
-          fo13.frequency.linearRampToValueAtTime(680, t + 0.18);
-          fo13.frequency.linearRampToValueAtTime(440, t + 0.3);
-          fg13.gain.setValueAtTime(vol * 0.18, t);
-          fg13.gain.linearRampToValueAtTime(vol * 0.3, t + 0.15);
-          fg13.gain.exponentialRampToValueAtTime(0.001, t + 0.32);
-          fo13.connect(fg13); fg13.connect(ctx.destination);
-          fo13.start(t); fo13.stop(t + 0.32);
-          // Friction noise
-          var nb4 = ctx.createBuffer(1, ctx.sampleRate * 0.3, ctx.sampleRate);
-          var nd4 = nb4.getChannelData(0);
-          for (var ni4 = 0; ni4 < nd4.length; ni4++) nd4[ni4] = (Math.random() * 2 - 1) * 0.2;
-          var ns4 = ctx.createBufferSource(); ns4.buffer = nb4;
-          var nf4 = ctx.createBiquadFilter(); nf4.type = 'highpass'; nf4.frequency.value = 1500;
-          var ng4 = ctx.createGain();
-          ng4.gain.setValueAtTime(vol * 0.12, t);
-          ng4.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
-          ns4.connect(nf4); nf4.connect(ng4); ng4.connect(ctx.destination);
-          ns4.start(t); ns4.stop(t + 0.3);
-        } else {
-          // Whoopee cushion — wobbling whoosh
-          var fo14 = ctx.createOscillator(); var fg14 = ctx.createGain();
-          fo14.type = 'sawtooth';
-          fo14.frequency.setValueAtTime(170, t);
-          fo14.frequency.linearRampToValueAtTime(110, t + 0.55);
-          fg14.gain.setValueAtTime(vol * 0.3, t);
-          fg14.gain.setValueAtTime(vol * 0.4, t + 0.08);
-          fg14.gain.exponentialRampToValueAtTime(0.001, t + 0.65);
-          fo14.connect(fg14); fg14.connect(ctx.destination);
-          fo14.start(t); fo14.stop(t + 0.65);
-          // Big wobble
-          var lfof = ctx.createOscillator(); var lfgf = ctx.createGain();
-          lfof.type = 'sine'; lfof.frequency.value = 9;
-          lfgf.gain.value = 40;
-          lfof.connect(lfgf); lfgf.connect(fo14.frequency);
-          lfof.start(t); lfof.stop(t + 0.65);
-        }
+      case 'fart': {
+        var fartUrls = ['sounds/fart-long-1.mp3','sounds/fart-long-2.mp3','sounds/fart-big-ripper.mp3','sounds/fart-echo.mp3','sounds/fart-roommates-door.mp3','sounds/fart-poop.mp3','sounds/fart-in-your-direction.mp3','sounds/man-pooping-brains.mp3'];
+        var fartA = new Audio(fartUrls[Math.floor(Math.random()*fartUrls.length)]);
+        fartA.volume = 0.8;
+        fartA.play().catch(function(){});
         break;
-      case 'burp':
-        var burpType = Math.floor(Math.random() * 4);
-        var bt = ctx.currentTime;
-        if (burpType === 0) {
-          // Quick belch — single rising/falling
-          var bo1 = ctx.createOscillator(); var bg1 = ctx.createGain();
-          bo1.type = 'sawtooth';
-          bo1.frequency.setValueAtTime(180, bt);
-          bo1.frequency.linearRampToValueAtTime(260, bt + 0.1);
-          bo1.frequency.linearRampToValueAtTime(140, bt + 0.25);
-          bg1.gain.setValueAtTime(vol * 0.35, bt);
-          bg1.gain.exponentialRampToValueAtTime(0.001, bt + 0.3);
-          bo1.connect(bg1); bg1.connect(ctx.destination);
-          bo1.start(bt); bo1.stop(bt + 0.3);
-        } else if (burpType === 1) {
-          // Long satisfied burp — sustained mid-range
-          var bo2 = ctx.createOscillator(); var bg2 = ctx.createGain();
-          bo2.type = 'sawtooth';
-          bo2.frequency.setValueAtTime(200, bt);
-          bo2.frequency.linearRampToValueAtTime(160, bt + 0.6);
-          bg2.gain.setValueAtTime(vol * 0.3, bt);
-          bg2.gain.setValueAtTime(vol * 0.4, bt + 0.1);
-          bg2.gain.exponentialRampToValueAtTime(0.001, bt + 0.75);
-          bo2.connect(bg2); bg2.connect(ctx.destination);
-          bo2.start(bt); bo2.stop(bt + 0.75);
-          // Add wetness via noise
-          var bnb = ctx.createBuffer(1, ctx.sampleRate * 0.7, ctx.sampleRate);
-          var bnd = bnb.getChannelData(0);
-          for (var bni = 0; bni < bnd.length; bni++) bnd[bni] = (Math.random() * 2 - 1) * 0.25;
-          var bns = ctx.createBufferSource(); bns.buffer = bnb;
-          var bnf = ctx.createBiquadFilter(); bnf.type = 'bandpass'; bnf.frequency.value = 600;
-          var bng = ctx.createGain();
-          bng.gain.setValueAtTime(vol * 0.15, bt);
-          bng.gain.exponentialRampToValueAtTime(0.001, bt + 0.7);
-          bns.connect(bnf); bnf.connect(bng); bng.connect(ctx.destination);
-          bns.start(bt); bns.stop(bt + 0.7);
-        } else if (burpType === 2) {
-          // Multi-burp — 3 quick bursts
-          for (var mbi = 0; mbi < 3; mbi++) {
-            (function(idx) {
-              var delay = idx * 0.18;
-              var bo3 = ctx.createOscillator(); var bg3 = ctx.createGain();
-              bo3.type = 'sawtooth';
-              bo3.frequency.setValueAtTime(220 - idx * 20, bt + delay);
-              bo3.frequency.linearRampToValueAtTime(160 - idx * 15, bt + delay + 0.12);
-              bg3.gain.setValueAtTime(vol * 0.35, bt + delay);
-              bg3.gain.exponentialRampToValueAtTime(0.001, bt + delay + 0.15);
-              bo3.connect(bg3); bg3.connect(ctx.destination);
-              bo3.start(bt + delay); bo3.stop(bt + delay + 0.15);
-            })(mbi);
-          }
-        } else {
-          // Massive monster burp — deep + long + slight pitch wobble
-          var bo4 = ctx.createOscillator(); var bg4 = ctx.createGain();
-          bo4.type = 'sawtooth';
-          bo4.frequency.setValueAtTime(130, bt);
-          bo4.frequency.linearRampToValueAtTime(180, bt + 0.3);
-          bo4.frequency.linearRampToValueAtTime(110, bt + 0.9);
-          bg4.gain.setValueAtTime(vol * 0.4, bt);
-          bg4.gain.setValueAtTime(vol * 0.45, bt + 0.15);
-          bg4.gain.exponentialRampToValueAtTime(0.001, bt + 1.0);
-          bo4.connect(bg4); bg4.connect(ctx.destination);
-          bo4.start(bt); bo4.stop(bt + 1.0);
-          // Wobble
-          var lfob = ctx.createOscillator(); var lfgb = ctx.createGain();
-          lfob.type = 'sine'; lfob.frequency.value = 6;
-          lfgb.gain.value = 15;
-          lfob.connect(lfgb); lfgb.connect(bo4.frequency);
-          lfob.start(bt); lfob.stop(bt + 1.0);
-        }
+      }
+      case 'goatscream': {
+        var goatUrls = ['sounds/goat-surprise-visitor.mp3','sounds/goat-shock-loud.mp3','sounds/goat-startled-barn.mp3','sounds/goat-funny-screaming.mp3'];
+        var goatA = new Audio(goatUrls[Math.floor(Math.random()*goatUrls.length)]);
+        goatA.volume = 0.8;
+        goatA.play().catch(function(){});
         break;
-      case 'goatscream':
-        var goatType = Math.floor(Math.random() * 5);
-        var gt = ctx.currentTime;
-        if (goatType === 0) {
-          // Classic MAAAAAH — falling pitch with vibrato
-          var go1 = ctx.createOscillator(); var gg1 = ctx.createGain();
-          go1.type = 'sawtooth';
-          go1.frequency.setValueAtTime(380, gt);
-          go1.frequency.linearRampToValueAtTime(280, gt + 0.6);
-          gg1.gain.setValueAtTime(vol * 0.35, gt);
-          gg1.gain.setValueAtTime(vol * 0.4, gt + 0.05);
-          gg1.gain.exponentialRampToValueAtTime(0.001, gt + 0.7);
-          go1.connect(gg1); gg1.connect(ctx.destination);
-          go1.start(gt); go1.stop(gt + 0.7);
-          // Vibrato
-          var lfo1 = ctx.createOscillator(); var lfg1 = ctx.createGain();
-          lfo1.type = 'sine'; lfo1.frequency.value = 12;
-          lfg1.gain.value = 40;
-          lfo1.connect(lfg1); lfg1.connect(go1.frequency);
-          lfo1.start(gt); lfo1.stop(gt + 0.7);
-        } else if (goatType === 1) {
-          // Screaming goat — high-pitched shriek
-          var go2 = ctx.createOscillator(); var gg2 = ctx.createGain();
-          go2.type = 'sawtooth';
-          go2.frequency.setValueAtTime(680, gt);
-          go2.frequency.linearRampToValueAtTime(620, gt + 0.4);
-          gg2.gain.setValueAtTime(vol * 0.3, gt);
-          gg2.gain.setValueAtTime(vol * 0.4, gt + 0.08);
-          gg2.gain.exponentialRampToValueAtTime(0.001, gt + 0.5);
-          go2.connect(gg2); gg2.connect(ctx.destination);
-          go2.start(gt); go2.stop(gt + 0.5);
-          // Fast vibrato
-          var lfo2 = ctx.createOscillator(); var lfg2 = ctx.createGain();
-          lfo2.type = 'sine'; lfo2.frequency.value = 22;
-          lfg2.gain.value = 60;
-          lfo2.connect(lfg2); lfg2.connect(go2.frequency);
-          lfo2.start(gt); lfo2.stop(gt + 0.5);
-        } else if (goatType === 2) {
-          // Stuttering bleat — 3 short bursts
-          for (var bi = 0; bi < 3; bi++) {
-            (function(idx) {
-              var delay = idx * 0.18;
-              var go3 = ctx.createOscillator(); var gg3 = ctx.createGain();
-              go3.type = 'sawtooth';
-              go3.frequency.setValueAtTime(420 - idx * 30, gt + delay);
-              go3.frequency.linearRampToValueAtTime(320 - idx * 30, gt + delay + 0.12);
-              gg3.gain.setValueAtTime(vol * 0.35, gt + delay);
-              gg3.gain.exponentialRampToValueAtTime(0.001, gt + delay + 0.14);
-              go3.connect(gg3); gg3.connect(ctx.destination);
-              go3.start(gt + delay); go3.stop(gt + delay + 0.14);
-            })(bi);
-          }
-        } else if (goatType === 3) {
-          // Long mournful BAAAAAH — low pitch, long sustain
-          var go4 = ctx.createOscillator(); var gg4 = ctx.createGain();
-          go4.type = 'sawtooth';
-          go4.frequency.setValueAtTime(260, gt);
-          go4.frequency.linearRampToValueAtTime(220, gt + 1.0);
-          gg4.gain.setValueAtTime(vol * 0.3, gt);
-          gg4.gain.setValueAtTime(vol * 0.4, gt + 0.1);
-          gg4.gain.exponentialRampToValueAtTime(0.001, gt + 1.2);
-          go4.connect(gg4); gg4.connect(ctx.destination);
-          go4.start(gt); go4.stop(gt + 1.2);
-          // Slow vibrato
-          var lfo4 = ctx.createOscillator(); var lfg4 = ctx.createGain();
-          lfo4.type = 'sine'; lfo4.frequency.value = 8;
-          lfg4.gain.value = 30;
-          lfo4.connect(lfg4); lfg4.connect(go4.frequency);
-          lfo4.start(gt); lfo4.stop(gt + 1.2);
-        } else {
-          // VIRAL SCREAMING GOAT MEME — sustained high-pitched human-like scream
-          var go5 = ctx.createOscillator(); var gg5 = ctx.createGain();
-          go5.type = 'sawtooth';
-          go5.frequency.setValueAtTime(550, gt);
-          go5.frequency.linearRampToValueAtTime(650, gt + 0.15);
-          go5.frequency.linearRampToValueAtTime(580, gt + 0.6);
-          go5.frequency.linearRampToValueAtTime(720, gt + 0.85);
-          go5.frequency.linearRampToValueAtTime(500, gt + 1.0);
-          gg5.gain.setValueAtTime(vol * 0.35, gt);
-          gg5.gain.setValueAtTime(vol * 0.45, gt + 0.08);
-          gg5.gain.exponentialRampToValueAtTime(0.001, gt + 1.1);
-          go5.connect(gg5); gg5.connect(ctx.destination);
-          go5.start(gt); go5.stop(gt + 1.1);
-          // Erratic vibrato for screaming texture
-          var lfo5 = ctx.createOscillator(); var lfg5 = ctx.createGain();
-          lfo5.type = 'sine'; lfo5.frequency.setValueAtTime(18, gt);
-          lfo5.frequency.linearRampToValueAtTime(28, gt + 0.5);
-          lfo5.frequency.linearRampToValueAtTime(22, gt + 1.0);
-          lfg5.gain.value = 80;
-          lfo5.connect(lfg5); lfg5.connect(go5.frequency);
-          lfo5.start(gt); lfo5.stop(gt + 1.1);
-          // Add raspy noise overlay
-          var gnb = ctx.createBuffer(1, ctx.sampleRate * 1.0, ctx.sampleRate);
-          var gnd = gnb.getChannelData(0);
-          for (var gni = 0; gni < gnd.length; gni++) gnd[gni] = (Math.random() * 2 - 1) * 0.3;
-          var gns = ctx.createBufferSource(); gns.buffer = gnb;
-          var gnf = ctx.createBiquadFilter(); gnf.type = 'bandpass'; gnf.frequency.value = 1200;
-          var gng = ctx.createGain();
-          gng.gain.setValueAtTime(vol * 0.1, gt);
-          gng.gain.exponentialRampToValueAtTime(0.001, gt + 1.0);
-          gns.connect(gnf); gnf.connect(gng); gng.connect(ctx.destination);
-          gns.start(gt); gns.stop(gt + 1.0);
-        }
+      }
+      case 'airhorn': {
+        var hu = ['sounds/horn-truck.wav','sounds/horn-car.wav'];
+        var ha = new Audio(hu[Math.floor(Math.random()*hu.length)]); ha.volume = 0.7; ha.play().catch(function(){});
         break;
-      case 'airhorn':
-        [340, 420, 520].forEach(function(f) {
-          var o2 = ctx.createOscillator(); var g2 = ctx.createGain();
-          o2.type = 'square'; o2.frequency.value = f;
-          g2.gain.setValueAtTime(vol * 0.2, ctx.currentTime);
-          g2.gain.setValueAtTime(vol * 0.3, ctx.currentTime + 0.05);
-          g2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
-          o2.connect(g2); g2.connect(ctx.destination);
-          o2.start(); o2.stop(ctx.currentTime + 0.8);
-        });
-        break;
-      case 'rimshot':
-        // Ba-dum-tss
+      }
+      case 'rimshot': {
         [200, 250].forEach(function(f, i) {
           var o3 = ctx.createOscillator(); var g3 = ctx.createGain();
           o3.type = 'triangle'; o3.frequency.value = f;
@@ -7263,10 +6895,9 @@ function gsPlaySoundEffect(type) {
           o3.connect(g3); g3.connect(ctx.destination);
           o3.start(t); o3.stop(t + 0.1);
         });
-        // Cymbal (white noise burst)
         var buf = ctx.createBuffer(1, ctx.sampleRate * 0.3, ctx.sampleRate);
-        var data = buf.getChannelData(0);
-        for (var s = 0; s < data.length; s++) data[s] = Math.random() * 2 - 1;
+        var dataR = buf.getChannelData(0);
+        for (var sR = 0; sR < dataR.length; sR++) dataR[sR] = Math.random() * 2 - 1;
         var noise = ctx.createBufferSource(); noise.buffer = buf;
         var ng = ctx.createGain();
         ng.gain.setValueAtTime(vol * 0.15, ctx.currentTime + 0.3);
@@ -7274,35 +6905,54 @@ function gsPlaySoundEffect(type) {
         noise.connect(ng); ng.connect(ctx.destination);
         noise.start(ctx.currentTime + 0.3); noise.stop(ctx.currentTime + 0.6);
         break;
-      case 'sadtrombone':
-        // Wah wah wah wahhh
-        [350, 330, 310, 260].forEach(function(f, i) {
-          var o4 = ctx.createOscillator(); var g4 = ctx.createGain();
-          o4.type = 'sawtooth'; o4.frequency.value = f;
-          var t2 = ctx.currentTime + i * 0.3;
-          g4.gain.setValueAtTime(vol * 0.2, t2);
-          g4.gain.exponentialRampToValueAtTime(0.001, t2 + 0.35);
-          o4.connect(g4); g4.connect(ctx.destination);
-          o4.start(t2); o4.stop(t2 + 0.35);
-        });
+      }
+      case 'sadtrombone': {
+        var sa = new Audio('sounds/sad-trombone.wav'); sa.volume = 0.7; sa.play().catch(function(){});
         break;
-      case 'applause':
-        // Multiple white noise bursts
-        for (var a = 0; a < 8; a++) {
-          (function(idx) {
-            var buf2 = ctx.createBuffer(1, ctx.sampleRate * 0.15, ctx.sampleRate);
-            var d2 = buf2.getChannelData(0);
-            for (var s2 = 0; s2 < d2.length; s2++) d2[s2] = Math.random() * 2 - 1;
-            var n2 = ctx.createBufferSource(); n2.buffer = buf2;
-            var ng2 = ctx.createGain();
-            var t3 = ctx.currentTime + idx * 0.1 + Math.random() * 0.05;
-            ng2.gain.setValueAtTime(vol * 0.1, t3);
-            ng2.gain.exponentialRampToValueAtTime(0.001, t3 + 0.15);
-            n2.connect(ng2); ng2.connect(ctx.destination);
-            n2.start(t3); n2.stop(t3 + 0.15);
-          })(a);
-        }
+      }
+      case 'applause': {
+        var clA = new Audio('sounds/clap-cheer.wav'); clA.volume = 0.7; clA.play().catch(function(){});
         break;
+      }
+      case 'laugh': {
+        var lu = ['sounds/laugh-crowd.wav','sounds/laugh-cartoon.wav','sounds/laugh-troll.wav'];
+        var la = new Audio(lu[Math.floor(Math.random()*lu.length)]); la.volume = 0.7; la.play().catch(function(){});
+        break;
+      }
+      case 'cheer': {
+        var cu = ['sounds/cheer-birthday.wav','sounds/cheer-army.wav'];
+        var chA = new Audio(cu[Math.floor(Math.random()*cu.length)]); chA.volume = 0.7; chA.play().catch(function(){});
+        break;
+      }
+      case 'boom': {
+        var bu = ['sounds/boom-8bit.wav','sounds/boom-big.wav','sounds/boom-collapse.wav','sounds/boom-laser.wav'];
+        var ba = new Audio(bu[Math.floor(Math.random()*bu.length)]); ba.volume = 0.7; ba.play().catch(function(){});
+        break;
+      }
+      case 'animal': {
+        var au = ['sounds/animal-lion-roar.wav','sounds/animal-wolf-howl.wav','sounds/animal-lion-growl.wav'];
+        var aA = new Audio(au[Math.floor(Math.random()*au.length)]); aA.volume = 0.7; aA.play().catch(function(){});
+        break;
+      }
+      case 'siren': {
+        var siA = new Audio('sounds/siren-police.wav'); siA.volume = 0.7; siA.play().catch(function(){});
+        break;
+      }
+      case 'creepy': {
+        var crU = ['sounds/creepy-creature.wav','sounds/creepy-ominous.wav','sounds/creepy-drums-deep.wav','sounds/creepy-drums-ritual.wav'];
+        var crA = new Audio(crU[Math.floor(Math.random()*crU.length)]); crA.volume = 0.7; crA.play().catch(function(){});
+        break;
+      }
+      case 'gameover': {
+        var goU = ['sounds/gameover-arcade.wav','sounds/gameover-long.wav','sounds/wrong-buzzer.wav'];
+        var goA = new Audio(goU[Math.floor(Math.random()*goU.length)]); goA.volume = 0.7; goA.play().catch(function(){});
+        break;
+      }
+      case 'suspense': {
+        var suU = ['sounds/suspense-gameshow.wav','sounds/suspense-bass.wav','sounds/suspense-whoosh.wav'];
+        var suA = new Audio(suU[Math.floor(Math.random()*suU.length)]); suA.volume = 0.7; suA.play().catch(function(){});
+        break;
+      }
     }
   } catch (e) { /* Audio not available */ }
 }
@@ -9459,10 +9109,7 @@ var chatState = {
 var fsbState = { collapsed: true, listener: null, lastTs: 0 };
 
 function fsbInit() {
-  document.getElementById('fsb-header').addEventListener('click', function() {
-    fsbState.collapsed = !fsbState.collapsed;
-    document.getElementById('floating-soundboard').classList.toggle('collapsed', fsbState.collapsed);
-  });
+  // Header click is a no-op now — FSB always visible as left-side panel
 
   document.querySelectorAll('.fsb-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
@@ -9481,8 +9128,7 @@ function fsbStartListening() {
   if (!roomRef) return;
   fsbState.lastTs = 0;
   document.getElementById('floating-soundboard').classList.add('visible');
-  document.getElementById('floating-soundboard').classList.add('collapsed');
-  fsbState.collapsed = true;
+  fsbState.collapsed = false;
 
   var ref = roomRef.child('floatingsounds');
   fsbState.listener = ref.on('value', function(snap) {
