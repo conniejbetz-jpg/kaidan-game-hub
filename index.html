@@ -434,6 +434,17 @@ body {
 .sa-help-content ul { margin-left: 18px; font-size: 13px; }
 .sa-help-content li { margin-bottom: 4px; }
 .sa-help-content strong { color: #fff; }
+.sa-help-content em { color: #F4A261; font-style: italic; }
+.sa-help-content table {
+  width: 100%; border-collapse: collapse; margin: 8px 0 12px; font-size: 12px;
+}
+.sa-help-content th, .sa-help-content td {
+  padding: 6px 8px; text-align: left; border-bottom: 1px solid #2a3a5c; vertical-align: top;
+}
+.sa-help-content th { color: #F4A261; font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+.sa-help-content td:first-child { font-weight: 800; color: #c1121f; white-space: nowrap; width: 92px; }
+.sa-help-content .sa-help-subsection { margin-left: 12px; padding-left: 10px; border-left: 2px solid #2a3a5c; margin-bottom: 10px; }
+.sa-help-content .sa-help-subsection h5 { color: #c0c0c0; font-size: 12px; margin-bottom: 4px; font-weight: 700; }
 .sa-help-close {
   background: #c1121f; color: #fff; border: none; padding: 10px 24px;
   border-radius: 6px; font-weight: 700; cursor: pointer; margin-top: 16px;
@@ -4227,54 +4238,126 @@ body {
         <div class="sa-help-content">
           <h3>How to Play Stack Attack</h3>
 
-          <h4>Goal</h4>
-          <p>Be the first to either <strong>empty your hand</strong> OR <strong>score three stacks</strong> of cards.</p>
+          <h4>The Goal</h4>
+          <p>Be the first to win by EITHER:</p>
+          <ul>
+            <li><strong>Scoring 3 stacks</strong> (the main way), OR</li>
+            <li><strong>Playing all 7 of your cards</strong> out of your hand (the fast way)</li>
+          </ul>
 
-          <h4>Setup</h4>
-          <p>You start with 7 cards. The deck has number cards in 4 colors (red, blue, green, yellow, numbered 1-9) plus action cards that let you mess with your opponent.</p>
+          <h4>The Basics</h4>
+          <p><strong>The deck:</strong> 57 cards total &mdash; 36 number cards (4 colors &times; 1-9) plus 21 action cards (the chaos cards).</p>
+          <p><strong>Each player starts with 7 cards in hand.</strong> The other 43 stay face-down as the draw pile.</p>
+          <p><strong>Your hand:</strong> Cards you hold. Only you can see your hand. Your opponent only sees how many cards you have, not what they are.</p>
+          <p><strong>Stacks:</strong> Piles of same-color cards in front of you. Stacks are how you score points to win. You can have as many stacks as you want, of any size.</p>
 
-          <h4>Your turn</h4>
+          <h4>Your Turn</h4>
+          <p>On your turn you do ONE of these two things:</p>
           <ol style="margin-left:18px;font-size:13px;">
-            <li>Play one card from your hand, OR draw a card if you can't or don't want to play</li>
-            <li>After playing, you can score a stack if any of your stacks has 3 or more cards</li>
-            <li>End your turn</li>
+            <li><strong>Play a card</strong> from your hand</li>
+            <li>OR <strong>draw a card</strong> from the deck</li>
           </ol>
+          <p>Then click "End Turn." That's it. One play OR one draw. Not both.</p>
 
-          <h4>Playing number cards</h4>
-          <p>When you play a number card, it goes into a stack of the same color in front of you. You can add it to an existing stack of that color, or start a new stack. Stacks belong to you &mdash; your opponent can't add to them, but they can attack them.</p>
+          <div class="sa-help-subsection">
+            <h5>What does "playing a card" mean?</h5>
+            <p>Playing MOVES a card from your hand &rarr; onto one of your stacks. The card is NOT discarded &mdash; it becomes part of your stack (which is potential points for you). After playing, your hand has 1 fewer card and your stack has 1 more.</p>
+          </div>
 
-          <h4>Action cards (coming in Phase 3)</h4>
+          <div class="sa-help-subsection">
+            <h5>What does "drawing a card" mean?</h5>
+            <p>Drawing takes the top card of the deck and puts it into your hand. After drawing, your hand has 1 more card and the deck has 1 fewer.</p>
+          </div>
+
+          <div class="sa-help-subsection">
+            <h5>When would you draw instead of play?</h5>
+            <ul>
+              <li>You don't have a card you want to commit yet</li>
+              <li>You're saving action cards for a better moment</li>
+              <li>You don't want to empty your hand too soon (opponent could SWAP and steal your lead)</li>
+              <li>All your cards would start new stacks instead of building existing ones</li>
+            </ul>
+          </div>
+
+          <h4>How Stacks Work</h4>
+          <p><strong>Building a stack:</strong> When you play a number card, it goes onto a stack of the SAME COLOR in front of you.</p>
           <ul>
-            <li><strong>STEAL</strong> &mdash; Take the top card off one of their stacks</li>
-            <li><strong>SWAP</strong> &mdash; Exchange your entire hand with theirs</li>
-            <li><strong>FREEZE</strong> &mdash; They skip their next turn completely</li>
-            <li><strong>WILD</strong> &mdash; Play as a number of any color you choose</li>
-            <li><strong>SHUFFLE</strong> &mdash; Their stacks get reorganized randomly by color</li>
-            <li><strong>DRAW 3</strong> &mdash; They must draw 3 cards before their next play</li>
-            <li><strong>REVERSE</strong> &mdash; Flip any stack upside down (top becomes bottom)</li>
-            <li><strong>DOUBLE</strong> &mdash; Play another card this turn</li>
+            <li>If you already have a stack of that color, the card adds to the top</li>
+            <li>If you don't, the card starts a new stack</li>
+            <li>The game enforces this &mdash; you can't accidentally mix colors</li>
           </ul>
-          <p style="font-style:italic;color:#8a8a9a;font-size:12px;">Action cards appear in your hand but don't do anything yet &mdash; clicking shows a message. They'll fully work after Phase 3.</p>
-
-          <h4>Scoring a stack (coming in Phase 4)</h4>
-          <p>When one of your stacks has 3 or more cards, you can choose to score it after playing. The stack gets discarded and you get 1 score point. You need 3 score points to win. Only one score per turn.</p>
-
-          <h4>Winning</h4>
-          <p>Win by reaching 3 scored stacks, OR by playing your last card so your hand is empty. Currently (Phase 2): empty-hand win works, deck-exhaustion loss works, 3-stacks win comes in Phase 4.</p>
-
-          <h4>Watch out for</h4>
+          <p><strong>Stack rules:</strong></p>
           <ul>
-            <li><strong>SWAP</strong> can flip a winning position fast &mdash; keep some cards in hand even when you're close to empty</li>
-            <li><strong>FREEZE + DRAW 3</strong> combo is brutal &mdash; opponent loses a turn AND draws 3 cards</li>
-            <li><strong>SHUFFLE</strong> can wreck a carefully built stack &mdash; score important stacks before they get hit</li>
-            <li><strong>DOUBLE</strong> lets you chain &mdash; playing a DOUBLE then another action can swing the game</li>
+            <li>All cards in a stack must be the SAME COLOR (red, blue, green, or yellow)</li>
+            <li>Card NUMBERS don't matter &mdash; values 1-9 are interchangeable for stacking</li>
+            <li>ORDER in the stack doesn't matter for scoring (but matters for STEAL/REVERSE &mdash; top card is exposed)</li>
+            <li>No max stack size</li>
+            <li>Stacks belong to YOU &mdash; opponent can't add to them, but they CAN attack them</li>
+          </ul>
+          <p><strong>Valid stack examples:</strong></p>
+          <ul>
+            <li>&#x2713; RED 1 + RED 5 + RED 9 = scoreable (3 reds)</li>
+            <li>&#x2713; BLUE 3 + BLUE 3 + BLUE 8 = scoreable (duplicates fine)</li>
+            <li>&#x2713; GREEN 9 + GREEN 2 + GREEN 4 + GREEN 7 = scoreable (4 cards counts)</li>
           </ul>
 
-          <h4>Tips for new players</h4>
+          <h4>Scoring Stacks (the main way to win)</h4>
+          <p>When one of your stacks has <strong>3 or more cards</strong>, you can SCORE it on your turn (after playing). Click the SCORE button next to that stack. The whole stack discards and you get <strong>1 stack point</strong> on the scoreboard.</p>
+          <p><strong>Get 3 stack points = win.</strong></p>
+          <p>Important rules:</p>
           <ul>
-            <li>Don't hoard. If you can play, play.</li>
-            <li>Score a stack when you can. Holding stacks makes them targets.</li>
-            <li>Save action cards for when they hurt the most &mdash; STEAL is worth more late than early.</li>
+            <li><strong>Each scored stack = 1 point, regardless of size.</strong> A 3-card stack = 1 point. A 10-card stack = STILL 1 point. Size does NOT change the score.</li>
+            <li><strong>Only ONE stack can be scored per turn.</strong> If two of your stacks are both 3+, you pick one and save the other for next turn.</li>
+            <li>Scoring is OPTIONAL &mdash; you can keep building a stack instead of cashing it in.</li>
+          </ul>
+          <p><strong>Why score at 3 cards (not later)?</strong> Tall stacks aren't worth more &mdash; they're just bigger targets. Scoring at exactly 3 cards locks the point in before opponent attacks.</p>
+
+          <h4>Action Cards (the chaos cards)</h4>
+          <p>8 different action card types. When you play one, it does something to your opponent or the game.</p>
+          <table>
+            <thead><tr><th>Card</th><th>What it does</th></tr></thead>
+            <tbody>
+              <tr><td>STEAL</td><td>Pick ONE of opponent's stacks. Take the TOP card and put it in one of your same-color stacks (or start new). They lose 1 card, you gain 1.</td></tr>
+              <tr><td>SWAP</td><td>Trade your ENTIRE hand with opponent's. Both hands switch.</td></tr>
+              <tr><td>FREEZE</td><td>Opponent skips their next turn completely &mdash; can't play, can't draw, can't score.</td></tr>
+              <tr><td>WILD</td><td>Played as any color you choose. Once placed in a stack, counts as that color from then on.</td></tr>
+              <tr><td>SHUFFLE</td><td>All OPPONENT'S stacks torn apart. Their cards regroup by color into new stacks with randomized order. Wrecks careful builds.</td></tr>
+              <tr><td>DRAW 3</td><td>Opponent must draw 3 cards at the start of their next turn before they can play.</td></tr>
+              <tr><td>REVERSE</td><td>Pick any stack (yours or theirs). Flip it upside down &mdash; top becomes bottom. Mostly affects STEAL targets.</td></tr>
+              <tr><td>DOUBLE</td><td>Get an EXTRA play this turn. Play DOUBLE, then play another card. Can chain.</td></tr>
+            </tbody>
+          </table>
+          <p style="font-style:italic;color:#8a8a9a;font-size:12px;">Note: action cards are dealt + visible in hand now, but clicking shows a "coming in Phase 3" message. They'll fully work after Phase 3 ships.</p>
+
+          <h4>What "Attacking Your Stacks" Means</h4>
+          <p>When opponent plays STEAL, SHUFFLE, or REVERSE &mdash; they're attacking your stacks.</p>
+          <ul>
+            <li><strong>STEAL</strong> takes 1 card off the top of ONE of your stacks</li>
+            <li><strong>SHUFFLE</strong> reorganizes ALL your stacks at once by color</li>
+            <li><strong>REVERSE</strong> flips one stack upside down (changes which card is on top, exposing a different card to the next STEAL)</li>
+          </ul>
+          <p><strong>Defense:</strong> A SCORED stack is SAFE &mdash; locked in, can't be touched. An UNSCORED 3-card stack is VULNERABLE. So when you can score, you usually should.</p>
+
+          <h4>How to Win</h4>
+          <p>You win the MOMENT any of these happens:</p>
+          <ol style="margin-left:18px;font-size:13px;">
+            <li><strong>You score your 3rd stack</strong> (main path)</li>
+            <li><strong>You play your last card</strong> so your hand reaches 0</li>
+            <li><strong>Opponent has to draw but the deck is empty</strong> (deck exhaustion = they lose)</li>
+          </ol>
+          <p>You LOSE if:</p>
+          <ul>
+            <li>Opponent hits any win condition first</li>
+            <li>You have to draw and the deck is empty</li>
+          </ul>
+
+          <h4>Strategy Tips for New Players</h4>
+          <ul>
+            <li><strong>Don't hoard.</strong> If you can play, play. Sitting on cards doesn't help you win.</li>
+            <li><strong>Score when you can.</strong> A scored stack is locked in. An unscored stack is at risk.</li>
+            <li><strong>Save STEAL for late.</strong> Worth way more when opponent has tall stacks to raid.</li>
+            <li><strong>Watch out for SWAP</strong> when your hand is small &mdash; opponent can erase your lead instantly.</li>
+            <li><strong>DOUBLE + action card</strong> = brutal combo. Save them for game-swing moments.</li>
           </ul>
 
           <button class="sa-help-close" id="sa-help-close">Got it!</button>
@@ -4294,7 +4377,8 @@ body {
           <span class="sa-cheatsheet-chevron">&#x25BC;</span>
         </button>
         <div class="sa-cheatsheet-content">
-          <div class="sa-cheat-goal">GOAL: Empty your hand OR score 3 stacks (3+ cards each)</div>
+          <div class="sa-cheat-goal">GOAL: SCORE 3 STACKS to win (or empty your hand)</div>
+          <div class="sa-cheat-goal" style="background:rgba(45,198,83,0.1);color:#2dc653;">A STACK = same-color cards piled together. Build to 3+ cards, then claim it = 1 point. Need 3 points.</div>
           <div class="sa-cheat-cards">
             <span><strong>STEAL</strong>top of their stack</span>
             <span><strong>SWAP</strong>trade hands</span>
