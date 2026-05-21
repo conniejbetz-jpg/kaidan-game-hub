@@ -474,6 +474,58 @@ body {
 }
 .sa-cheat-cards span { padding: 1px 0; }
 .sa-cheat-cards strong { color: #c1121f; margin-right: 4px; font-weight: 800; }
+/* WILD color-pick modal */
+.sa-wild-modal {
+  display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.85); z-index: 2100;
+  align-items: center; justify-content: center; padding: 20px;
+}
+.sa-wild-modal.active { display: flex; }
+.sa-wild-content {
+  background: #16213e; border: 2px solid #c1121f; border-radius: 12px;
+  padding: 24px; max-width: 360px; width: 100%; text-align: center;
+}
+.sa-wild-title { color: #fff; font-size: 16px; font-weight: 700; margin-bottom: 16px; }
+.sa-wild-colors { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.sa-wild-color {
+  padding: 18px; border: none; border-radius: 8px; color: #fff;
+  font-weight: 900; font-size: 14px; cursor: pointer; letter-spacing: 1px;
+  font-family: 'Inter', sans-serif; transition: transform 0.15s;
+}
+.sa-wild-color:hover { transform: scale(1.05); }
+.sa-wild-red { background: #e76f51; }
+.sa-wild-blue { background: #48cae4; }
+.sa-wild-green { background: #2dc653; }
+.sa-wild-yellow { background: #ffd700; color: #1a1a2e; }
+.sa-wild-cancel {
+  background: transparent; border: 1px solid #8a8a9a; color: #8a8a9a;
+  padding: 8px 16px; border-radius: 6px; margin-top: 14px; cursor: pointer;
+  font-family: 'Inter', sans-serif; font-size: 12px;
+}
+/* Target mode (STEAL/REVERSE) — banner + stack highlight */
+.sa-target-banner {
+  position: fixed; top: 70px; left: 50%; transform: translateX(-50%);
+  background: #c1121f; color: #fff; padding: 10px 18px; border-radius: 8px;
+  z-index: 1500; display: flex; align-items: center; gap: 14px;
+  box-shadow: 0 4px 16px rgba(193, 18, 31, 0.5);
+  font-weight: 700; font-size: 13px;
+}
+.sa-target-cancel-btn {
+  background: rgba(255,255,255,0.2); color: #fff; border: 1px solid #fff;
+  padding: 4px 12px; border-radius: 4px; cursor: pointer;
+  font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 1px;
+}
+.sa-target-cancel-btn:hover { background: #fff; color: #c1121f; }
+.sa-stack.target-eligible {
+  outline: 3px solid #ffd700; outline-offset: 4px; cursor: pointer;
+  border-radius: 6px;
+  animation: saTargetPulse 1.5s infinite;
+}
+@keyframes saTargetPulse {
+  0%, 100% { outline-color: #ffd700; }
+  50% { outline-color: #fff; }
+}
 @media (max-width: 600px) {
   .sa-cheat-cards { grid-template-columns: 1fr; }
   .sa-card { width: 44px; height: 64px; }
@@ -4400,6 +4452,26 @@ body {
 
       <!-- Log -->
       <div class="sa-log" id="sa-log"></div>
+
+      <!-- Target mode banner (STEAL/REVERSE) -->
+      <div class="sa-target-banner" id="sa-target-banner" style="display:none;">
+        <span id="sa-target-msg">Pick a stack...</span>
+        <button class="sa-target-cancel-btn" id="sa-target-cancel">Cancel</button>
+      </div>
+
+      <!-- WILD color-pick modal -->
+      <div class="sa-wild-modal" id="sa-wild-modal">
+        <div class="sa-wild-content">
+          <div class="sa-wild-title">Pick a color for your WILD</div>
+          <div class="sa-wild-colors">
+            <button class="sa-wild-color sa-wild-red" data-color="red">RED</button>
+            <button class="sa-wild-color sa-wild-blue" data-color="blue">BLUE</button>
+            <button class="sa-wild-color sa-wild-green" data-color="green">GREEN</button>
+            <button class="sa-wild-color sa-wild-yellow" data-color="yellow">YELLOW</button>
+          </div>
+          <button class="sa-wild-cancel" id="sa-wild-cancel">Cancel</button>
+        </div>
+      </div>
 
       <!-- Win modal -->
       <div class="sa-win-modal" id="sa-win-modal">
@@ -11800,6 +11872,19 @@ function saInit() {
   document.getElementById('sa-cheatsheet-toggle').addEventListener('click', function() {
     document.getElementById('sa-cheatsheet').classList.toggle('expanded');
   });
+  document.querySelectorAll('.sa-wild-color').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var modal = document.getElementById('sa-wild-modal');
+      var cardId = parseInt(modal.dataset.cardId, 10);
+      var color = this.getAttribute('data-color');
+      modal.classList.remove('active');
+      saPlayWild(cardId, color);
+    });
+  });
+  document.getElementById('sa-wild-cancel').addEventListener('click', function() {
+    document.getElementById('sa-wild-modal').classList.remove('active');
+  });
+  document.getElementById('sa-target-cancel').addEventListener('click', saCancelTargetMode);
 }
 
 function saStartGame() {
@@ -11833,6 +11918,8 @@ function saStartGame() {
         p2: { hand: p2Hand, stacks: [], scored: 0, frozen: false, pendingDraws: 0 },
         turn: 'p1',
         hasPlayedThisTurn: false,
+        doubleActive: false,
+        doubleChainCount: 0,
         log: [{ ts: Date.now(), msg: 'Game started — ' + p1Name + ' goes first' }],
         winner: null,
         winReason: null,
@@ -11852,6 +11939,26 @@ function saListenForState() {
     document.getElementById('sa-waiting').style.display = 'none';
     document.getElementById('sa-board').style.display = 'block';
     saRender(s);
+
+    // Turn-start auto handlers (frozen + pendingDraws)
+    if (s.turn === playerId && !s.winner) {
+      var me = s[playerId];
+      if (me && me.frozen) {
+        setTimeout(function() {
+          var cur = saState.cached;
+          if (cur && cur.turn === playerId && cur[playerId] && cur[playerId].frozen && !cur.winner) {
+            saAutoEndFrozen();
+          }
+        }, 1500);
+      } else if (me && (me.pendingDraws || 0) > 0 && !s.hasPlayedThisTurn) {
+        setTimeout(function() {
+          var cur = saState.cached;
+          if (cur && cur.turn === playerId && (cur[playerId].pendingDraws || 0) > 0 && !cur.winner) {
+            saAutoDrawPending();
+          }
+        }, 800);
+      }
+    }
   });
   saState.listeners.push({ ref: saRef, event: 'value', fn: listener });
 }
@@ -11881,6 +11988,22 @@ function saRender(s) {
   saRenderOpponentStacks(s);
   saRenderLog(s);
   saRenderWinModal(s);
+  saRenderTargetBanner(s);
+}
+
+function saRenderTargetBanner(s) {
+  var banner = document.getElementById('sa-target-banner');
+  if (!banner) return;
+  var msg = document.getElementById('sa-target-msg');
+  if (saState.targetMode === 'steal') {
+    msg.textContent = 'STEAL: click an opponent stack to take its top card';
+    banner.style.display = 'flex';
+  } else if (saState.targetMode === 'reverse') {
+    msg.textContent = 'REVERSE: click any stack to flip it upside down';
+    banner.style.display = 'flex';
+  } else {
+    banner.style.display = 'none';
+  }
 }
 
 function saRenderScoreboard(s) {
@@ -11942,9 +12065,19 @@ function saRenderStacksInto(s, ownerKey, containerId) {
     container.innerHTML = '<div class="sa-stacks-empty">No stacks yet</div>';
     return;
   }
-  stacks.forEach(function(stack) {
+  var isOpponent = ownerKey !== playerId;
+  stacks.forEach(function(stack, stackIdx) {
     var stackDiv = document.createElement('div');
     stackDiv.className = 'sa-stack';
+    var isStealTarget = saState.targetMode === 'steal' && isOpponent && stack.length > 0;
+    var isReverseTarget = saState.targetMode === 'reverse' && stack.length > 0;
+    if (isStealTarget || isReverseTarget) {
+      stackDiv.classList.add('target-eligible');
+      stackDiv.addEventListener('click', function() {
+        if (saState.targetMode === 'steal') saPerformSteal(stackIdx);
+        else if (saState.targetMode === 'reverse') saPerformReverse(ownerKey, stackIdx);
+      });
+    }
     stack.forEach(function(cardIdOrObj) {
       var card = saCardById(cardIdOrObj);
       stackDiv.appendChild(saCardEl(card));
@@ -11991,17 +12124,23 @@ function saCardEl(card, clickable) {
     return div;
   }
   if (card.kind === 'number') {
-    var color = card.assignedColor || card.color;
+    var color = card.color;
     div.classList.add('sa-card-' + color);
     div.innerHTML = '<div class="sa-card-letter">' + color.charAt(0).toUpperCase() + '</div>' +
                     '<div class="sa-card-value">' + card.value + '</div>';
   } else if (card.kind === 'action') {
-    if (card.action === 'WILD') {
+    if (card.action === 'WILD' && card.assignedColor) {
+      // WILD placed in stack with assigned color — render as that color with W
+      div.classList.add('sa-card-' + card.assignedColor);
+      div.innerHTML = '<div class="sa-card-letter">' + card.assignedColor.charAt(0).toUpperCase() + '</div>' +
+                      '<div class="sa-card-value">W</div>';
+    } else if (card.action === 'WILD') {
       div.classList.add('sa-card-wild');
+      div.innerHTML = '<div class="sa-card-action-name">WILD</div>';
     } else {
       div.classList.add('sa-card-action');
+      div.innerHTML = '<div class="sa-card-action-name">' + card.action + '</div>';
     }
-    div.innerHTML = '<div class="sa-card-action-name">' + card.action + '</div>';
   }
   if (clickable) div.classList.add('clickable');
   return div;
@@ -12018,7 +12157,15 @@ function saHandlePlayCard(cardId) {
   if (!card) return;
 
   if (card.kind === 'action') {
-    toast('Action cards land in Phase 3 — try a number card', 'info');
+    if (card.action === 'WILD') { saPromptWildColor(cardId); return; }
+    if (card.action === 'SWAP') { saPlaySwap(cardId); return; }
+    if (card.action === 'FREEZE') { saPlayFreeze(cardId); return; }
+    if (card.action === 'DRAW3') { saPlayDraw3(cardId); return; }
+    if (card.action === 'DOUBLE') { saPlayDouble(cardId); return; }
+    if (card.action === 'SHUFFLE') { saPlayShuffle(cardId); return; }
+    if (card.action === 'STEAL') { saStartTargetMode(cardId, 'steal'); return; }
+    if (card.action === 'REVERSE') { saStartTargetMode(cardId, 'reverse'); return; }
+    toast('Unknown action card: ' + card.action, 'error');
     return;
   }
 
@@ -12064,6 +12211,379 @@ function saPlayNumber(cardId, stackIdx) {
   updates[playerId + '/hand'] = newHand;
   updates[playerId + '/stacks'] = stacks;
   updates.hasPlayedThisTurn = true;
+  updates.doubleChainCount = 0;
+  updates.log = newLog;
+  updates.version = (s.version || 0) + 1;
+
+  if (newHand.length === 0) {
+    updates.winner = playerId;
+    updates.winReason = 'emptyHand';
+    newLog.push({ ts: Date.now(), msg: (playerName || playerId.toUpperCase()) + ' WINS — empty hand!' });
+    updates.log = newLog;
+  }
+  roomRef.child('stackattack').update(updates);
+}
+
+function saPromptWildColor(cardId) {
+  var modal = document.getElementById('sa-wild-modal');
+  modal.dataset.cardId = String(cardId);
+  modal.classList.add('active');
+}
+
+// ── Action cards (Phase 3) ───────────────────────────────
+function saPlaySwap(cardId) {
+  var s = saState.cached;
+  if (!s) return;
+  var me = s[playerId];
+  var opKey = playerId === 'p1' ? 'p2' : 'p1';
+  var op = s[opKey];
+
+  var myHand = saArr(me.hand);
+  var handIdx = myHand.indexOf(cardId);
+  if (handIdx === -1) return;
+  var myHandMinusSwap = myHand.slice(); myHandMinusSwap.splice(handIdx, 1);
+  var opHand = saArr(op.hand);
+
+  var newLog = saArr(s.log).concat([{ ts: Date.now(), msg: (playerName || playerId.toUpperCase()) + ' played SWAP — hands exchanged!' }]);
+  var updates = {};
+  updates[playerId + '/hand'] = opHand;
+  updates[opKey + '/hand'] = myHandMinusSwap;
+  updates.hasPlayedThisTurn = true;
+  updates.doubleChainCount = 0;
+  updates.log = newLog.slice(-30);
+  updates.version = (s.version || 0) + 1;
+  if (opHand.length === 0) { updates.winner = playerId; updates.winReason = 'emptyHand'; }
+  else if (myHandMinusSwap.length === 0) { updates.winner = opKey; updates.winReason = 'emptyHand'; }
+  roomRef.child('stackattack').update(updates);
+}
+
+function saPlayFreeze(cardId) {
+  var s = saState.cached;
+  if (!s) return;
+  var me = s[playerId];
+  var opKey = playerId === 'p1' ? 'p2' : 'p1';
+  var hand = saArr(me.hand);
+  var handIdx = hand.indexOf(cardId);
+  if (handIdx === -1) return;
+  var newHand = hand.slice(); newHand.splice(handIdx, 1);
+
+  var newLog = saArr(s.log).concat([{ ts: Date.now(), msg: (playerName || playerId.toUpperCase()) + ' played FREEZE — ' + opKey.toUpperCase() + ' skips next turn' }]);
+  var updates = {};
+  updates[playerId + '/hand'] = newHand;
+  updates[opKey + '/frozen'] = true;
+  updates.hasPlayedThisTurn = true;
+  updates.doubleChainCount = 0;
+  updates.log = newLog.slice(-30);
+  updates.version = (s.version || 0) + 1;
+  if (newHand.length === 0) { updates.winner = playerId; updates.winReason = 'emptyHand'; }
+  roomRef.child('stackattack').update(updates);
+}
+
+function saPlayDraw3(cardId) {
+  var s = saState.cached;
+  if (!s) return;
+  var me = s[playerId];
+  var opKey = playerId === 'p1' ? 'p2' : 'p1';
+  var hand = saArr(me.hand);
+  var handIdx = hand.indexOf(cardId);
+  if (handIdx === -1) return;
+  var newHand = hand.slice(); newHand.splice(handIdx, 1);
+  var existingDraws = (s[opKey] && s[opKey].pendingDraws) || 0;
+  var newDraws = Math.max(existingDraws, 3);
+
+  var newLog = saArr(s.log).concat([{ ts: Date.now(), msg: (playerName || playerId.toUpperCase()) + ' played DRAW 3 — ' + opKey.toUpperCase() + ' must draw 3 next turn' }]);
+  var updates = {};
+  updates[playerId + '/hand'] = newHand;
+  updates[opKey + '/pendingDraws'] = newDraws;
+  updates.hasPlayedThisTurn = true;
+  updates.doubleChainCount = 0;
+  updates.log = newLog.slice(-30);
+  updates.version = (s.version || 0) + 1;
+  if (newHand.length === 0) { updates.winner = playerId; updates.winReason = 'emptyHand'; }
+  roomRef.child('stackattack').update(updates);
+}
+
+function saPlayDouble(cardId) {
+  var s = saState.cached;
+  if (!s) return;
+  var me = s[playerId];
+  var hand = saArr(me.hand);
+  var handIdx = hand.indexOf(cardId);
+  if (handIdx === -1) return;
+  var newHand = hand.slice(); newHand.splice(handIdx, 1);
+  var chainCount = (s.doubleChainCount || 0) + 1;
+
+  if (chainCount > 5) {
+    var newLog1 = saArr(s.log).concat([{ ts: Date.now(), msg: 'DOUBLE chain limit (5) hit — discarded as no-op' }]);
+    var updates1 = {};
+    updates1[playerId + '/hand'] = newHand;
+    updates1.hasPlayedThisTurn = true;
+    updates1.doubleChainCount = 0;
+    updates1.log = newLog1.slice(-30);
+    updates1.version = (s.version || 0) + 1;
+    if (newHand.length === 0) { updates1.winner = playerId; updates1.winReason = 'emptyHand'; }
+    roomRef.child('stackattack').update(updates1);
+    return;
+  }
+
+  var newLog = saArr(s.log).concat([{ ts: Date.now(), msg: (playerName || playerId.toUpperCase()) + ' played DOUBLE — bonus play available (chain ' + chainCount + '/5)' }]);
+  var updates = {};
+  updates[playerId + '/hand'] = newHand;
+  updates.hasPlayedThisTurn = false;  // allow another play
+  updates.doubleChainCount = chainCount;
+  updates.log = newLog.slice(-30);
+  updates.version = (s.version || 0) + 1;
+  if (newHand.length === 0) { updates.winner = playerId; updates.winReason = 'emptyHand'; }
+  roomRef.child('stackattack').update(updates);
+}
+
+function saPlayShuffle(cardId) {
+  var s = saState.cached;
+  if (!s) return;
+  var me = s[playerId];
+  var opKey = playerId === 'p1' ? 'p2' : 'p1';
+  var op = s[opKey];
+  var opStacks = saArr(op.stacks).map(saArr);
+  if (opStacks.length < 2) { toast('SHUFFLE needs opponent to have 2+ stacks', 'info'); return; }
+
+  var hand = saArr(me.hand);
+  var handIdx = hand.indexOf(cardId);
+  if (handIdx === -1) return;
+  var newHand = hand.slice(); newHand.splice(handIdx, 1);
+
+  // Group all opponent cards by (assigned-or-actual) color
+  var byColor = { red: [], blue: [], green: [], yellow: [] };
+  opStacks.forEach(function(stack) {
+    stack.forEach(function(cardRef) {
+      var card = saCardById(cardRef);
+      var color = card.assignedColor || card.color;
+      if (byColor[color]) byColor[color].push(cardRef);
+    });
+  });
+  var newOpStacks = [];
+  SA_COLORS.forEach(function(color) {
+    if (byColor[color].length > 0) newOpStacks.push(saShuffle(byColor[color]));
+  });
+
+  var newLog = saArr(s.log).concat([{ ts: Date.now(), msg: (playerName || playerId.toUpperCase()) + ' played SHUFFLE — ' + opKey.toUpperCase() + ' stacks regrouped by color' }]);
+  var updates = {};
+  updates[playerId + '/hand'] = newHand;
+  updates[opKey + '/stacks'] = newOpStacks;
+  updates.hasPlayedThisTurn = true;
+  updates.doubleChainCount = 0;
+  updates.log = newLog.slice(-30);
+  updates.version = (s.version || 0) + 1;
+  if (newHand.length === 0) { updates.winner = playerId; updates.winReason = 'emptyHand'; }
+  roomRef.child('stackattack').update(updates);
+}
+
+// ── Target mode (STEAL + REVERSE) ────────────────────────
+function saStartTargetMode(cardId, mode) {
+  var s = saState.cached;
+  if (!s) return;
+  var opKey = playerId === 'p1' ? 'p2' : 'p1';
+  if (mode === 'steal') {
+    var opStacks = saArr(s[opKey].stacks).map(saArr);
+    if (!opStacks.some(function(st) { return st.length > 0; })) {
+      toast('STEAL needs opponent to have at least 1 stack', 'info');
+      return;
+    }
+  }
+  if (mode === 'reverse') {
+    var totalStacks = saArr(s.p1.stacks).length + saArr(s.p2.stacks).length;
+    if (totalStacks === 0) { toast('REVERSE needs at least 1 stack to flip', 'info'); return; }
+  }
+  saState.targetMode = mode;
+  saState.targetCardId = cardId;
+  saRender(s);
+}
+
+function saCancelTargetMode() {
+  saState.targetMode = null;
+  saState.targetCardId = null;
+  if (saState.cached) saRender(saState.cached);
+}
+
+function saPerformSteal(stackIdx) {
+  var s = saState.cached;
+  if (!s) return;
+  var cardId = saState.targetCardId;
+  var me = s[playerId];
+  var opKey = playerId === 'p1' ? 'p2' : 'p1';
+  var opStacks = saArr(s[opKey].stacks).map(saArr);
+  if (!opStacks[stackIdx] || opStacks[stackIdx].length === 0) return;
+
+  var stolenCardRef = opStacks[stackIdx][opStacks[stackIdx].length - 1];
+  var stolenCard = saCardById(stolenCardRef);
+  var stolenColor = stolenCard.assignedColor || stolenCard.color;
+
+  var newOpStacks = [];
+  opStacks.forEach(function(st, i) {
+    if (i === stackIdx) {
+      var trimmed = st.slice(0, -1);
+      if (trimmed.length > 0) newOpStacks.push(trimmed);
+    } else {
+      newOpStacks.push(st);
+    }
+  });
+
+  var myHand = saArr(me.hand);
+  var handIdx = myHand.indexOf(cardId);
+  var newMyHand = myHand.slice(); newMyHand.splice(handIdx, 1);
+
+  var myStacks = saArr(me.stacks).map(saArr);
+  var matchingIdx = -1;
+  for (var i = 0; i < myStacks.length; i++) {
+    var top = myStacks[i][myStacks[i].length - 1];
+    var tc = saCardById(top);
+    var topColor = tc && (tc.assignedColor || tc.color);
+    if (topColor === stolenColor) { matchingIdx = i; break; }
+  }
+  if (matchingIdx === -1) myStacks.push([stolenCardRef]);
+  else myStacks[matchingIdx] = myStacks[matchingIdx].concat([stolenCardRef]);
+
+  var newLog = saArr(s.log).concat([{ ts: Date.now(), msg: (playerName || playerId.toUpperCase()) + ' STOLE a ' + stolenColor.toUpperCase() + ' card from ' + opKey.toUpperCase() }]);
+  var updates = {};
+  updates[playerId + '/hand'] = newMyHand;
+  updates[playerId + '/stacks'] = myStacks;
+  updates[opKey + '/stacks'] = newOpStacks;
+  updates.hasPlayedThisTurn = true;
+  updates.doubleChainCount = 0;
+  updates.log = newLog.slice(-30);
+  updates.version = (s.version || 0) + 1;
+  if (newMyHand.length === 0) { updates.winner = playerId; updates.winReason = 'emptyHand'; }
+  saState.targetMode = null;
+  saState.targetCardId = null;
+  roomRef.child('stackattack').update(updates);
+}
+
+function saPerformReverse(ownerKey, stackIdx) {
+  var s = saState.cached;
+  if (!s) return;
+  var cardId = saState.targetCardId;
+  var me = s[playerId];
+  var ownerStacks = saArr(s[ownerKey].stacks).map(saArr);
+  if (!ownerStacks[stackIdx]) return;
+  var newOwnerStacks = ownerStacks.map(function(st, i) {
+    return i === stackIdx ? st.slice().reverse() : st;
+  });
+
+  var myHand = saArr(me.hand);
+  var handIdx = myHand.indexOf(cardId);
+  if (handIdx === -1) return;
+  var newMyHand = myHand.slice(); newMyHand.splice(handIdx, 1);
+
+  var newLog = saArr(s.log).concat([{ ts: Date.now(), msg: (playerName || playerId.toUpperCase()) + ' REVERSED a ' + (ownerKey === playerId ? 'OWN' : opKeyOf(playerId).toUpperCase()) + ' stack' }]);
+  var updates = {};
+  updates[playerId + '/hand'] = newMyHand;
+  updates[ownerKey + '/stacks'] = newOwnerStacks;
+  updates.hasPlayedThisTurn = true;
+  updates.doubleChainCount = 0;
+  updates.log = newLog.slice(-30);
+  updates.version = (s.version || 0) + 1;
+  if (newMyHand.length === 0) { updates.winner = playerId; updates.winReason = 'emptyHand'; }
+  saState.targetMode = null;
+  saState.targetCardId = null;
+  roomRef.child('stackattack').update(updates);
+}
+
+function opKeyOf(pid) { return pid === 'p1' ? 'p2' : 'p1'; }
+
+// ── Turn-start auto handlers (frozen + pendingDraws) ─────
+function saAutoEndFrozen() {
+  var s = saState.cached;
+  if (!s) return;
+  var nextTurn = playerId === 'p1' ? 'p2' : 'p1';
+  var newLog = saArr(s.log).concat([{ ts: Date.now(), msg: (playerName || playerId.toUpperCase()) + ' is FROZEN — turn skipped' }]);
+  var updates = {
+    turn: nextTurn,
+    hasPlayedThisTurn: false,
+    doubleChainCount: 0,
+    log: newLog.slice(-30),
+    version: (s.version || 0) + 1
+  };
+  updates[playerId + '/frozen'] = false;
+  roomRef.child('stackattack').update(updates);
+}
+
+function saAutoDrawPending() {
+  var s = saState.cached;
+  if (!s) return;
+  var me = s[playerId];
+  var pending = me.pendingDraws || 0;
+  if (pending <= 0) return;
+
+  var deck = saArr(s.deck);
+  var newDeck = deck.slice();
+  var newHand = saArr(me.hand).slice();
+  var drawn = 0;
+  while (drawn < pending && newDeck.length > 0) {
+    newHand.push(newDeck.shift());
+    drawn++;
+  }
+  var newLog = saArr(s.log).concat([{ ts: Date.now(), msg: (playerName || playerId.toUpperCase()) + ' was forced to draw ' + drawn + ' (DRAW 3)' }]);
+
+  if (newDeck.length === 0 && drawn < pending) {
+    var winner = playerId === 'p1' ? 'p2' : 'p1';
+    newLog.push({ ts: Date.now(), msg: 'Deck empty mid-forced-draw — ' + winner.toUpperCase() + ' WINS!' });
+    roomRef.child('stackattack').update({
+      winner: winner, winReason: 'deckExhaustion', log: newLog.slice(-30), version: (s.version || 0) + 1
+    });
+    return;
+  }
+
+  var updates = {};
+  updates[playerId + '/hand'] = newHand;
+  updates[playerId + '/pendingDraws'] = 0;
+  updates.deck = newDeck;
+  updates.log = newLog.slice(-30);
+  updates.version = (s.version || 0) + 1;
+  roomRef.child('stackattack').update(updates);
+}
+
+function saPlayWild(cardId, color) {
+  var s = saState.cached;
+  if (!s) return;
+  if (s.turn !== playerId) return;
+  if (s.hasPlayedThisTurn) return;
+
+  var me = s[playerId];
+  var hand = saArr(me.hand);
+  var handIdx = hand.indexOf(cardId);
+  if (handIdx === -1) return;
+
+  var newHand = hand.slice();
+  newHand.splice(handIdx, 1);
+
+  // Build WILD-as-color object (stored in stack so color persists for STEAL/SHUFFLE later)
+  var wildObj = { id: cardId, kind: 'action', action: 'WILD', assignedColor: color };
+
+  // Find matching color stack
+  var stacks = saArr(me.stacks).map(saArr);
+  var matchingIdx = -1;
+  for (var i = 0; i < stacks.length; i++) {
+    var top = stacks[i][stacks[i].length - 1];
+    var topCard = saCardById(top);
+    var topColor = topCard && (topCard.assignedColor || topCard.color);
+    if (topColor === color) { matchingIdx = i; break; }
+  }
+  if (matchingIdx === -1) {
+    stacks.push([wildObj]);
+  } else {
+    stacks[matchingIdx] = stacks[matchingIdx].concat([wildObj]);
+  }
+
+  var newLog = saArr(s.log).concat([{
+    ts: Date.now(),
+    msg: (playerName || playerId.toUpperCase()) + ' played WILD as ' + color.toUpperCase()
+  }]);
+  if (newLog.length > 30) newLog = newLog.slice(-30);
+
+  var updates = {};
+  updates[playerId + '/hand'] = newHand;
+  updates[playerId + '/stacks'] = stacks;
+  updates.hasPlayedThisTurn = true;
+  updates.doubleChainCount = 0;
   updates.log = newLog;
   updates.version = (s.version || 0) + 1;
 
@@ -12121,6 +12641,7 @@ function saHandleEndTurn() {
   roomRef.child('stackattack').update({
     turn: nextTurn,
     hasPlayedThisTurn: false,
+    doubleChainCount: 0,
     log: newLog,
     version: (s.version || 0) + 1
   });
