@@ -522,6 +522,20 @@ body {
   border-radius: 6px;
   animation: saTargetPulse 1.5s infinite;
 }
+.sa-score-btn {
+  position: absolute; top: -12px; right: -8px; z-index: 6;
+  background: #2dc653; color: #fff; border: 2px solid #fff;
+  padding: 4px 10px; font-size: 10px; font-weight: 900;
+  border-radius: 14px; cursor: pointer; letter-spacing: 1px;
+  box-shadow: 0 2px 8px rgba(45, 198, 83, 0.6);
+  font-family: 'Inter', sans-serif;
+  animation: saScoreBtnPulse 1.5s infinite;
+}
+.sa-score-btn:hover { background: #fff; color: #2dc653; }
+@keyframes saScoreBtnPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.12); }
+}
 @keyframes saTargetPulse {
   0%, 100% { outline-color: #ffd700; }
   50% { outline-color: #fff; }
@@ -2938,6 +2952,12 @@ body {
   position: absolute; top: 46px; left: 100px;
 }
 /* Word display */
+.hm-category-hint {
+  font-size: 12px; color: #F4A261; text-transform: uppercase; letter-spacing: 2px;
+  font-weight: 700; margin-bottom: 8px; padding: 4px 12px;
+  background: rgba(244, 162, 97, 0.1); border-radius: 6px;
+  border: 1px solid rgba(244, 162, 97, 0.3); display: inline-block;
+}
 .hm-word-display {
   display: flex; flex-wrap: wrap; justify-content: center; gap: 16px;
 }
@@ -3622,6 +3642,9 @@ body {
           <button class="hm-cat-btn" data-cat="obscurecountries">Obscure Countries</button>
           <button class="hm-cat-btn" data-cat="medical">Medical</button>
           <button class="hm-cat-btn" data-cat="bodyparts">Body Parts</button>
+          <button class="hm-cat-btn" data-cat="medicalprocedures">Medical Procedures</button>
+          <button class="hm-cat-btn" data-cat="urbanlegends">Urban Legends</button>
+          <button class="hm-cat-btn" data-cat="hauntedplaces">Haunted Places</button>
         </div>
         <input type="text" class="hm-word-input" id="hm-word-input" placeholder="Type a word or phrase..." maxlength="100" autocomplete="off" spellcheck="false">
         <div class="hm-or-divider">— OR —</div>
@@ -3660,6 +3683,9 @@ body {
         <div class="hm-part hm-left-eye" id="hm-part-10"></div>
         <div class="hm-part hm-right-eye" id="hm-part-11"></div>
       </div>
+
+      <!-- Category hint (shown to both players during game) -->
+      <div class="hm-category-hint" id="hm-category-hint" style="display:none;"></div>
 
       <!-- Word Display -->
       <div class="hm-word-display" id="hm-word-display"></div>
@@ -9317,7 +9343,10 @@ var HM_WORDS = {
   videogames: ["ZELDA","MARIO","MINECRAFT","FORTNITE","ROBLOX","POKEMON","KIRBY","TETRIS","SONIC","LUIGI","BOWSER","PIKACHU","CREEPER","YOSHI","DONKEY","SPLATOON","METROID","PACMAN","MEGAMAN","TOAD"],
   obscurecountries: ["TUVALU","BHUTAN","KIRIBATI","ESWATINI","COMOROS","VANUATU","NAURU","SURINAME","ANDORRA","MOLDOVA","LIECHTENSTEIN","DJIBOUTI","BRUNEI","PALAU","LESOTHO","SUDAN","TAJIKISTAN","TURKMENISTAN","UZBEKISTAN","YUGOSLAVIA","TRINIDAD AND TOBAGO","UNITED ARAB EMIRATES","UNITED KINGDOM"],
   medical: ["BRONCHITIS","MIGRAINE","ARTHRITIS","ECZEMA","ANEMIA","INSOMNIA","ASTHMA","DIABETES","VERTIGO","HEARTBURN","PSORIASIS","TINNITUS","DEHYDRATION","CATARACTS","SHINGLES","GOUT","SCIATICA","HEADACHE","TONSILLITIS","LARYNGITIS","VEISALGIA"],
-  bodyparts: ["GLABELLA","PHILTRUM","TRAGUS","COLUMELLA NASI","GNATHION","CANTHUS","PLICA SEMILUNARIS","FRENULUM","UVULA","VIBRISSAE","INION","ANATOMICAL SNUFFBOX","LUNULA","HALLUX","POLLEX","POPLITEAL FOSSA","THENAR EMINENCE","HYPOTHENAR EMINENCE","EPONYCHIUM","HYPONYCHIUM","INTERDIGITAL WEBS","AXILLA","OMPHALOS","OLECRANON","XIPHOID PROCESS","DIMPLES OF VENUS","SUPRASTERNAL NOTCH","PHALANGETTES","PATELLA","CLAVICLE","COCCYX","STAPES","MASSETER","GASTROCNEMIUS","ARRECTOR PILI","SARTORIUS","HYOID","MASTOID PROCESS","ZYGOMATICUS","CALCANEUS","CERUMEN","LACRYMAL PUNCTUM","PAPILLAE","MEISSNERS CORPUSCLES","RUFFINI ENDINGS","PACINIAN CORPUSCLES","SCLERA","SEBACEOUS GLANDS","PURKINJE FIBERS","ALVEOLI"]
+  bodyparts: ["GLABELLA","PHILTRUM","TRAGUS","COLUMELLA NASI","GNATHION","CANTHUS","PLICA SEMILUNARIS","FRENULUM","UVULA","VIBRISSAE","INION","ANATOMICAL SNUFFBOX","LUNULA","HALLUX","POLLEX","POPLITEAL FOSSA","THENAR EMINENCE","HYPOTHENAR EMINENCE","EPONYCHIUM","HYPONYCHIUM","INTERDIGITAL WEBS","AXILLA","OMPHALOS","OLECRANON","XIPHOID PROCESS","DIMPLES OF VENUS","SUPRASTERNAL NOTCH","PHALANGETTES","PATELLA","CLAVICLE","COCCYX","STAPES","MASSETER","GASTROCNEMIUS","ARRECTOR PILI","SARTORIUS","HYOID","MASTOID PROCESS","ZYGOMATICUS","CALCANEUS","CERUMEN","LACRYMAL PUNCTUM","PAPILLAE","MEISSNERS CORPUSCLES","RUFFINI ENDINGS","PACINIAN CORPUSCLES","SCLERA","SEBACEOUS GLANDS","PURKINJE FIBERS","ALVEOLI","MODIOLUS","PROCERUS","TRAGION","NASION","GONION","PTERION","HELIX","ANTIHELIX","MENTOLABIAL SULCUS","NASOLABIAL FOLD","PALPEBRAL FISSURE","LUNATE BONE","PISIFORM","SCAPHOID","NAVICULAR","CUBOID","PLANTAR FASCIA","ALINEA","LINEAE TRANSVERSAE","BRACHIORADIALIS","CUBITAL FOSSA","COCHLEA","INCUS","MALLEUS","TAPETUM LUCIDUM","CORNEA","IRIS","OLFACTORY BULB","FOVEA CENTRALIS","OTOLITHS","MANUBRIUM","ETHMOID BONE","SPHENOID BONE","ATLAS","AXIS","ILIAC CREST","ISCHIUM","VOMER","LUNATE SULCUS","PEYERS PATCHES","MEIBOMIAN GLANDS","SUDORIFEROUS GLANDS","PAPILLARY RIDGES","CHORDA TYMPANI","LIGAMENTUM NUCHAE","LINEA ALBA","GLABELLAR LINES","TYMPANIC MEMBRANE","EPIGLOTTIS","HAVERSIAN CANALS"],
+  medicalprocedures: ["CRYOABLATION","LITHOTRIPSY","LASER CAPSULOTOMY","PHOTOBIOMODULATION","ANGIOPLASTY","ELECTROENCEPHALOGRAPHY","FLUOROSCOPY","ENDOSCOPY","BRONCHOSCOPY","HYPERBARIC OXYGEN THERAPY","ELECTROMYOGRAPHY","RADIOFREQUENCY ABLATION","ARTHROPLASTY","STEREOTACTIC RADIOSURGERY","CRYOTHERAPY","TYMPANOMETRY","PLEURODESIS","SCLEROTHERAPY","THROMBOLYSIS","TRACHEOSTOMY","CRANIOTOMY","ECHOCARDIOGRAM","MYRINGOTOMY","POLYSOMNOGRAPHY","OPHTHALMOSCOPY","RHINOPLASTY","SUTURING","CAUTERIZATION","OTOPLASTY","ORTHODONTIC REALIGNMENT","DERMABRASION","LARYNGOSCOPY","SPINAL FUSION","GASTROPLASTY","GINGIVECTOMY","BLEPHAROPLASTY","ARTHROCENTESIS","FRENECTOMY","VENIPUNCTURE","OSTEOTOMY","TONSILLECTOMY","ADENOIDECTOMY","APPENDECTOMY","SPLENECTOMY","CHOLECYSTECTOMY","HERNIORRHAPHY","PULPOTOMY","DEBRIDEMENT","PAP SMEAR","DIALYSIS","RADIOGRAPHY","ULTRASONOGRAPHY","CAPNOGRAPHY","SPIROMETRY","ANGIOGRAPHY","ELECTROCARDIOGRAM","BIOPSY","COLONOSCOPY","LAPAROSCOPY","CYSTOSCOPY","AUDIOMETRY","KERATOMETRY","PULSE OXIMETRY","MAMMOGRAPHY","ARTERIOGRAPHY","MYELOGRAPHY","OXIMETRY","THERMOGRAPHY","DENSITOMETRY","PELVIMETRY","VENOGRAPHY","BRONCHOGRAPHY","SIALOGRAM","TONOMETRY","CHEMOTHERAPY","IMMUNOTHERAPY","PHOTOCOAGULATION","CATHETERIZATION","DEFIBRILLATION","THORACENTESIS","PARACENTESIS","LUMBAR PUNCTURE","INTUBATING","CARDIOVERSION","HEMODIALYSIS","EMBOLIZATION","ACANTHOLYSIS","GASTROENTEROSTOMY","ESOPHAGOSCOPY","PNEUMONECTOMY","NEPHRECTOMY","CRANIOPLASTY","LAMINECTOMY","ATHECTOMY","VALVULOPLASTY","TRACHEOTOMY","LECITHOLYSIS","OSTEOCLASIS","CRYOSURGERY"],
+  urbanlegends: ["THE BERMUDA TRIANGLE","CHUPACABRA GOAT SUCKER","THE JERSEY DEVIL","MOTHMAN PROPHECIES","LOCH NESS MONSTER","ABOMINABLE SNOWMAN","SPONTANEOUS COMBUSTION","ANALOG HORROR MONSTERS","ALIEN SPACESHIP ABDUCTION","THE FLYING DUTCHMAN","AREA FIFTY ONE SECRET","THE ROSWELL INCIDENT","SASQUATCH BIGFOOT","THE KRAKEN SEA MONSTER","CRYPTID HUNT IN THE WOODS","THE SLENDERMAN LEGEND","SKINWALKER RANCH MYSTERY","THE FLATWOODS MONSTER","HEADLESS HORSEMAN GHOST","MEN IN BLACK COVERUP","THE FRESNO NIGHTCRAWLER","POLYBIUS ARCADE GAME","CROP CIRCLE CREATORS","THE BEAST OF BODMIN MOOR","HIMALAYAN YETI EXPEDITION","THE LOVELAND FROGMAN","PHANTOM HITCHHIKER","THE WENDIGO CURSE","MONGOLIAN DEATH WORM","THE DOVER DEMON","SPRING HEELED JACK","THE ENFIELD MONSTER","BLACK EYED CHILDREN","THE BUNNY MAN BRIDGE","SHADOW PEOPLE SIGHTING","THE GOATMAN DIVERSION","CHRONOMANCY TIME TRAVEL","ANCIENT ASTRONAUT THEORY","THE BLOOP OCEAN NOISE","GHOST SHIP MARY CELESTE","THE VANISHING COLONY","MOKELE MBEMBE DINOSAUR","CTHULHU DEEP SEA RISING","THE WINCHESTER MYSTERY","HAUNTED MIRROR SEANCE","THE BELL WITCH HAUNTING","BEAST OF GEVAUDAN","THE BEAST OF BRAY ROAD","SIREN HEAD RADIO BLAST","THE POPE LICK MONSTER"],
+  hauntedplaces: ["BHANGARH FORT","POVEGLIA ISLAND","EASTERN STATE PENITENTIARY","THE TOWER OF LONDON","ANCIENT RAM INN","EDINBURGH CASTLE","AOKIGAHARA FOREST","CHATEAU DE BRISSAC","ISLAND OF THE DOLLS","STANLEY HOTEL","PORT ARTHUR","WAVERLY HILLS SANATORIUM","MYRTLES PLANTATION","MONTE CRISTO HOMESTEAD","LEAP CASTLE","CASTLE OF GOOD HOPE","AKERSHUS FORTRESS","QUEEN MARY","FORBIDDEN CITY","LAWANG SEWU","ROSE HALL GREAT HOUSE","CORVIN CASTLE","ST AUGUSTINE LIGHTHOUSE","DRAGSHOLM CASTLE","FAIRMONT BANFF SPRINGS"]
 };
 
 var HM_DEFINITIONS = {
@@ -9391,7 +9420,181 @@ var HM_DEFINITIONS = {
   "SCLERA": "The white part of your eyeball.",
   "SEBACEOUS GLANDS": "The tiny glands in your skin that produce natural oils to keep you from drying out.",
   "PURKINJE FIBERS": "Special electrical fibers in your heart that tell it exactly when to pump.",
-  "ALVEOLI": "The microscopic, balloon-like air sacs at the end of your lungs where oxygen enters your blood."
+  "ALVEOLI": "The microscopic, balloon-like air sacs at the end of your lungs where oxygen enters your blood.",
+  "MODIOLUS": "The tiny, dense knot of muscle right at the corner of your mouth where nine different facial muscles meet. Controls almost all expressions.",
+  "PROCERUS": "The small, pyramid-shaped muscle between your eyebrows that pulls your skin down when you frown.",
+  "TRAGION": "The exact anatomical point at the very top of the tragus (little bump on your inner ear).",
+  "NASION": "The intersection point on your skull where the top of your nose bridge meets your forehead bone.",
+  "GONION": "The sharpest point at the very corner of your lower jawbone, right below your ear.",
+  "PTERION": "The H-shaped area on the side of your skull where four different skull bones join together.",
+  "HELIX": "The curved, outer rim of cartilage that forms the entire edge of your ear.",
+  "ANTIHELIX": "The inner curved ridge of cartilage on your ear that runs parallel to the outer rim.",
+  "MENTOLABIAL SULCUS": "The horizontal groove between your lower lip and your chin.",
+  "NASOLABIAL FOLD": "The laugh lines or smile creases that run from the edge of your nose down to the corners of your mouth.",
+  "PALPEBRAL FISSURE": "The technical name for the almond-shaped opening between your upper and lower eyelids.",
+  "LUNATE BONE": "A small, crescent-moon-shaped bone right in the middle of your wrist.",
+  "PISIFORM": "A tiny, pea-shaped bone you can feel as a hard bump on the pinky-finger side of your wrist.",
+  "SCAPHOID": "A boat-shaped wrist bone at the base of the thumb, resting inside the anatomical snuffbox.",
+  "NAVICULAR": "A boat-shaped bone in your foot that helps support the main arch you walk on.",
+  "CUBOID": "A cube-shaped bone on the outside edge of your foot, right behind your pinky toe.",
+  "PLANTAR FASCIA": "The thick band of tissue running along the bottom of your foot connecting your heel bone to your toes.",
+  "ALINEA": "The faint, horizontal crease on the palm side of your finger joints where they bend.",
+  "LINEAE TRANSVERSAE": "The horizontal fibrous lines across your abdominal muscles that create the six-pack look.",
+  "BRACHIORADIALIS": "The prominent muscle on the thumb-side of your forearm that flexes your arm at the elbow.",
+  "CUBITAL FOSSA": "The triangular soft space on the inside of your elbow (opposite the elbow point).",
+  "COCHLEA": "The snail-shell-shaped bony structure in your inner ear that converts sound vibrations into electrical signals for your brain.",
+  "INCUS": "The tiny, anvil-shaped bone in your middle ear that sits between the hammer and stirrup bones.",
+  "MALLEUS": "The hammer-shaped bone in your ear that vibrates directly against your eardrum.",
+  "TAPETUM LUCIDUM": "Humans don't have this — it's the retro-reflective layer behind the retina in animals like cats and goats that makes their eyes glow in the dark!",
+  "CORNEA": "The clear, dome-shaped window covering the front of your eye that focuses incoming light.",
+  "IRIS": "The colored, circular muscle in your eye that shrinks or expands to control how much light gets in.",
+  "OLFACTORY BULB": "The structure just above your nasal cavity that receives scent signals directly from your nose hairs.",
+  "FOVEA CENTRALIS": "A tiny pit in the back of your retina that provides the sharpest, clearest vision in the center of your gaze.",
+  "OTOLITHS": "Microscopic ear stones made of calcium carbonate in your inner ear that shift when you move, telling your brain which way is up.",
+  "MANUBRIUM": "The broad, upper part of your breastbone (sternum) that looks a bit like the handle of a necktie.",
+  "ETHMOID BONE": "A lightweight, spongy bone at the roof of your nose that separates your nasal cavity from your brain.",
+  "SPHENOID BONE": "A complex, butterfly-shaped bone running through the middle of your skull base that touches almost every other skull bone.",
+  "ATLAS": "The very first vertebra at the top of your spine. Named after the Greek titan Atlas because it holds up the weight of your entire head.",
+  "AXIS": "The second vertebra of your spine, which has a bony peg that the Atlas rotates around — lets you shake your head no.",
+  "ILIAC CREST": "The curved, upper ridge of your hip bone that you can feel when you put your hands on your hips.",
+  "ISCHIUM": "The curved bone forming the base of each half of your pelvis — the exact sit bones you rest on in a chair.",
+  "VOMER": "The small, thin, flat bone that forms the lower part of the wall separating your left and right nostrils.",
+  "LUNATE SULCUS": "A groove in the brain's occipital lobe associated with visual processing.",
+  "PEYERS PATCHES": "Groups of lymph nodes in the lining of your small intestine that check the food you eat for bad bacteria.",
+  "MEIBOMIAN GLANDS": "Tiny glands inside your eyelids that secrete a special oil to keep your tears from evaporating too fast.",
+  "SUDORIFEROUS GLANDS": "The technical, scientific name for your sweat glands.",
+  "PAPILLARY RIDGES": "The medical term for the raised friction ridges on your skin that make up your unique fingerprints.",
+  "CHORDA TYMPANI": "A nerve that runs directly across your eardrum and carries taste signals from the front of your tongue to your brain.",
+  "LIGAMENTUM NUCHAE": "A strong, elastic ligament in the back of your neck that helps support your head without exhausting your muscles.",
+  "LINEA ALBA": "The tough, vertical band of white connective tissue running down the exact center of your stomach muscles.",
+  "GLABELLAR LINES": "The vertical wrinkles or creases that form between your eyebrows when you concentrate or scowl.",
+  "TYMPANIC MEMBRANE": "The official medical term for your eardrum.",
+  "EPIGLOTTIS": "The small, leaf-shaped flap of cartilage at the root of your tongue that snaps shut over your windpipe every time you swallow.",
+  "HAVERSIAN CANALS": "A network of microscopic tubes inside your bones that house blood vessels and nerve fibers to keep your bone cells alive.",
+  "CRYOABLATION": "Freezing and destroying bad cells or abnormal heart tissue using extreme cold.",
+  "LITHOTRIPSY": "Using sound waves to blast kidney stones into tiny pieces so they can pass.",
+  "LASER CAPSULOTOMY": "Using a laser to clear up blurry vision after cataract surgery.",
+  "PHOTOBIOMODULATION": "Using red light therapy to help cells heal faster and reduce pain.",
+  "ANGIOPLASTY": "Inflating a tiny balloon inside a clogged blood vessel to stretch it open.",
+  "ELECTROENCEPHALOGRAPHY": "Taping electrodes to the head to map and record brainwave patterns.",
+  "FLUOROSCOPY": "Taking a continuous, real-time X-ray movie of moving internal organs.",
+  "ENDOSCOPY": "Sneaking a tiny camera down a flexible tube to look inside the stomach or any body cavity.",
+  "BRONCHOSCOPY": "Sending a camera down the breathing tubes to inspect the lungs.",
+  "HYPERBARIC OXYGEN THERAPY": "Sitting in a high-pressure dive chamber to force oxygen into deep wounds to speed up healing.",
+  "ELECTROMYOGRAPHY": "Testing how fast electricity travels through muscles to see if nerves are healthy.",
+  "RADIOFREQUENCY ABLATION": "Using heat from radio waves to temporarily turn off a nerve that is causing pain.",
+  "ARTHROPLASTY": "Swapping out a worn-out knee or hip joint with a shiny metal and plastic one.",
+  "STEREOTACTIC RADIOSURGERY": "Aiming 3D laser-guided radiation beams at a single spot to fix a brain issue without cutting.",
+  "CRYOTHERAPY": "Freezing off weird skin spots or warts with liquid nitrogen.",
+  "TYMPANOMETRY": "Bouncing air pressure off the eardrum to see how well it vibrates.",
+  "PLEURODESIS": "Sticking the outside of the lung to the chest wall to prevent it from collapsing.",
+  "SCLEROTHERAPY": "Injecting a special medicine into swollen blood vessels to make them shrink away.",
+  "THROMBOLYSIS": "Injecting a powerful chemical medicine to melt a dangerous blood clot instantly.",
+  "TRACHEOSTOMY": "Creating a small temporary breathing hole in the front of the neck.",
+  "CRANIOTOMY": "Temporarily removing a small piece of bone from the skull to fix a brain issue.",
+  "ECHOCARDIOGRAM": "Using sound waves to create a live 3D video of a beating heart.",
+  "MYRINGOTOMY": "Making a tiny poke in the eardrum to drain trapped fluid and stop an earache.",
+  "POLYSOMNOGRAPHY": "A formal overnight sleep study tracking breathing, brain waves, and snoring.",
+  "OPHTHALMOSCOPY": "Shining a super bright light through the pupil to look at the very back of the eye.",
+  "RHINOPLASTY": "Changing the shape, bone, or cartilage of the nose.",
+  "SUTURING": "The formal medical term for sewing up a cut with stitches.",
+  "CAUTERIZATION": "Burning a tiny blood vessel with heat to make a bad nosebleed stop.",
+  "OTOPLASTY": "Reshaping or pinning back ears that stick out far.",
+  "ORTHODONTIC REALIGNMENT": "Using metal wires and brackets to slowly pull crooked teeth straight.",
+  "DERMABRASION": "Sanding down the top layer of skin to smooth out deep scars.",
+  "LARYNGOSCOPY": "Holding down the tongue and using a mirror or light to look at the vocal cords.",
+  "SPINAL FUSION": "Welding two loose backbones together with metal screws so they stop rubbing.",
+  "GASTROPLASTY": "Changing the shape of the stomach to help it hold less food.",
+  "GINGIVECTOMY": "Trimming away extra or swollen gum tissue around the teeth.",
+  "BLEPHAROPLASTY": "Trimming drooping eyelid skin that is blocking someone's vision.",
+  "ARTHROCENTESIS": "Using a needle to drain extra fluid out of a swollen knee joint.",
+  "FRENECTOMY": "Snipping the tiny string of skin under the tongue so a person can talk easier.",
+  "VENIPUNCTURE": "Putting a needle into a vein to draw blood for a lab test.",
+  "OSTEOTOMY": "Cutting and shifting a bone to change its angle or alignment.",
+  "TONSILLECTOMY": "Snipping out infected lumps at the back of the throat.",
+  "ADENOIDECTOMY": "Removing swollen glands behind the nose that cause heavy snoring.",
+  "APPENDECTOMY": "Rushing to take out an inflamed appendix before it pops.",
+  "SPLENECTOMY": "Removing a damaged or ruptured spleen after a bad injury.",
+  "CHOLECYSTECTOMY": "Taking out a gallbladder that is full of painful gallstones.",
+  "HERNIORRHAPHY": "Patching up a weak spot in a muscle wall so tissue doesn't poke out.",
+  "PULPOTOMY": "Removing the infected top part of a tooth nerve to save the tooth.",
+  "DEBRIDEMENT": "Cleaning out dirt and bad tissue from a deep scrape or wound.",
+  "PAP SMEAR": "Collecting a tiny swipe of cells to check for early health signs.",
+  "DIALYSIS": "Hooking up to a machine that acts like an artificial kidney to clean the blood.",
+  "RADIOGRAPHY": "The official medical name for taking a standard X-ray picture.",
+  "ULTRASONOGRAPHY": "Bouncing sound waves off internal organs to build a live picture.",
+  "CAPNOGRAPHY": "Measuring exactly how much carbon dioxide a person is breathing out.",
+  "SPIROMETRY": "Blowing into a tube as hard as possible to test lung power.",
+  "ANGIOGRAPHY": "Injecting a glowing dye into blood vessels to track them on an X-ray.",
+  "ELECTROCARDIOGRAM": "The formal name for an EKG test that traces heart patterns.",
+  "BIOPSY": "Snagging a tiny piece of tissue to look at it under a microscope.",
+  "COLONOSCOPY": "Checking the inside of the large intestine with a flexible camera scope.",
+  "LAPAROSCOPY": "Doing surgery through tiny keyhole cuts using long, thin instruments.",
+  "CYSTOSCOPY": "Using a thin, lighted tube to inspect the inside of the bladder.",
+  "AUDIOMETRY": "Sitting in a quiet booth with headphones to find the quietest sounds you can hear.",
+  "KERATOMETRY": "Measuring the curvature of the clear front part of the eye to fit contact lenses.",
+  "PULSE OXIMETRY": "Clipping a red light onto a fingertip to instantly read oxygen levels.",
+  "MAMMOGRAPHY": "Using low-dose X-rays to check breast tissue for lumps.",
+  "ARTERIOGRAPHY": "A specialized scan focused strictly on mapping major arteries.",
+  "MYELOGRAPHY": "Putting a special contrast dye into the spinal cord to look for pinched nerves.",
+  "OXIMETRY": "Any general scientific test used to measure oxygen in blood or tissue.",
+  "THERMOGRAPHY": "Using infrared cameras to map heat patterns on the surface of the body.",
+  "DENSITOMETRY": "Passing a tiny amount of X-ray energy through bones to measure how strong they are.",
+  "PELVIMETRY": "Measuring the dimensions of the pelvis to check for structural alignment.",
+  "VENOGRAPHY": "An X-ray test specifically designed to look at deep leg veins for clots.",
+  "BRONCHOGRAPHY": "An uncommon X-ray scan using special dye to see inside the breathing paths.",
+  "SIALOGRAM": "Injecting a tiny bit of dye into the salivary glands to check for blockages.",
+  "TONOMETRY": "Puffing a quick burst of air directly at the eyeball to measure internal pressure.",
+  "CHEMOTHERAPY": "Using powerful target medicines to destroy fast-growing bad cells.",
+  "IMMUNOTHERAPY": "Training the body's own immune system to spot and fight off hidden diseases.",
+  "PHOTOCOAGULATION": "Using a precise laser beam to seal off tiny leaking vessels in the eye.",
+  "CATHETERIZATION": "Snaking a thin, hollow tube through blood vessels directly to the heart.",
+  "DEFIBRILLATION": "Sending a sudden electric shock to the heart to restart its normal rhythm.",
+  "THORACENTESIS": "Passing a thin needle through the ribs to drain trapped fluid around the lung.",
+  "PARACENTESIS": "Using a long, hollow needle to pull extra built-up fluid out of the belly.",
+  "LUMBAR PUNCTURE": "Collecting a sample of spinal fluid from the lower back using a needle.",
+  "INTUBATING": "Sliding a plastic tube down the windpipe to let a breathing machine take over.",
+  "CARDIOVERSION": "Using quick electrical zaps or medicines to correct a racing heart rate.",
+  "HEMODIALYSIS": "Running blood out through a high-tech filter machine and returning it clean.",
+  "EMBOLIZATION": "Intentionally blocking a blood vessel on purpose to stop an internal leak.",
+  "ACANTHOLYSIS": "A microscopic lab procedure used to examine how skin cells separate.",
+  "GASTROENTEROSTOMY": "Creating a new internal pathway directly between the stomach and intestines.",
+  "ESOPHAGOSCOPY": "Running a visual light scope down the swallowing tube to check for irritation.",
+  "PNEUMONECTOMY": "An advanced surgical procedure used to remove an injured or diseased lung.",
+  "NEPHRECTOMY": "The surgical removal of a damaged kidney.",
+  "CRANIOPLASTY": "Using a custom 3D-printed plate to patch up a gap in the skull bone.",
+  "LAMINECTOMY": "Trimming away the back part of a backbone to give pinched spinal nerves room.",
+  "ATHECTOMY": "Using a tiny, spinning shaver inside an artery to scrape away hard plaque.",
+  "VALVULOPLASTY": "Using a small balloon tool to stretch open a stiff, tight heart valve.",
+  "TRACHEOTOMY": "Making an emergency surgical opening in the throat to secure an airway.",
+  "LECITHOLYSIS": "A laboratory technique used to break down specific fat compounds for testing.",
+  "OSTEOCLASIS": "Intentionally resetting a bone that healed crookedly so it can heal straight.",
+  "CRYOSURGERY": "Using extreme localized freezing probes during an operation to target tissue.",
+  "BHANGARH FORT": "Abandoned 17th-century fort city in Rajasthan, India. Legend says a sorcerer cursed it after being rejected by a princess. Government bans tourists from sunset to sunrise.",
+  "POVEGLIA ISLAND": "Small isolated island in the Venetian Lagoon used as a plague quarantine station and later an asylum. Over 100,000 people are rumored to have died there.",
+  "EASTERN STATE PENITENTIARY": "Historic Pennsylvania prison famous for strict solitary confinement that drove inmates mad. A shadow figure is frequently spotted in Cellblock 12.",
+  "THE TOWER OF LONDON": "Medieval English fortress and execution site. Anne Boleyn, beheaded wife of Henry VIII, allegedly walks the grounds carrying her own head.",
+  "ANCIENT RAM INN": "English former pub built in 1145 on an ancient pagan burial ground. Guests report being pushed and encountering a witch and an incubus.",
+  "EDINBURGH CASTLE": "Scottish fortress with deep stone dungeons. Sightings of a headless drummer boy and a phantom piper who vanished in the tunnels.",
+  "AOKIGAHARA FOREST": "Dense quiet woodland at the base of Mount Fuji, Japan. Deeply associated with Yūrei (ghosts of the dead) in folklore.",
+  "CHATEAU DE BRISSAC": "Tallest castle in France (11th century). Haunted by the Green Lady — an unfaithful wife murdered by her husband, often seen with holes where her eyes should be.",
+  "ISLAND OF THE DOLLS": "Floating garden island near Xochimilco, Mexico. A hermit hung hundreds of decaying plastic dolls in trees. Locals claim they blink, move, and whisper at night.",
+  "STANLEY HOTEL": "Colorado mountain resort that inspired Stephen King's The Shining. Flora Stanley's antique piano allegedly plays itself at night.",
+  "PORT ARTHUR": "Brutal 19th-century Tasmanian penal colony. Ghost tours document moving objects, unexplained cold spots, and phantom lights in the cellblocks.",
+  "WAVERLY HILLS SANATORIUM": "Abandoned Kentucky tuberculosis hospital where thousands died. Features the Body Chute tunnel and a young boy spirit named Timmy who plays with bouncy balls.",
+  "MYRTLES PLANTATION": "1796 Louisiana antebellum home built on a burial ground. Haunted by Chloe (a slave girl who poisoned the family) and spirits trapped in a haunted mirror.",
+  "MONTE CRISTO HOMESTEAD": "Widely considered Australia's most haunted house due to tragic deaths (child dropped down stairs, stable boy burned alive). Visitors experience choking and dread.",
+  "LEAP CASTLE": "Ancient Irish stronghold with a hidden spike dungeon. Features the Bloody Chapel where a priest was murdered, and an elemental beast that smells of sulfur.",
+  "CASTLE OF GOOD HOPE": "17th-century star fortress in Cape Town. Dark dungeons held tortured prisoners. Modern reports include a large black dog that lunges and a bell that rings alone.",
+  "AKERSHUS FORTRESS": "Medieval Norwegian castle built in 1300, later a WWII execution site. Allegedly guarded by Malcanisen — a phantom dog buried alive under the castle gates.",
+  "QUEEN MARY": "Retired luxury ocean liner permanently docked in California, used as a WWII troopship. Spirits roam the First Class pool and Room B340 (once closed to the public).",
+  "FORBIDDEN CITY": "Ancient palace complex of China's emperors. Centuries of murders and betrayals. Guards have seen weeping women in royal silk walking narrow alleys at night.",
+  "LAWANG SEWU": "Massive colonial Dutch building in Indonesia used by Japanese WWII forces as a detention camp. Famous for a Pontianak (vampire spirit) and headless Dutch ghosts.",
+  "ROSE HALL GREAT HOUSE": "18th-century Jamaican plantation. Annie Palmer, the White Witch of Rose Hall, allegedly murdered three husbands and many slaves with voodoo and poison.",
+  "CORVIN CASTLE": "Dramatic Gothic-Renaissance Romanian fortress where Vlad the Impaler was rumored to be imprisoned for years. Visitors report shadow figures and physical attacks.",
+  "ST AUGUSTINE LIGHTHOUSE": "Historic Florida coastal lighthouse where three young girls drowned during 1870s construction. Visitors hear them laughing and see a dark figure on the catwalk.",
+  "DRAGSHOLM CASTLE": "12th-century Danish castle, now a luxury hotel. Famous for three ghosts: a Grey Lady, the Earl of Bothwell, and a White Lady whose skeleton was found in a wall in 1910.",
+  "FAIRMONT BANFF SPRINGS": "Grand Canadian mountain hotel. Haunted by a Ghost Bride who tripped on the stone staircase on her wedding day, and an elderly bellhop named Sam who vanishes when tipped."
 };
 
 var hmState = {
@@ -9446,6 +9649,7 @@ function hmInit() {
     var word = pool[Math.floor(Math.random() * pool.length)];
     document.getElementById('hm-word-input').value = word;
     document.getElementById('hm-submit-word').disabled = false;
+    hmState.actualCategory = cat;  // track which category random picker chose, for guesser hint
   });
 
   document.querySelectorAll('.hm-cat-btn').forEach(function(btn) {
@@ -9557,6 +9761,15 @@ function hmListenForState() {
     } else if (data.status === 'guessing') {
       document.getElementById('hm-game-area').style.display = 'flex';
 
+      // Category hint (shown to both players)
+      var hint = document.getElementById('hm-category-hint');
+      if (data.category) {
+        hint.textContent = 'Category: ' + hmCategoryLabel(data.category);
+        hint.style.display = 'inline-block';
+      } else {
+        hint.style.display = 'none';
+      }
+
       // Word display
       if (data.revealed) {
         hmState.revealed = data.revealed;
@@ -9642,6 +9855,18 @@ function hmListenForState() {
   hmState.listeners.push({ ref: opRef, event: 'value', fn: opListener });
 }
 
+function hmCategoryLabel(cat) {
+  var labels = {
+    random: 'Mystery (any category)',
+    animals: 'Animals', food: 'Food', places: 'Places',
+    movies: 'Movies', sports: 'Sports', science: 'Science', videogames: 'Video Games',
+    obscurecountries: 'Obscure Countries', medical: 'Medical Conditions',
+    bodyparts: 'Body Parts', medicalprocedures: 'Medical Procedures',
+    urbanlegends: 'Urban Legends', hauntedplaces: 'Haunted Places'
+  };
+  return labels[cat] || cat;
+}
+
 function hmCalcMaxWrong(word) {
   // Count unique non-space characters
   var unique = {};
@@ -9672,7 +9897,8 @@ function hmSubmitWord(word) {
     guessedLetters: [],
     wrongCount: 0,
     maxWrong: maxWrong,
-    status: 'guessing'
+    status: 'guessing',
+    category: hmState.actualCategory || hmState.category || 'random'
   });
 
   hmPlaySound('submit');
@@ -11920,7 +12146,9 @@ function saStartGame() {
         hasPlayedThisTurn: false,
         doubleActive: false,
         doubleChainCount: 0,
-        log: [{ ts: Date.now(), msg: 'Game started — ' + p1Name + ' goes first' }],
+        scoredThisTurn: false,
+        turnStartDrawDone: false,
+        log: [{ ts: Date.now(), msg: 'Game started — ' + p1Name + ' goes first (auto-draw + play each turn)' }],
         winner: null,
         winReason: null,
         version: 0,
@@ -11940,7 +12168,7 @@ function saListenForState() {
     document.getElementById('sa-board').style.display = 'block';
     saRender(s);
 
-    // Turn-start auto handlers (frozen + pendingDraws)
+    // Turn-start auto handlers (frozen + pendingDraws + auto-draw 1)
     if (s.turn === playerId && !s.winner) {
       var me = s[playerId];
       if (me && me.frozen) {
@@ -11950,13 +12178,20 @@ function saListenForState() {
             saAutoEndFrozen();
           }
         }, 1500);
-      } else if (me && (me.pendingDraws || 0) > 0 && !s.hasPlayedThisTurn) {
+      } else if (me && (me.pendingDraws || 0) > 0 && !s.turnStartDrawDone) {
         setTimeout(function() {
           var cur = saState.cached;
           if (cur && cur.turn === playerId && (cur[playerId].pendingDraws || 0) > 0 && !cur.winner) {
             saAutoDrawPending();
           }
         }, 800);
+      } else if (me && !s.turnStartDrawDone && !s.hasPlayedThisTurn) {
+        setTimeout(function() {
+          var cur = saState.cached;
+          if (cur && cur.turn === playerId && !cur.turnStartDrawDone && !cur.winner && !cur[playerId].frozen && !(cur[playerId].pendingDraws > 0)) {
+            saAutoDrawOne();
+          }
+        }, 500);
       }
     }
   });
@@ -12016,7 +12251,8 @@ function saRenderTurnIndicator(s) {
   var msg = document.getElementById('sa-turn-msg');
   msg.textContent = s.winner ? 'GAME OVER' : (myTurn ? 'YOUR TURN' : 'WAITING');
   msg.className = 'sa-turn-msg ' + (myTurn ? 'my-turn' : 'waiting');
-  document.getElementById('sa-draw-btn').disabled = !myTurn || s.hasPlayedThisTurn;
+  // Draw button hidden — cards auto-draw at turn start now
+  document.getElementById('sa-draw-btn').style.display = 'none';
   document.getElementById('sa-end-turn-btn').disabled = !myTurn;
 }
 
@@ -12066,6 +12302,7 @@ function saRenderStacksInto(s, ownerKey, containerId) {
     return;
   }
   var isOpponent = ownerKey !== playerId;
+  var canScore = !isOpponent && s.turn === playerId && s.hasPlayedThisTurn && !s.scoredThisTurn && !s.winner;
   stacks.forEach(function(stack, stackIdx) {
     var stackDiv = document.createElement('div');
     stackDiv.className = 'sa-stack';
@@ -12082,6 +12319,19 @@ function saRenderStacksInto(s, ownerKey, containerId) {
       var card = saCardById(cardIdOrObj);
       stackDiv.appendChild(saCardEl(card));
     });
+    // SCORE button for own stacks of 3+ when eligible
+    if (canScore && stack.length >= 3) {
+      var scoreBtn = document.createElement('button');
+      scoreBtn.className = 'sa-score-btn';
+      scoreBtn.textContent = 'SCORE';
+      (function(idx) {
+        scoreBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          saScoreStack(idx);
+        });
+      })(stackIdx);
+      stackDiv.appendChild(scoreBtn);
+    }
     container.appendChild(stackDiv);
   });
 }
@@ -12499,10 +12749,81 @@ function saAutoEndFrozen() {
     turn: nextTurn,
     hasPlayedThisTurn: false,
     doubleChainCount: 0,
+    scoredThisTurn: false,
+    turnStartDrawDone: false,
     log: newLog.slice(-30),
     version: (s.version || 0) + 1
   };
   updates[playerId + '/frozen'] = false;
+  roomRef.child('stackattack').update(updates);
+}
+
+function saAutoDrawOne() {
+  var s = saState.cached;
+  if (!s) return;
+  if (s.turn !== playerId) return;
+  if (s.turnStartDrawDone) return;
+  if (s.winner) return;
+  if (s[playerId].frozen) return;
+  if ((s[playerId].pendingDraws || 0) > 0) return;
+
+  var deck = saArr(s.deck);
+  if (deck.length === 0) {
+    // Per spec: deck empty + must draw = current player loses
+    var winner = playerId === 'p1' ? 'p2' : 'p1';
+    var logArr = saArr(s.log).concat([{ ts: Date.now(), msg: 'Deck empty at turn start — ' + winner.toUpperCase() + ' WINS!' }]);
+    roomRef.child('stackattack').update({
+      winner: winner, winReason: 'deckExhaustion', log: logArr.slice(-30), version: (s.version || 0) + 1
+    });
+    return;
+  }
+  var newDeck = deck.slice();
+  var newHand = saArr(s[playerId].hand).concat([newDeck.shift()]);
+  var newLog = saArr(s.log).concat([{ ts: Date.now(), msg: (playerName || playerId.toUpperCase()) + ' drew 1 card (turn start)' }]);
+  var updates = {};
+  updates[playerId + '/hand'] = newHand;
+  updates.deck = newDeck;
+  updates.turnStartDrawDone = true;
+  updates.log = newLog.slice(-30);
+  updates.version = (s.version || 0) + 1;
+  roomRef.child('stackattack').update(updates);
+}
+
+function saScoreStack(stackIdx) {
+  var s = saState.cached;
+  if (!s || s.winner) return;
+  if (s.turn !== playerId) return;
+  if (!s.hasPlayedThisTurn) { toast('Play a card first, then score', 'info'); return; }
+  if (s.scoredThisTurn) { toast('Only one stack can be scored per turn', 'info'); return; }
+
+  var me = s[playerId];
+  var stacks = saArr(me.stacks).map(saArr);
+  if (!stacks[stackIdx] || stacks[stackIdx].length < 3) {
+    toast('Stack needs 3+ cards to score', 'info');
+    return;
+  }
+
+  var newStacks = stacks.filter(function(_, i) { return i !== stackIdx; });
+  var newScored = (me.scored || 0) + 1;
+
+  var newLog = saArr(s.log).concat([{
+    ts: Date.now(),
+    msg: (playerName || playerId.toUpperCase()) + ' SCORED a stack! Total: ' + newScored + '/3'
+  }]);
+
+  var updates = {};
+  updates[playerId + '/stacks'] = newStacks;
+  updates[playerId + '/scored'] = newScored;
+  updates.scoredThisTurn = true;
+  updates.log = newLog.slice(-30);
+  updates.version = (s.version || 0) + 1;
+
+  if (newScored >= 3) {
+    updates.winner = playerId;
+    updates.winReason = 'threeStacks';
+    newLog.push({ ts: Date.now(), msg: (playerName || playerId.toUpperCase()) + ' WINS — 3 stacks scored!' });
+    updates.log = newLog.slice(-30);
+  }
   roomRef.child('stackattack').update(updates);
 }
 
@@ -12536,6 +12857,7 @@ function saAutoDrawPending() {
   updates[playerId + '/hand'] = newHand;
   updates[playerId + '/pendingDraws'] = 0;
   updates.deck = newDeck;
+  updates.turnStartDrawDone = true;  // pending-draws fulfills the turn-start draw obligation
   updates.log = newLog.slice(-30);
   updates.version = (s.version || 0) + 1;
   roomRef.child('stackattack').update(updates);
@@ -12642,6 +12964,8 @@ function saHandleEndTurn() {
     turn: nextTurn,
     hasPlayedThisTurn: false,
     doubleChainCount: 0,
+    scoredThisTurn: false,
+    turnStartDrawDone: false,
     log: newLog,
     version: (s.version || 0) + 1
   });
