@@ -6907,9 +6907,9 @@ var FSB_RENAME_MAP = {
   'suspense-whoosh.wav':'mixkit-fast-rocket-whoosh-1714.wav'
 };
 function fsbAudio(rel) {
-  var fn = String(rel).replace(/^sounds\//, '');
+  var fn = String(rel).replace(/^[Ss]ounds\//, '');
   var actual = FSB_RENAME_MAP[fn] || fn;
-  return new Audio('sounds/' + encodeURIComponent(actual));
+  return new Audio('Sounds/' + encodeURIComponent(actual));
 }
 
 function gsPlaySoundEffect(type) {
@@ -6918,21 +6918,21 @@ function gsPlaySoundEffect(type) {
     var vol = 0.4;
     switch (type) {
       case 'fart': {
-        var fartUrls = ['sounds/fart-long-1.mp3','sounds/fart-long-2.mp3','sounds/fart-big-ripper.mp3','sounds/fart-echo.mp3','sounds/fart-roommates-door.mp3','sounds/fart-poop.mp3','sounds/fart-in-your-direction.mp3','sounds/man-pooping-brains.mp3'];
+        var fartUrls = ['Sounds/fart-long-1.mp3','Sounds/fart-long-2.mp3','Sounds/fart-big-ripper.mp3','Sounds/fart-echo.mp3','Sounds/fart-roommates-door.mp3','Sounds/fart-poop.mp3','Sounds/fart-in-your-direction.mp3','Sounds/man-pooping-brains.mp3'];
         var fartA = fsbAudio(fartUrls[Math.floor(Math.random()*fartUrls.length)]);
         fartA.volume = 0.8;
         fartA.play().catch(function(){});
         break;
       }
       case 'goatscream': {
-        var goatUrls = ['sounds/goat-surprise-visitor.mp3','sounds/goat-shock-loud.mp3','sounds/goat-startled-barn.mp3','sounds/goat-funny-screaming.mp3'];
+        var goatUrls = ['Sounds/goat-surprise-visitor.mp3','Sounds/goat-shock-loud.mp3','Sounds/goat-startled-barn.mp3','Sounds/goat-funny-screaming.mp3'];
         var goatA = fsbAudio(goatUrls[Math.floor(Math.random()*goatUrls.length)]);
         goatA.volume = 0.8;
         goatA.play().catch(function(){});
         break;
       }
       case 'airhorn': {
-        var hu = ['sounds/horn-truck.wav','sounds/horn-car.wav'];
+        var hu = ['Sounds/horn-truck.wav','Sounds/horn-car.wav'];
         var ha = fsbAudio(hu[Math.floor(Math.random()*hu.length)]); ha.volume = 0.7; ha.play().catch(function(){});
         break;
       }
@@ -6958,49 +6958,49 @@ function gsPlaySoundEffect(type) {
         break;
       }
       case 'sadtrombone': {
-        var sa = fsbAudio('sounds/sad-trombone.wav'); sa.volume = 0.7; sa.play().catch(function(){});
+        var sa = fsbAudio('Sounds/sad-trombone.wav'); sa.volume = 0.7; sa.play().catch(function(){});
         break;
       }
       case 'applause': {
-        var clA = fsbAudio('sounds/clap-cheer.wav'); clA.volume = 0.7; clA.play().catch(function(){});
+        var clA = fsbAudio('Sounds/clap-cheer.wav'); clA.volume = 0.7; clA.play().catch(function(){});
         break;
       }
       case 'laugh': {
-        var lu = ['sounds/laugh-crowd.wav','sounds/laugh-cartoon.wav','sounds/laugh-troll.wav'];
+        var lu = ['Sounds/laugh-crowd.wav','Sounds/laugh-cartoon.wav','Sounds/laugh-troll.wav'];
         var la = fsbAudio(lu[Math.floor(Math.random()*lu.length)]); la.volume = 0.7; la.play().catch(function(){});
         break;
       }
       case 'cheer': {
-        var cu = ['sounds/cheer-birthday.wav','sounds/cheer-army.wav'];
+        var cu = ['Sounds/cheer-birthday.wav','Sounds/cheer-army.wav'];
         var chA = fsbAudio(cu[Math.floor(Math.random()*cu.length)]); chA.volume = 0.7; chA.play().catch(function(){});
         break;
       }
       case 'boom': {
-        var bu = ['sounds/boom-8bit.wav','sounds/boom-big.wav','sounds/boom-collapse.wav','sounds/boom-laser.wav'];
+        var bu = ['Sounds/boom-8bit.wav','Sounds/boom-big.wav','Sounds/boom-collapse.wav','Sounds/boom-laser.wav'];
         var ba = fsbAudio(bu[Math.floor(Math.random()*bu.length)]); ba.volume = 0.7; ba.play().catch(function(){});
         break;
       }
       case 'animal': {
-        var au = ['sounds/animal-lion-roar.wav','sounds/animal-wolf-howl.wav','sounds/animal-lion-growl.wav'];
+        var au = ['Sounds/animal-lion-roar.wav','Sounds/animal-wolf-howl.wav','Sounds/animal-lion-growl.wav'];
         var aA = fsbAudio(au[Math.floor(Math.random()*au.length)]); aA.volume = 0.7; aA.play().catch(function(){});
         break;
       }
       case 'siren': {
-        var siA = fsbAudio('sounds/siren-police.wav'); siA.volume = 0.7; siA.play().catch(function(){});
+        var siA = fsbAudio('Sounds/siren-police.wav'); siA.volume = 0.7; siA.play().catch(function(){});
         break;
       }
       case 'creepy': {
-        var crU = ['sounds/creepy-creature.wav','sounds/creepy-ominous.wav','sounds/creepy-drums-deep.wav','sounds/creepy-drums-ritual.wav'];
+        var crU = ['Sounds/creepy-creature.wav','Sounds/creepy-ominous.wav','Sounds/creepy-drums-deep.wav','Sounds/creepy-drums-ritual.wav'];
         var crA = fsbAudio(crU[Math.floor(Math.random()*crU.length)]); crA.volume = 0.7; crA.play().catch(function(){});
         break;
       }
       case 'gameover': {
-        var goU = ['sounds/gameover-arcade.wav','sounds/gameover-long.wav','sounds/wrong-buzzer.wav'];
+        var goU = ['Sounds/gameover-arcade.wav','Sounds/gameover-long.wav','Sounds/wrong-buzzer.wav'];
         var goA = fsbAudio(goU[Math.floor(Math.random()*goU.length)]); goA.volume = 0.7; goA.play().catch(function(){});
         break;
       }
       case 'suspense': {
-        var suU = ['sounds/suspense-gameshow.wav','sounds/suspense-bass.wav','sounds/suspense-whoosh.wav'];
+        var suU = ['Sounds/suspense-gameshow.wav','Sounds/suspense-bass.wav','Sounds/suspense-whoosh.wav'];
         var suA = fsbAudio(suU[Math.floor(Math.random()*suU.length)]); suA.volume = 0.7; suA.play().catch(function(){});
         break;
       }
