@@ -2339,24 +2339,25 @@ body {
 .fsb-header-title { font-size: 9px; font-weight: 700; color: #8a8a9a; letter-spacing: 1px; text-transform: uppercase; }
 .fsb-toggle-icon { display: none; }
 .fsb-buttons {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 8px;
+  display: flex; flex-direction: column; gap: 5px; padding: 8px;
   overflow-y: auto; flex: 1;
 }
 .fsb-btn {
-  width: 46px; height: 46px; border-radius: 8px; border: 2px solid #3a4a6c;
+  width: 78px; min-height: 54px; border-radius: 8px; border: 2px solid #3a4a6c;
   background: #1a1a2e; cursor: pointer; transition: all 0.15s;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 1px; user-select: none;
+  gap: 2px; user-select: none; padding: 4px;
 }
-.fsb-btn:hover { transform: scale(1.08); border-color: #2dc653; }
-.fsb-btn:active { transform: scale(0.92); }
-.fsb-btn .fsb-icon { font-size: 18px; }
-.fsb-btn .fsb-label { font-size: 6px; font-weight: 700; color: #888; font-family: 'Inter', sans-serif; letter-spacing: 0.3px; text-align: center; line-height: 1; }
+.fsb-btn:hover { transform: scale(1.06); border-color: #2dc653; }
+.fsb-btn:active { transform: scale(0.94); }
+.fsb-btn .fsb-icon { font-size: 20px; }
+.fsb-btn .fsb-label { font-size: 10px; font-weight: 700; color: #c0c0c0; font-family: 'Inter', sans-serif; letter-spacing: 0.5px; text-align: center; line-height: 1.1; }
 .fsb-btn.flash { border-color: #2dc653; box-shadow: 0 0 16px rgba(45,198,83,0.4); }
 @media (max-width: 600px) {
   .floating-soundboard { top: 60px; bottom: 10px; }
-  .fsb-btn { width: 40px; height: 40px; }
-  .fsb-btn .fsb-icon { font-size: 15px; }
+  .fsb-btn { width: 68px; min-height: 48px; }
+  .fsb-btn .fsb-icon { font-size: 17px; }
+  .fsb-btn .fsb-label { font-size: 9px; }
 }
 
 /* ========== GOAT CARDS STYLES ========== */
@@ -6861,6 +6862,56 @@ function gsGetAudioCtx() {
   return gsState.audioCtx;
 }
 
+
+// FSB filename map — original GitHub filenames (uploaded from Automations source folder)
+// translated from clean kebab-case names used in code. Encodes URL-unsafe chars (#, spaces, commas).
+var FSB_RENAME_MAP = {
+  'fart-long-1.mp3':'A_long-duration_pres_#1-1779404298628.mp3',
+  'fart-long-2.mp3':'A_long-duration_pres_#2-1779404337576.mp3',
+  'fart-big-ripper.mp3':'Big Ripper Fart - QuickSounds.com.mp3',
+  'fart-echo.mp3':'fart echo - QuickSounds.com.mp3',
+  'fart-roommates-door.mp3':'Fart on my roommates door - QuickSounds.com.mp3',
+  'fart-poop.mp3':'Fart poop - QuickSounds.com.mp3',
+  'fart-in-your-direction.mp3':'I fart in your direction - QuickSounds.com.mp3',
+  'man-pooping-brains.mp3':'Man Pooping His Brains Out - QuickSounds.com.mp3',
+  'goat-surprise-visitor.mp3':'ElevenLabs_Goat_reacting_with_a_loud_scream_to_a_surprise_visitor.mp3',
+  'goat-shock-loud.mp3':'ElevenLabs_Goat_screaming_in_shock_at_a_sudden_loud_noise.mp3',
+  'goat-startled-barn.mp3':'ElevenLabs_Startled_goat_scream,_echoing_in_a_barn.mp3',
+  'goat-funny-screaming.mp3':'Funny Screaming Goat - QuickSounds.com.mp3',
+  'horn-truck.wav':'mixkit-truck-horn-720.wav',
+  'horn-car.wav':'mixkit-car-double-horn-719.wav',
+  'sad-trombone.wav':'mixkit-sad-game-over-trombone-471.wav',
+  'clap-cheer.wav':'mixkit-small-group-cheer-and-applause-518.wav',
+  'laugh-crowd.wav':'mixkit-big-crowd-laughing-460.wav',
+  'laugh-cartoon.wav':'mixkit-cartoon-giggle-743.wav',
+  'laugh-troll.wav':'mixkit-troll-warrior-laugh-409.wav',
+  'cheer-birthday.wav':'mixkit-birthday-crowd-party-cheer-531.wav',
+  'cheer-army.wav':'mixkit-big-army-crowd-marching-461.wav',
+  'boom-8bit.wav':'mixkit-8-bit-explosion-gun-2779.wav',
+  'boom-big.wav':'mixkit-explosion-hit-1704.wav',
+  'boom-collapse.wav':'mixkit-collapsing-structure-2958.wav',
+  'boom-laser.wav':'mixkit-laser-gun-impact-destruction-782.wav',
+  'animal-lion-roar.wav':'mixkit-wild-lion-animal-roar-6.wav',
+  'animal-wolf-howl.wav':'mixkit-wolf-howling-1775.wav',
+  'animal-lion-growl.wav':'mixkit-wounded-lion-growling-5.wav',
+  'siren-police.wav':'mixkit-police-siren-us-1643.wav',
+  'creepy-creature.wav':'mixkit-creepy-little-creature-2873.wav',
+  'creepy-ominous.wav':'mixkit-ominous-drums-227.wav',
+  'creepy-drums-deep.wav':'mixkit-tribal-deep-drum-echoes-575.wav',
+  'creepy-drums-ritual.wav':'mixkit-tribal-ritual-drums-567.wav',
+  'gameover-arcade.wav':'mixkit-arcade-retro-game-over-213.wav',
+  'gameover-long.wav':'mixkit-long-game-over-notification-276.wav',
+  'wrong-buzzer.wav':'mixkit-wrong-answer-fail-notification-946.wav',
+  'suspense-gameshow.wav':'mixkit-game-show-suspense-waiting-667.wav',
+  'suspense-bass.wav':'mixkit-pulsating-bass-transition-2295.wav',
+  'suspense-whoosh.wav':'mixkit-fast-rocket-whoosh-1714.wav'
+};
+function fsbAudio(rel) {
+  var fn = String(rel).replace(/^sounds\//, '');
+  var actual = FSB_RENAME_MAP[fn] || fn;
+  return new Audio('sounds/' + encodeURIComponent(actual));
+}
+
 function gsPlaySoundEffect(type) {
   try {
     var ctx = gsGetAudioCtx();
@@ -6868,21 +6919,21 @@ function gsPlaySoundEffect(type) {
     switch (type) {
       case 'fart': {
         var fartUrls = ['sounds/fart-long-1.mp3','sounds/fart-long-2.mp3','sounds/fart-big-ripper.mp3','sounds/fart-echo.mp3','sounds/fart-roommates-door.mp3','sounds/fart-poop.mp3','sounds/fart-in-your-direction.mp3','sounds/man-pooping-brains.mp3'];
-        var fartA = new Audio(fartUrls[Math.floor(Math.random()*fartUrls.length)]);
+        var fartA = fsbAudio(fartUrls[Math.floor(Math.random()*fartUrls.length)]);
         fartA.volume = 0.8;
         fartA.play().catch(function(){});
         break;
       }
       case 'goatscream': {
         var goatUrls = ['sounds/goat-surprise-visitor.mp3','sounds/goat-shock-loud.mp3','sounds/goat-startled-barn.mp3','sounds/goat-funny-screaming.mp3'];
-        var goatA = new Audio(goatUrls[Math.floor(Math.random()*goatUrls.length)]);
+        var goatA = fsbAudio(goatUrls[Math.floor(Math.random()*goatUrls.length)]);
         goatA.volume = 0.8;
         goatA.play().catch(function(){});
         break;
       }
       case 'airhorn': {
         var hu = ['sounds/horn-truck.wav','sounds/horn-car.wav'];
-        var ha = new Audio(hu[Math.floor(Math.random()*hu.length)]); ha.volume = 0.7; ha.play().catch(function(){});
+        var ha = fsbAudio(hu[Math.floor(Math.random()*hu.length)]); ha.volume = 0.7; ha.play().catch(function(){});
         break;
       }
       case 'rimshot': {
@@ -6907,50 +6958,50 @@ function gsPlaySoundEffect(type) {
         break;
       }
       case 'sadtrombone': {
-        var sa = new Audio('sounds/sad-trombone.wav'); sa.volume = 0.7; sa.play().catch(function(){});
+        var sa = fsbAudio('sounds/sad-trombone.wav'); sa.volume = 0.7; sa.play().catch(function(){});
         break;
       }
       case 'applause': {
-        var clA = new Audio('sounds/clap-cheer.wav'); clA.volume = 0.7; clA.play().catch(function(){});
+        var clA = fsbAudio('sounds/clap-cheer.wav'); clA.volume = 0.7; clA.play().catch(function(){});
         break;
       }
       case 'laugh': {
         var lu = ['sounds/laugh-crowd.wav','sounds/laugh-cartoon.wav','sounds/laugh-troll.wav'];
-        var la = new Audio(lu[Math.floor(Math.random()*lu.length)]); la.volume = 0.7; la.play().catch(function(){});
+        var la = fsbAudio(lu[Math.floor(Math.random()*lu.length)]); la.volume = 0.7; la.play().catch(function(){});
         break;
       }
       case 'cheer': {
         var cu = ['sounds/cheer-birthday.wav','sounds/cheer-army.wav'];
-        var chA = new Audio(cu[Math.floor(Math.random()*cu.length)]); chA.volume = 0.7; chA.play().catch(function(){});
+        var chA = fsbAudio(cu[Math.floor(Math.random()*cu.length)]); chA.volume = 0.7; chA.play().catch(function(){});
         break;
       }
       case 'boom': {
         var bu = ['sounds/boom-8bit.wav','sounds/boom-big.wav','sounds/boom-collapse.wav','sounds/boom-laser.wav'];
-        var ba = new Audio(bu[Math.floor(Math.random()*bu.length)]); ba.volume = 0.7; ba.play().catch(function(){});
+        var ba = fsbAudio(bu[Math.floor(Math.random()*bu.length)]); ba.volume = 0.7; ba.play().catch(function(){});
         break;
       }
       case 'animal': {
         var au = ['sounds/animal-lion-roar.wav','sounds/animal-wolf-howl.wav','sounds/animal-lion-growl.wav'];
-        var aA = new Audio(au[Math.floor(Math.random()*au.length)]); aA.volume = 0.7; aA.play().catch(function(){});
+        var aA = fsbAudio(au[Math.floor(Math.random()*au.length)]); aA.volume = 0.7; aA.play().catch(function(){});
         break;
       }
       case 'siren': {
-        var siA = new Audio('sounds/siren-police.wav'); siA.volume = 0.7; siA.play().catch(function(){});
+        var siA = fsbAudio('sounds/siren-police.wav'); siA.volume = 0.7; siA.play().catch(function(){});
         break;
       }
       case 'creepy': {
         var crU = ['sounds/creepy-creature.wav','sounds/creepy-ominous.wav','sounds/creepy-drums-deep.wav','sounds/creepy-drums-ritual.wav'];
-        var crA = new Audio(crU[Math.floor(Math.random()*crU.length)]); crA.volume = 0.7; crA.play().catch(function(){});
+        var crA = fsbAudio(crU[Math.floor(Math.random()*crU.length)]); crA.volume = 0.7; crA.play().catch(function(){});
         break;
       }
       case 'gameover': {
         var goU = ['sounds/gameover-arcade.wav','sounds/gameover-long.wav','sounds/wrong-buzzer.wav'];
-        var goA = new Audio(goU[Math.floor(Math.random()*goU.length)]); goA.volume = 0.7; goA.play().catch(function(){});
+        var goA = fsbAudio(goU[Math.floor(Math.random()*goU.length)]); goA.volume = 0.7; goA.play().catch(function(){});
         break;
       }
       case 'suspense': {
         var suU = ['sounds/suspense-gameshow.wav','sounds/suspense-bass.wav','sounds/suspense-whoosh.wav'];
-        var suA = new Audio(suU[Math.floor(Math.random()*suU.length)]); suA.volume = 0.7; suA.play().catch(function(){});
+        var suA = fsbAudio(suU[Math.floor(Math.random()*suU.length)]); suA.volume = 0.7; suA.play().catch(function(){});
         break;
       }
     }
