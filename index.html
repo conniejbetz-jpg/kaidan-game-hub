@@ -9299,8 +9299,7 @@ function goatCleanup() {
 
 function goatScheduleRandom() {
   if (goatState.randomTimer) clearTimeout(goatState.randomTimer);
-  var min = 120000, max = 240000;  // 2–4 min between surprise goats (tunable)
-  var delay = min + Math.random() * (max - min);
+  var delay = 600000;  // every 10 minutes (tunable)
   goatState.randomTimer = setTimeout(function() {
     if (roomRef) {
       var clip = GOAT_CLIPS[Math.floor(Math.random() * GOAT_CLIPS.length)];
