@@ -2339,6 +2339,13 @@ body {
 .fsb-header-title { font-size: 9px; font-weight: 700; color: #8a8a9a; letter-spacing: 1px; text-transform: uppercase; }
 .fsb-mute-btn { margin-left: 8px; background: none; border: none; cursor: pointer; font-size: 13px; line-height: 1; padding: 0; }
 .fsb-mute-btn.muted { opacity: 0.5; }
+/* Goat overlay — fire-at-opponent prank */
+#goat-overlay-canvas { position: fixed; top: 32%; left: 0; z-index: 99999; pointer-events: none; display: none; }
+#goat-overlay-canvas.flying { display: block; animation: goatFly linear forwards; }
+@keyframes goatFly { from { transform: translateX(-45vw); } to { transform: translateX(115vw); } }
+.fsb-fire-btn { margin: 4px 8px 6px; padding: 8px 6px; background: #c1121f; color: #fff; font-size: 11px; font-weight: 800; letter-spacing: 0.5px; text-align: center; border-radius: 6px; cursor: pointer; user-select: none; }
+.fsb-fire-btn:hover { background: #e0231f; }
+.fsb-fire-btn:active { transform: scale(0.96); }
 .fsb-toggle-icon { display: none; }
 .fsb-buttons {
   display: flex; flex-direction: column; gap: 5px; padding: 8px;
@@ -4556,6 +4563,7 @@ body {
     <button class="fsb-mute-btn" id="fsb-mute-btn" title="Mute the sound board">&#x1F50A;</button>
     <span class="fsb-toggle-icon" id="fsb-toggle-icon">&#x25BC;</span>
   </div>
+  <div class="fsb-fire-btn" id="goat-fire-btn" title="Fire a goat across both screens">&#x1F410; FIRE GOAT!</div>
   <div class="fsb-buttons" id="fsb-buttons">
     <div class="fsb-btn" data-fsound="fart"><span class="fsb-icon">&#x1F4A8;</span><span class="fsb-label">FART</span></div>
     <div class="fsb-btn" data-fsound="airhorn"><span class="fsb-icon">&#x1F4E2;</span><span class="fsb-label">HORN</span></div>
@@ -4588,6 +4596,10 @@ body {
 </div>
 
 <!-- ========== FIREBASE SDK ========== -->
+<!-- Goat overlay — fire-at-opponent prank -->
+<canvas id="goat-overlay-canvas"></canvas>
+<video id="goat-overlay-video" muted playsinline preload="auto" style="display:none"></video>
+
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
@@ -4646,6 +4658,7 @@ function init() {
   hcInit();
   saInit();
   fsbInit();
+  goatInit();
   chatInit();
 }
 
@@ -4851,6 +4864,7 @@ function enterRoom() {
 
   listenToRoom();
   fsbStartListening();
+  goatStartListening();
   chatStartListening();
 }
 
@@ -5031,6 +5045,7 @@ function leaveRoom() {
   hcCleanup();
   saCleanup();
   fsbCleanup();
+  goatCleanup();
   chatCleanup();
 
   roomListeners.forEach(function(l) {
@@ -9233,6 +9248,96 @@ function fsbCleanup() {
     fsbState.listener = null;
   }
   document.getElementById('floating-soundboard').classList.remove('visible');
+}
+
+// ── Goat Overlay (fire-at-opponent prank) ────────────────
+var GOAT_CLIPS = ['overlays/goat-confetti.mp4', 'overlays/goat-running.mp4', 'overlays/goat-sparklers.mp4'];
+var goatState = { listener: null, lastTs: 0, rafId: null };
+
+function goatInit() {
+  var btn = document.getElementById('goat-fire-btn');
+  if (!btn) return;
+  btn.addEventListener('click', function() {
+    if (!roomRef) { toast('Join a room first', 'info'); return; }
+    var clip = GOAT_CLIPS[Math.floor(Math.random() * GOAT_CLIPS.length)];
+    // Broadcast to both players (same pattern as the sound board)
+    roomRef.child('goatoverlay').set({ clip: clip, by: playerId, ts: Date.now() });
+  });
+}
+
+function goatStartListening() {
+  if (!roomRef) return;
+  var ref = roomRef.child('goatoverlay');
+  if (goatState.listener) ref.off('value', goatState.listener);  // off-before-on hygiene
+  goatState.lastTs = 0;
+  goatState.listener = ref.on('value', function(snap) {
+    var data = snap.val();
+    if (!data || !data.clip || data.ts <= goatState.lastTs) return;
+    goatState.lastTs = data.ts;
+    goatPlay(data.clip);
+  });
+}
+
+function goatCleanup() {
+  if (goatState.listener && roomRef) {
+    roomRef.child('goatoverlay').off('value', goatState.listener);
+    goatState.listener = null;
+  }
+  if (goatState.rafId) { cancelAnimationFrame(goatState.rafId); goatState.rafId = null; }
+  var c = document.getElementById('goat-overlay-canvas');
+  if (c) c.classList.remove('flying');
+}
+
+function goatPlay(clipPath) {
+  var canvas = document.getElementById('goat-overlay-canvas');
+  var video = document.getElementById('goat-overlay-video');
+  if (!canvas || !video) return;
+  if (goatState.rafId) { cancelAnimationFrame(goatState.rafId); goatState.rafId = null; }  // cancel any in-flight goat
+  var ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+  // Goat scream on top — respects the sound-board mute
+  if (!fsbState.muted && typeof gsPlaySoundEffect === 'function') gsPlaySoundEffect('goatscream');
+
+  var cleanup = function() {
+    if (goatState.rafId) { cancelAnimationFrame(goatState.rafId); goatState.rafId = null; }
+    canvas.classList.remove('flying');
+    try { video.pause(); } catch (e) {}
+  };
+
+  var draw = function() {
+    if (video.paused || video.ended) return;
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    try {
+      var frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      var d = frame.data;
+      for (var i = 0; i < d.length; i += 4) {
+        var r = d[i], g = d[i + 1], b = d[i + 2];
+        if (g > 90 && r < g * 0.75 && b < g * 0.75) d[i + 3] = 0;  // knock out bright green (tunable)
+      }
+      ctx.putImageData(frame, 0, 0);
+    } catch (e) { /* frame not ready / tainted — skip keying */ }
+    goatState.rafId = requestAnimationFrame(draw);
+  };
+
+  video.onloadedmetadata = function() {
+    var maxH = 240;
+    var scale = video.videoHeight ? Math.min(1, maxH / video.videoHeight) : 1;
+    canvas.width = Math.round((video.videoWidth || 320) * scale);
+    canvas.height = Math.round((video.videoHeight || 240) * scale);
+  };
+  video.onended = cleanup;
+  video.onerror = cleanup;
+
+  video.src = clipPath;
+  try { video.currentTime = 0; } catch (e) {}
+  video.play().then(function() {
+    canvas.classList.remove('flying');
+    void canvas.offsetWidth;  // force reflow so the slide restarts on every fire
+    var dur = (video.duration && isFinite(video.duration)) ? video.duration : 4;
+    canvas.style.animationDuration = dur + 's';
+    canvas.classList.add('flying');
+    goatState.rafId = requestAnimationFrame(draw);
+  }).catch(function() { cleanup(); });
 }
 
 function chatInit() {
