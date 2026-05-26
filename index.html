@@ -2337,6 +2337,8 @@ body {
   border-bottom: 1px solid #2a3a5c; user-select: none;
 }
 .fsb-header-title { font-size: 9px; font-weight: 700; color: #8a8a9a; letter-spacing: 1px; text-transform: uppercase; }
+.fsb-mute-btn { margin-left: 8px; background: none; border: none; cursor: pointer; font-size: 13px; line-height: 1; padding: 0; }
+.fsb-mute-btn.muted { opacity: 0.5; }
 .fsb-toggle-icon { display: none; }
 .fsb-buttons {
   display: flex; flex-direction: column; gap: 5px; padding: 8px;
@@ -4359,12 +4361,12 @@ body {
           <p><strong>Stacks:</strong> Piles of same-color cards in front of you. Stacks are how you score points to win. You can have as many stacks as you want, of any size.</p>
 
           <h4>Your Turn</h4>
-          <p>On your turn you do ONE of these two things:</p>
+          <p>On your turn, in this order:</p>
           <ol style="margin-left:18px;font-size:13px;">
-            <li><strong>Play a card</strong> from your hand</li>
-            <li>OR <strong>draw a card</strong> from the deck</li>
+            <li><strong>Draw a card</strong> from the deck &mdash; OPTIONAL, once per turn (tap "Draw Card" only if you want one)</li>
+            <li><strong>Play a card</strong> from your hand onto a stack &mdash; REQUIRED, one play per turn</li>
           </ol>
-          <p>Then click "End Turn." That's it. One play OR one draw. Not both.</p>
+          <p>You must play a card each turn &mdash; that's how the game moves toward an ending (you can't just sit and pass). Drawing first is optional. Then click "End Turn." <em>Stuck with nothing to play? Draw a card.</em></p>
 
           <div class="sa-help-subsection">
             <h5>What does "playing a card" mean?</h5>
@@ -4373,16 +4375,15 @@ body {
 
           <div class="sa-help-subsection">
             <h5>What does "drawing a card" mean?</h5>
-            <p>Drawing takes the top card of the deck and puts it into your hand. After drawing, your hand has 1 more card and the deck has 1 fewer.</p>
+            <p>Drawing takes the top card of the deck and puts it into your hand. After drawing, your hand has 1 more card and the deck has 1 fewer. You don't have to draw &mdash; skip it if you already have a card you want to play.</p>
           </div>
 
           <div class="sa-help-subsection">
-            <h5>When would you draw instead of play?</h5>
+            <h5>When would you draw?</h5>
             <ul>
-              <li>You don't have a card you want to commit yet</li>
-              <li>You're saving action cards for a better moment</li>
-              <li>You don't want to empty your hand too soon (opponent could SWAP and steal your lead)</li>
-              <li>All your cards would start new stacks instead of building existing ones</li>
+              <li>You don't have a card you want to play yet</li>
+              <li>You want more options, or you're hunting for a specific color</li>
+              <li>You're stocking up on action cards for a better moment</li>
             </ul>
           </div>
 
@@ -4434,7 +4435,7 @@ body {
               <tr><td>DOUBLE</td><td>Get an EXTRA play this turn. Play DOUBLE, then play another card. Can chain.</td></tr>
             </tbody>
           </table>
-          <p style="font-style:italic;color:#8a8a9a;font-size:12px;">Note: action cards are dealt + visible in hand now, but clicking shows a "coming in Phase 3" message. They'll fully work after Phase 3 ships.</p>
+          <p style="font-style:italic;color:#8a8a9a;font-size:12px;">All 8 action cards are fully playable.</p>
 
           <h4>What "Attacking Your Stacks" Means</h4>
           <p>When opponent plays STEAL, SHUFFLE, or REVERSE &mdash; they're attacking your stacks.</p>
@@ -4450,13 +4451,14 @@ body {
           <ol style="margin-left:18px;font-size:13px;">
             <li><strong>You score your 3rd stack</strong> (main path)</li>
             <li><strong>You play your last card</strong> so your hand reaches 0</li>
-            <li><strong>Opponent has to draw but the deck is empty</strong> (deck exhaustion = they lose)</li>
+            <li><strong>Opponent is forced to draw (DRAW 3) but the deck is empty</strong> (deck exhaustion = they lose)</li>
           </ol>
           <p>You LOSE if:</p>
           <ul>
             <li>Opponent hits any win condition first</li>
-            <li>You have to draw and the deck is empty</li>
+            <li>You're forced to draw (from a DRAW 3) and the deck is empty</li>
           </ul>
+          <p style="font-style:italic;color:#8a8a9a;font-size:12px;">A normal optional draw on an empty deck just doesn't draw &mdash; it's not a loss. Only a forced DRAW 3 can cost you the game that way.</p>
 
           <h4>Strategy Tips for New Players</h4>
           <ul>
@@ -4551,6 +4553,7 @@ body {
 <div class="floating-soundboard collapsed" id="floating-soundboard">
   <div class="fsb-header" id="fsb-header">
     <span class="fsb-header-title">SOUNDS &#x1F50A;</span>
+    <button class="fsb-mute-btn" id="fsb-mute-btn" title="Mute the sound board">&#x1F50A;</button>
     <span class="fsb-toggle-icon" id="fsb-toggle-icon">&#x25BC;</span>
   </div>
   <div class="fsb-buttons" id="fsb-buttons">
@@ -4718,7 +4721,7 @@ function bindUI() {
 
 // ── Room Code Generator ──────────────────────────────────
 function generateCode() {
-  var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+  var chars = '0123456789';
   var code = '';
   for (var i = 0; i < 4; i++) {
     code += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -9157,10 +9160,12 @@ var chatState = {
 };
 
 // ── Floating Sound Board ─────────────────────────────────
-var fsbState = { collapsed: true, listener: null, lastTs: 0 };
+var fsbState = { collapsed: true, listener: null, lastTs: 0, muted: (localStorage.getItem('fsbMuted') === '1'), initialized: false };
 
 function fsbInit() {
   // Header click is a no-op now — FSB always visible as left-side panel
+  if (fsbState.initialized) return;  // idempotent — re-running would stack duplicate click handlers
+  fsbState.initialized = true;
 
   document.querySelectorAll('.fsb-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
@@ -9173,26 +9178,47 @@ function fsbInit() {
       });
     });
   });
+
+  // Master mute — silences all 14 shared sounds on THIS device only (sticky, per-device)
+  var muteBtn = document.getElementById('fsb-mute-btn');
+  if (muteBtn) {
+    fsbUpdateMuteIcon();
+    muteBtn.addEventListener('click', function() {
+      fsbState.muted = !fsbState.muted;
+      localStorage.setItem('fsbMuted', fsbState.muted ? '1' : '0');
+      fsbUpdateMuteIcon();
+    });
+  }
+}
+
+function fsbUpdateMuteIcon() {
+  var muteBtn = document.getElementById('fsb-mute-btn');
+  if (!muteBtn) return;
+  muteBtn.innerHTML = fsbState.muted ? '&#x1F507;' : '&#x1F50A;';  // 🔇 muted / 🔊 unmuted
+  muteBtn.classList.toggle('muted', fsbState.muted);
+  muteBtn.title = fsbState.muted ? 'Sound board muted — tap to unmute' : 'Mute the sound board';
 }
 
 function fsbStartListening() {
   if (!roomRef) return;
+  var ref = roomRef.child('floatingsounds');
+  // Remove any prior listener before registering — stops listener pile-up across rejoins
+  if (fsbState.listener) ref.off('value', fsbState.listener);
   fsbState.lastTs = 0;
   document.getElementById('floating-soundboard').classList.add('visible');
   fsbState.collapsed = false;
 
-  var ref = roomRef.child('floatingsounds');
   fsbState.listener = ref.on('value', function(snap) {
     var data = snap.val();
     if (!data || data.ts <= fsbState.lastTs) return;
     fsbState.lastTs = data.ts;
 
-    // Play sound using GoatStation's sound engine
-    if (typeof gsPlaySoundEffect === 'function') {
+    // Play sound using GoatStation's sound engine — skip audio if THIS device is muted
+    if (!fsbState.muted && typeof gsPlaySoundEffect === 'function') {
       gsPlaySoundEffect(data.type);
     }
 
-    // Flash the button
+    // Flash the button always — so you can still see the other player pressing, even when muted
     var btn = document.querySelector('.fsb-btn[data-fsound="' + data.type + '"]');
     if (btn) {
       btn.classList.add('flash');
@@ -12218,7 +12244,7 @@ function saStartGame() {
         doubleChainCount: 0,
         scoredThisTurn: false,
         turnStartDrawDone: false,
-        log: [{ ts: Date.now(), msg: 'Game started — ' + p1Name + ' goes first (auto-draw + play each turn)' }],
+        log: [{ ts: Date.now(), msg: 'Game started — ' + p1Name + ' goes first (draw optional, then play)' }],
         winner: null,
         winReason: null,
         version: 0,
@@ -12255,14 +12281,8 @@ function saListenForState() {
             saAutoDrawPending();
           }
         }, 800);
-      } else if (me && !s.turnStartDrawDone && !s.hasPlayedThisTurn) {
-        setTimeout(function() {
-          var cur = saState.cached;
-          if (cur && cur.turn === playerId && !cur.turnStartDrawDone && !cur.winner && !cur[playerId].frozen && !(cur[playerId].pendingDraws > 0)) {
-            saAutoDrawOne();
-          }
-        }, 500);
       }
+      // (No turn-start auto-draw — drawing is now optional via the Draw Card button.)
     }
   });
   saState.listeners.push({ ref: saRef, event: 'value', fn: listener });
@@ -12321,9 +12341,15 @@ function saRenderTurnIndicator(s) {
   var msg = document.getElementById('sa-turn-msg');
   msg.textContent = s.winner ? 'GAME OVER' : (myTurn ? 'YOUR TURN' : 'WAITING');
   msg.className = 'sa-turn-msg ' + (myTurn ? 'my-turn' : 'waiting');
-  // Draw button hidden — cards auto-draw at turn start now
-  document.getElementById('sa-draw-btn').style.display = 'none';
-  document.getElementById('sa-end-turn-btn').disabled = !myTurn;
+  // Draw is optional: show the button on your turn, enabled until you've drawn or played
+  var meTI = s[playerId] || {};
+  var drawBtn = document.getElementById('sa-draw-btn');
+  var canDraw = myTurn && !s.hasPlayedThisTurn && !s.turnStartDrawDone && !meTI.frozen && !((meTI.pendingDraws || 0) > 0);
+  drawBtn.style.display = myTurn ? 'inline-block' : 'none';
+  drawBtn.disabled = !canDraw;
+  // End Turn stays disabled until you've played (or played DOUBLE) — one play required per turn
+  var hasActed = s.hasPlayedThisTurn || (s.doubleChainCount || 0) > 0;
+  document.getElementById('sa-end-turn-btn').disabled = !myTurn || !hasActed;
 }
 
 function saRenderDeckCount(s) {
@@ -12872,37 +12898,6 @@ function saAutoEndFrozen() {
   roomRef.child('stackattack').update(updates);
 }
 
-function saAutoDrawOne() {
-  var s = saState.cached;
-  if (!s) return;
-  if (s.turn !== playerId) return;
-  if (s.turnStartDrawDone) return;
-  if (s.winner) return;
-  if (s[playerId].frozen) return;
-  if ((s[playerId].pendingDraws || 0) > 0) return;
-
-  var deck = saArr(s.deck);
-  if (deck.length === 0) {
-    // Per spec: deck empty + must draw = current player loses
-    var winner = playerId === 'p1' ? 'p2' : 'p1';
-    var logArr = saArr(s.log).concat([{ ts: Date.now(), msg: 'Deck empty at turn start — ' + winner.toUpperCase() + ' WINS!' }]);
-    roomRef.child('stackattack').update({
-      winner: winner, winReason: 'deckExhaustion', log: logArr.slice(-30), version: (s.version || 0) + 1
-    });
-    return;
-  }
-  var newDeck = deck.slice();
-  var newHand = saArr(s[playerId].hand).concat([newDeck.shift()]);
-  var newLog = saArr(s.log).concat([{ ts: Date.now(), msg: (playerName || playerId.toUpperCase()) + ' drew 1 card (turn start)' }]);
-  var updates = {};
-  updates[playerId + '/hand'] = newHand;
-  updates.deck = newDeck;
-  updates.turnStartDrawDone = true;
-  updates.log = newLog.slice(-30);
-  updates.version = (s.version || 0) + 1;
-  roomRef.child('stackattack').update(updates);
-}
-
 function saScoreStack(stackIdx) {
   var s = saState.cached;
   if (!s || s.winner) return;
@@ -13036,16 +13031,13 @@ function saHandleDrawCard() {
   var s = saState.cached;
   if (!s || s.winner) return;
   if (s.turn !== playerId) return;
-  if (s.hasPlayedThisTurn) return;
+  if (s.hasPlayedThisTurn) { toast('You already played this turn', 'info'); return; }
+  if (s.turnStartDrawDone) { toast('You can draw once per turn', 'info'); return; }
 
   var deck = saArr(s.deck);
   if (deck.length === 0) {
-    var loser = playerId;
-    var winner = playerId === 'p1' ? 'p2' : 'p1';
-    var newLog = saArr(s.log).concat([{ ts: Date.now(), msg: 'Deck empty — ' + winner.toUpperCase() + ' WINS!' }]);
-    roomRef.child('stackattack').update({
-      winner: winner, winReason: 'deckExhaustion', log: newLog, version: (s.version || 0) + 1
-    });
+    // Draw is optional now — an empty deck just means you can't draw. Not a loss.
+    toast('Deck is empty — play a card instead', 'info');
     return;
   }
 
@@ -13059,7 +13051,7 @@ function saHandleDrawCard() {
   var updates = {};
   updates[playerId + '/hand'] = newHand;
   updates.deck = newDeck;
-  updates.hasPlayedThisTurn = true;
+  updates.turnStartDrawDone = true;  // marks the one optional draw as used; you can still play this turn
   updates.log = newLog;
   updates.version = (s.version || 0) + 1;
   roomRef.child('stackattack').update(updates);
@@ -13069,6 +13061,12 @@ function saHandleEndTurn() {
   var s = saState.cached;
   if (!s || s.winner) return;
   if (s.turn !== playerId) return;
+  // Require one play per turn so hands trend down and the game always ends.
+  // DOUBLE counts (it leaves your hand). Frozen turns auto-end via saAutoEndFrozen, not here.
+  if (!s.hasPlayedThisTurn && (s.doubleChainCount || 0) === 0) {
+    toast('Play a card before you end your turn', 'info');
+    return;
+  }
 
   var nextTurn = playerId === 'p1' ? 'p2' : 'p1';
   var newLog = saArr(s.log).concat([{ ts: Date.now(), msg: 'Turn passed to ' + nextTurn.toUpperCase() }]);
