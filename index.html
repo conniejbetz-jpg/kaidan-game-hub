@@ -2342,8 +2342,8 @@ body {
 /* Goat overlay — fire-at-opponent prank */
 #goat-overlay-canvas { position: fixed; top: 32%; left: 0; z-index: 99999; pointer-events: none; display: none; }
 #goat-overlay-canvas.flying { display: block; animation: goatFly linear forwards; }
-@keyframes goatFly { from { transform: translateX(-45vw); } to { transform: translateX(115vw); } }
-.fsb-fire-btn { margin: 4px 8px 6px; padding: 8px 6px; background: #c1121f; color: #fff; font-size: 11px; font-weight: 800; letter-spacing: 0.5px; text-align: center; border-radius: 6px; cursor: pointer; user-select: none; }
+@keyframes goatFly { from { transform: translateX(115vw); } to { transform: translateX(-45vw); } }
+.fsb-fire-btn { margin: 4px 8px 6px; padding: 8px 6px; background: #c1121f; color: #fff; font-size: 11px; font-weight: 800; letter-spacing: 0.5px; text-align: center; border-radius: 6px; cursor: pointer; user-select: none; display: none; }
 .fsb-fire-btn:hover { background: #e0231f; }
 .fsb-fire-btn:active { transform: scale(0.96); }
 .fsb-toggle-icon { display: none; }
@@ -9252,7 +9252,7 @@ function fsbCleanup() {
 
 // ── Goat Overlay (fire-at-opponent prank) ────────────────
 var GOAT_CLIPS = ['goat-confetti.mp4', 'goat-running.mp4', 'goat-sparklers.mp4'];
-var goatState = { listener: null, lastTs: 0, rafId: null };
+var goatState = { listener: null, lastTs: 0, rafId: null, randomTimer: null };
 
 function goatInit() {
   var btn = document.getElementById('goat-fire-btn');
@@ -9276,6 +9276,12 @@ function goatStartListening() {
     goatState.lastTs = data.ts;
     goatPlay(data.clip);
   });
+
+  // Fire button + random pop-ups belong to Yaya's screen only
+  var isYaya = (playerName || '').trim().toLowerCase() === 'yaya';
+  var fireBtn = document.getElementById('goat-fire-btn');
+  if (fireBtn) fireBtn.style.display = isYaya ? 'block' : 'none';
+  if (isYaya) goatScheduleRandom();
 }
 
 function goatCleanup() {
@@ -9283,9 +9289,25 @@ function goatCleanup() {
     roomRef.child('goatoverlay').off('value', goatState.listener);
     goatState.listener = null;
   }
+  if (goatState.randomTimer) { clearTimeout(goatState.randomTimer); goatState.randomTimer = null; }
   if (goatState.rafId) { cancelAnimationFrame(goatState.rafId); goatState.rafId = null; }
   var c = document.getElementById('goat-overlay-canvas');
   if (c) c.classList.remove('flying');
+  var fb = document.getElementById('goat-fire-btn');
+  if (fb) fb.style.display = 'none';
+}
+
+function goatScheduleRandom() {
+  if (goatState.randomTimer) clearTimeout(goatState.randomTimer);
+  var min = 120000, max = 240000;  // 2–4 min between surprise goats (tunable)
+  var delay = min + Math.random() * (max - min);
+  goatState.randomTimer = setTimeout(function() {
+    if (roomRef) {
+      var clip = GOAT_CLIPS[Math.floor(Math.random() * GOAT_CLIPS.length)];
+      roomRef.child('goatoverlay').set({ clip: clip, by: 'random', ts: Date.now() });  // both screens see it
+    }
+    goatScheduleRandom();  // reschedule the next surprise
+  }, delay);
 }
 
 function goatPlay(clipPath) {
