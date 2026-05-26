@@ -4669,7 +4669,7 @@ function bindUI() {
   document.getElementById('btn-join').addEventListener('click', function() {
     var code = document.getElementById('join-code').value.trim().toUpperCase();
     if (code.length === 4) joinRoom(code);
-    else toast('Enter a 4-letter code', 'error');
+    else toast('Enter a 4-digit code', 'error');
   });
 
   document.getElementById('join-code').addEventListener('keydown', function(e) {
@@ -4677,7 +4677,7 @@ function bindUI() {
   });
 
   document.getElementById('join-code').addEventListener('input', function() {
-    this.value = this.value.toUpperCase().replace(/[^A-Z]/g, '');
+    this.value = this.value.replace(/[^0-9]/g, '');
   });
 
   document.getElementById('btn-leave').addEventListener('click', leaveRoom);
