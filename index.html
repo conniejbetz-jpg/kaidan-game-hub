@@ -3462,6 +3462,13 @@ body {
       <span class="game-status waiting">Join a room to play</span>
     </div>
 
+    <div class="game-card" data-game="statecapitals">
+      <span class="game-icon">&#x1F3DB;&#xFE0F;</span>
+      <div class="game-name">State Capitals</div>
+      <div class="game-tagline">Guess the capital. First right wins.</div>
+      <span class="game-status waiting">Join a room to play</span>
+    </div>
+
     <div class="game-card disabled" data-game="cipher">
       <span class="game-icon">&#x1F575;</span>
       <div class="game-name">Cipher Challenge</div>
@@ -3959,6 +3966,103 @@ body {
 </div>
 
 <!-- ========== MATH BATTLE VIEW ========== -->
+<style>
+.sc-container { width: 100%; max-width: 640px; margin: 0 auto; padding: 16px 20px 32px; }
+.sc-header { text-align: center; margin-bottom: 18px; }
+.sc-title { font-size: 30px; font-weight: 900; letter-spacing: 2px; color: #fff; }
+.sc-accent { color: #3a86ff; }
+
+.sc-pick-prompt { text-align: center; font-size: 17px; color: #c9c9d4; margin-bottom: 16px; }
+.sc-level-btn { display: block; width: 100%; background: #232340; border: 2px solid #34345a;
+  border-radius: 14px; padding: 18px; margin-bottom: 14px; cursor: pointer; text-align: left; }
+.sc-level-btn:hover { border-color: #3a86ff; box-shadow: 0 4px 16px rgba(58, 134, 255, 0.25); }
+.sc-level-name { display: block; font-size: 20px; font-weight: 800; color: #fff; }
+.sc-level-desc { display: block; font-size: 14px; color: #8a8a9a; margin-top: 4px; }
+
+.sc-wait-msg { text-align: center; font-size: 16px; color: #8a8a9a; padding: 40px 0; }
+
+.sc-score-bar { display: flex; justify-content: center; gap: 28px; margin-bottom: 16px;
+  font-size: 15px; font-weight: 600; color: #c9c9d4; }
+.sc-score-val { color: #3a86ff; font-weight: 900; font-size: 18px; }
+.sc-progress { text-align: center; font-size: 12px; color: #8a8a9a; margin-bottom: 12px; }
+
+.sc-card { background: #232340; border: 2px solid #34345a; border-radius: 16px;
+  padding: 26px 22px; text-align: center; margin-bottom: 18px; }
+.sc-label { font-size: 13px; font-weight: 700; letter-spacing: 1px; color: #3a86ff; text-transform: uppercase; }
+.sc-prompt { font-size: 30px; font-weight: 900; color: #fff; margin-top: 10px; }
+
+.sc-choices { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.sc-choices .sc-choice { background: #1a1a2e; border: 2px solid #34345a; border-radius: 12px;
+  color: #fff; font-size: 16px; font-weight: 600; padding: 16px 12px; cursor: pointer; }
+.sc-choices .sc-choice:hover:not(:disabled) { border-color: #3a86ff; }
+.sc-choices .sc-choice:disabled { cursor: default; opacity: 0.85; }
+.sc-choices .sc-choice.correct { background: #27ae60; border-color: #27ae60; color: #fff; }
+.sc-choices .sc-choice.wrong { background: #E86A25; border-color: #E86A25; color: #fff; }
+
+.sc-status { text-align: center; font-size: 15px; font-weight: 700; color: #3a86ff;
+  min-height: 22px; margin-top: 14px; }
+
+.sc-bigscreen { text-align: center; background: #232340; border: 2px solid #3a86ff;
+  border-radius: 16px; padding: 36px 24px; }
+.sc-bigscreen-title { font-size: 26px; font-weight: 900; color: #fff; margin-bottom: 12px; }
+.sc-bigscreen-score { font-size: 20px; font-weight: 700; color: #3a86ff; margin-bottom: 22px; }
+.sc-playagain-btn { background: #3a86ff; color: #fff; border: none; border-radius: 10px;
+  font-size: 16px; font-weight: 800; padding: 12px 32px; cursor: pointer; }
+</style>
+
+<div class="game-view" id="view-statecapitals">
+  <button class="back-to-hub" id="back-statecapitals">&#x2190; Back to Hub</button>
+
+  <div class="sc-container">
+    <div class="sc-header">
+      <div class="sc-title">STATE <span class="sc-accent">CAPITALS</span></div>
+    </div>
+
+    <!-- LEVEL PICKER (p1 host) -->
+    <div id="sc-levelpick" style="display:none;">
+      <div class="sc-pick-prompt">Pick a level:</div>
+      <button class="sc-level-btn" id="sc-level-basic">
+        <span class="sc-level-name">Basic</span>
+        <span class="sc-level-desc">See the state &rarr; pick the capital</span>
+      </button>
+      <button class="sc-level-btn" id="sc-level-advanced">
+        <span class="sc-level-name">Advanced</span>
+        <span class="sc-level-desc">See the capital &rarr; pick the state</span>
+      </button>
+    </div>
+
+    <!-- WAIT (p2) -->
+    <div id="sc-levelwait" style="display:none;">
+      <div class="sc-wait-msg">Waiting for the other player to pick a level...</div>
+    </div>
+
+    <!-- PLAY AREA -->
+    <div id="sc-play-area" style="display:none;">
+      <div class="sc-score-bar">
+        <div class="sc-score-item"><span id="sc-myname">You</span>: <span class="sc-score-val" id="sc-myscore">0</span></div>
+        <div class="sc-score-item"><span id="sc-opname">Them</span>: <span class="sc-score-val" id="sc-opscore">0</span></div>
+      </div>
+
+      <div class="sc-progress" id="sc-progress">Question 1 of 10</div>
+
+      <div class="sc-card">
+        <div class="sc-label" id="sc-label">What is the capital of this state?</div>
+        <div class="sc-prompt" id="sc-prompt">&nbsp;</div>
+      </div>
+
+      <div class="sc-choices" id="sc-choices"></div>
+      <div class="sc-status" id="sc-status">&nbsp;</div>
+    </div>
+
+    <!-- ROUND OVER -->
+    <div id="sc-roundover" class="sc-bigscreen" style="display:none;">
+      <div class="sc-bigscreen-title" id="sc-roundover-title">You win!</div>
+      <div class="sc-bigscreen-score" id="sc-roundover-score">You 0 — 0 Them</div>
+      <button class="sc-playagain-btn" id="sc-playagain-btn">Play Again &#x27A1;</button>
+    </div>
+  </div>
+</div>
+
 <div class="game-view" id="view-mathbattle">
   <button class="back-to-hub" id="back-mathbattle">&#x2190; Back to Hub</button>
 
@@ -4765,6 +4869,7 @@ function init() {
   hmInit();
   cbInit();
   mbInit();
+  scInit();
   ccInit();
   gcInit();
   gsInit();
@@ -4836,6 +4941,7 @@ function bindUI() {
   document.getElementById('back-goatstation').addEventListener('click', function() { gsLeaveGame(); });
   document.getElementById('back-codebreaker').addEventListener('click', function() { cbLeaveGame(); });
   document.getElementById('back-mathbattle').addEventListener('click', function() { mbLeaveGame(); });
+  document.getElementById('back-statecapitals').addEventListener('click', function() { scLeaveGame(); });
   document.getElementById('back-cipher').addEventListener('click', function() { ccLeaveGame(); });
   document.getElementById('back-goatcards').addEventListener('click', function() { gcLeaveGame(); });
   document.getElementById('back-wouldyourather').addEventListener('click', function() { wyrLeaveGame(); });
@@ -5020,6 +5126,9 @@ function listenToRoom() {
       if (game === 'codebreaker') {
         cbStartGame();
       }
+      if (game === 'statecapitals' && !scState.active) {
+        scStartGame();
+      }
       if (game === 'mathbattle') {
         mbStartGame();
       }
@@ -5079,7 +5188,7 @@ function updateGameCards(players) {
     }
 
     // Coming soon games stay disabled
-    if (game !== 'battleship' && game !== 'wouldyourather' && game !== 'hangman' && game !== 'codebreaker' && game !== 'mathbattle' && game !== 'cipher' && game !== 'goatcards' && game !== 'goatstation' && game !== 'colorsandclues' && game !== 'stackattack' && game !== 'kaidanvsyaya') {
+    if (game !== 'battleship' && game !== 'wouldyourather' && game !== 'hangman' && game !== 'codebreaker' && game !== 'mathbattle' && game !== 'cipher' && game !== 'goatcards' && game !== 'goatstation' && game !== 'colorsandclues' && game !== 'stackattack' && game !== 'kaidanvsyaya' && game !== 'statecapitals') {
       card.classList.add('disabled');
       return;
     }
@@ -5191,7 +5300,7 @@ function leaveRoom() {
     card.classList.add('disabled');
     var statusEl = card.querySelector('.game-status');
     var game = card.getAttribute('data-game');
-    if (game === 'battleship' || game === 'wouldyourather' || game === 'hangman' || game === 'codebreaker' || game === 'mathbattle' || game === 'cipher' || game === 'goatcards' || game === 'goatstation' || game === 'colorsandclues' || game === 'kaidanvsyaya') {
+    if (game === 'battleship' || game === 'wouldyourather' || game === 'hangman' || game === 'codebreaker' || game === 'mathbattle' || game === 'cipher' || game === 'goatcards' || game === 'goatstation' || game === 'colorsandclues' || game === 'kaidanvsyaya' || game === 'statecapitals') {
       statusEl.textContent = 'Join a room to play';
       statusEl.className = 'game-status waiting';
     }
@@ -8309,6 +8418,372 @@ function mbGenerateProblem(diff, qNum) {
   }
   return { equation: eq, answer: answer };
 }
+
+
+// -- Piece 1: data -------------------------------------------
+// 50 states + capitals. { s: state, c: capital }.
+var SC_DATA = [
+  { s: "Alabama", c: "Montgomery" },
+  { s: "Alaska", c: "Juneau" },
+  { s: "Arizona", c: "Phoenix" },
+  { s: "Arkansas", c: "Little Rock" },
+  { s: "California", c: "Sacramento" },
+  { s: "Colorado", c: "Denver" },
+  { s: "Connecticut", c: "Hartford" },
+  { s: "Delaware", c: "Dover" },
+  { s: "Florida", c: "Tallahassee" },
+  { s: "Georgia", c: "Atlanta" },
+  { s: "Hawaii", c: "Honolulu" },
+  { s: "Idaho", c: "Boise" },
+  { s: "Illinois", c: "Springfield" },
+  { s: "Indiana", c: "Indianapolis" },
+  { s: "Iowa", c: "Des Moines" },
+  { s: "Kansas", c: "Topeka" },
+  { s: "Kentucky", c: "Frankfort" },
+  { s: "Louisiana", c: "Baton Rouge" },
+  { s: "Maine", c: "Augusta" },
+  { s: "Maryland", c: "Annapolis" },
+  { s: "Massachusetts", c: "Boston" },
+  { s: "Michigan", c: "Lansing" },
+  { s: "Minnesota", c: "Saint Paul" },
+  { s: "Mississippi", c: "Jackson" },
+  { s: "Missouri", c: "Jefferson City" },
+  { s: "Montana", c: "Helena" },
+  { s: "Nebraska", c: "Lincoln" },
+  { s: "Nevada", c: "Carson City" },
+  { s: "New Hampshire", c: "Concord" },
+  { s: "New Jersey", c: "Trenton" },
+  { s: "New Mexico", c: "Santa Fe" },
+  { s: "New York", c: "Albany" },
+  { s: "North Carolina", c: "Raleigh" },
+  { s: "North Dakota", c: "Bismarck" },
+  { s: "Ohio", c: "Columbus" },
+  { s: "Oklahoma", c: "Oklahoma City" },
+  { s: "Oregon", c: "Salem" },
+  { s: "Pennsylvania", c: "Harrisburg" },
+  { s: "Rhode Island", c: "Providence" },
+  { s: "South Carolina", c: "Columbia" },
+  { s: "South Dakota", c: "Pierre" },
+  { s: "Tennessee", c: "Nashville" },
+  { s: "Texas", c: "Austin" },
+  { s: "Utah", c: "Salt Lake City" },
+  { s: "Vermont", c: "Montpelier" },
+  { s: "Virginia", c: "Richmond" },
+  { s: "Washington", c: "Olympia" },
+  { s: "West Virginia", c: "Charleston" },
+  { s: "Wisconsin", c: "Madison" },
+  { s: "Wyoming", c: "Cheyenne" }
+];
+
+// Self-check (dev only — logs once at load).
+(function scDataSelfCheck() {
+  var total = SC_DATA.length;
+  var states = {}, caps = {};
+  var bad = SC_DATA.filter(function(d) {
+    if (!d.s || !d.c) return true;
+    if (states[d.s] || caps[d.c]) return true; // duplicate state or capital
+    states[d.s] = caps[d.c] = true;
+    return false;
+  });
+  console.log("[SC data] " + total + " states, unique: " + (bad.length === 0) +
+    ", bad/dupe entries: " + bad.length);
+  if (bad.length) console.warn("[SC data] problems:", bad);
+})();
+
+// -- Piece 2: question generation ----------------------------
+// Fisher-Yates shuffle (returns a new shuffled copy).
+function scShuffle(arr) {
+  var a = arr.slice();
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+
+// Build ONE question from a specific state object, for the given level.
+//   level "basic"    -> prompt = state,   answer = its capital,
+//                       choices = 5 capitals (correct + 4 other real ones)
+//   level "advanced" -> prompt = capital, answer = its state,
+//                       choices = 5 states  (correct + 4 other real ones)
+// Returns: { prompt, answer, choices:[5 shuffled], promptLabel }
+function scBuildQuestion(stateObj, level) {
+  var prompt, answer, pool, label;
+  if (level === "advanced") {
+    prompt = stateObj.c;             // show the capital
+    answer = stateObj.s;             // they pick the state
+    pool   = SC_DATA.map(function(d) { return d.s; });
+    label  = "Which state has this capital?";
+  } else {
+    prompt = stateObj.s;             // show the state (basic / default)
+    answer = stateObj.c;             // they pick the capital
+    pool   = SC_DATA.map(function(d) { return d.c; });
+    label  = "What is the capital of this state?";
+  }
+  // 4 distractors: real values of the same type, none equal to the answer.
+  var others = scShuffle(pool.filter(function(v) { return v !== answer; }));
+  var choices = scShuffle([answer].concat(others.slice(0, 4)));
+  return { prompt: prompt, answer: answer, choices: choices, promptLabel: label };
+}
+
+// One random question (any state).
+function scMakeQuestion(level) {
+  return scBuildQuestion(SC_DATA[Math.floor(Math.random() * SC_DATA.length)], level);
+}
+
+// A full round: 10 random questions, no repeated state within the round.
+function scMakeRound(level) {
+  return scShuffle(SC_DATA).slice(0, 10).map(function(d) {
+    return scBuildQuestion(d, level);
+  });
+}
+
+
+var SC_ROUND_SIZE = 10;     // questions per round
+var SC_WIN_POINTS = 2;      // first correct gets 2 points
+
+var scState = {
+  active: false,
+  level: "basic",
+  qNum: 0,
+  answered: false,    // have I already gotten THIS one right? (locks my buttons)
+  listeners: []
+};
+
+// Start (called from the hub's gameListener). Shows the level picker (p1)
+// or a "waiting for level" screen (p2). No question is seeded until p1
+// picks a level via scChooseLevel.
+function scStartGame() {
+  scState.active = true;
+  scState.qNum = 0;
+
+  showView("statecapitals"); // hub helper prepends "view-"
+
+  // Show the level picker to p1; p2 waits for p1's choice.
+  document.getElementById("sc-levelpick").style.display = (playerId === "p1") ? "block" : "none";
+  document.getElementById("sc-levelwait").style.display = (playerId === "p1") ? "none" : "block";
+  document.getElementById("sc-play-area").style.display = "none";
+  document.getElementById("sc-roundover").style.display = "none";
+
+  scListen();
+}
+
+// p1 picks Basic or Advanced — seeds Q1 of a fresh round at that level.
+function scChooseLevel(level) {
+  scState.level = level;
+  document.getElementById("sc-levelpick").style.display = "none";
+  scState._round = scMakeRound(level);
+  scSeedQuestion(roomRef.child("statecapitals"), scState._round, 1, 0, 0, level);
+}
+
+// Write a question into Firebase (p1 only). qNum is 1-based.
+function scSeedQuestion(scRef, round, qNum, p1Score, p2Score, level) {
+  var q = round[qNum - 1];
+  scRef.set({
+    level: level,
+    qNum: qNum,
+    prompt: q.prompt,
+    answer: q.answer,
+    choices: q.choices,
+    promptLabel: q.promptLabel,
+    winner: null,
+    winTime: null,
+    p1Score: p1Score,
+    p2Score: p2Score,
+    phase: (qNum > SC_ROUND_SIZE) ? "roundover" : "playing"
+  });
+}
+
+// Listen for shared question state.
+function scListen() {
+  var scRef = roomRef.child("statecapitals");
+  var fn = scRef.on("value", function(snap) {
+    var d = snap.val();
+    if (!d || !scState.active) return;
+
+    // New question? clear my local "answered" latch.
+    if (d.qNum !== scState.qNum) {
+      scState.qNum = d.qNum;
+      scState.answered = false;
+    }
+    scState.level = d.level;
+
+    var phase = d.phase || "playing";
+
+    // p2 asked to restart while on the round-over screen — p1 rebuilds.
+    if (d.restartRequested && playerId === "p1" && phase === "roundover") {
+      scState._round = scMakeRound(scState.level);
+      scSeedQuestion(scRef, scState._round, 1, 0, 0, scState.level);
+      return;
+    }
+
+    // A question exists now — hide the level pick/wait screens.
+    document.getElementById("sc-levelpick").style.display = "none";
+    document.getElementById("sc-levelwait").style.display = "none";
+
+    document.getElementById("sc-play-area").style.display = (phase === "roundover") ? "none" : "block";
+    document.getElementById("sc-roundover").style.display = (phase === "roundover") ? "block" : "none";
+    if (phase === "roundover") { scRenderRoundOver(d); return; }
+
+    scRenderQuestion(d);
+
+    // Auto-advance: once a question is resolved (someone won), p1 waits a
+    // beat so both players see the correct answer, then moves to the next
+    // question — or ends the round after #10. Single advancer = p1.
+    if (d.winner && d.phase === "resolved" && playerId === "p1") {
+      if (scState._advanceTimer) clearTimeout(scState._advanceTimer);
+      scState._advanceTimer = setTimeout(function() { scAdvance(d); }, 1800);
+    }
+  });
+  scState.listeners.push({ ref: scRef, event: "value", fn: fn });
+}
+
+// p1 only: advance to the next question, or end the round after #10.
+function scAdvance(d) {
+  var scRef = roomRef.child("statecapitals");
+  var nextNum = (d.qNum || 0) + 1;
+  if (nextNum > SC_ROUND_SIZE) {
+    scRef.update({ phase: "roundover" });
+    return;
+  }
+  // p1 holds the round in scState._round; seed the next question, carrying scores.
+  scSeedQuestion(scRef, scState._round, nextNum, d.p1Score || 0, d.p2Score || 0, d.level);
+}
+
+// Round-over screen: declare the winner by score.
+function scRenderRoundOver(d) {
+  var s1 = d.p1Score || 0, s2 = d.p2Score || 0;
+  var myName = playerName || "You";
+  var opName = opponentName || "Them";
+  var myScore = (playerId === "p1") ? s1 : s2;
+  var opScore = (playerId === "p1") ? s2 : s1;
+
+  var headline;
+  if (myScore > opScore) headline = myName + " wins!";
+  else if (opScore > myScore) headline = opName + " wins!";
+  else headline = "It's a tie!";
+
+  document.getElementById("sc-roundover-title").textContent = headline;
+  document.getElementById("sc-roundover-score").textContent =
+    myName + " " + myScore + " — " + opScore + " " + opName;
+}
+
+// Play again — start a fresh round at the SAME level. Only p1 holds/seeds
+// the round (single source of truth), so p1 rebuilds it. If p2 clicks, ask
+// p1 to restart via a flag p1's listener acts on.
+function scPlayAgain() {
+  var scRef = roomRef.child("statecapitals");
+  if (playerId === "p1") {
+    scState._round = scMakeRound(scState.level);
+    scSeedQuestion(scRef, scState._round, 1, 0, 0, scState.level);
+  } else {
+    // p2 asks p1 to restart; p1's listener (below) picks this up.
+    scRef.update({ restartRequested: true });
+  }
+}
+
+// Render the current question + choices + scores.
+function scRenderQuestion(d) {
+  document.getElementById("sc-progress").textContent =
+    "Question " + d.qNum + " of " + SC_ROUND_SIZE;
+  document.getElementById("sc-label").textContent = d.promptLabel || "";
+  document.getElementById("sc-prompt").textContent = d.prompt;
+
+  // Scores by name.
+  var myScore = (playerId === "p1") ? (d.p1Score || 0) : (d.p2Score || 0);
+  var opScore = (playerId === "p1") ? (d.p2Score || 0) : (d.p1Score || 0);
+  document.getElementById("sc-myname").textContent = playerName || "You";
+  document.getElementById("sc-opname").textContent = opponentName || "Them";
+  document.getElementById("sc-myscore").textContent = myScore;
+  document.getElementById("sc-opscore").textContent = opScore;
+
+  // Build the 5 choice buttons.
+  var wrap = document.getElementById("sc-choices");
+  wrap.innerHTML = "";
+  var resolved = !!d.winner;
+  (d.choices || []).forEach(function(choice) {
+    var btn = document.createElement("button");
+    btn.className = "sc-choice";
+    btn.textContent = choice;
+    if (resolved) {
+      // Reveal: highlight the correct answer; disable all.
+      btn.disabled = true;
+      if (choice === d.answer) btn.classList.add("correct");
+    } else if (scState.answered) {
+      btn.disabled = true; // I already got it right; wait for advance
+    } else {
+      btn.onclick = function() { scPick(choice, d); };
+    }
+    wrap.appendChild(btn);
+  });
+
+  // Status line.
+  var status = document.getElementById("sc-status");
+  if (resolved) {
+    var firstName = (d.winner === playerId) ? (playerName || "You") : (opponentName || "Them");
+    var verb = (d.winner === playerId) ? " got it first — +2!" : " got it first — +2 to them.";
+    status.textContent = firstName + verb + "  Answer: " + d.answer;
+  } else if (scState.answered) {
+    status.textContent = "You got it! Waiting...";
+  } else {
+    status.textContent = "";
+  }
+}
+
+// Click a choice. Wrong = flash + try again (no write). Correct = claim win.
+function scPick(choice, d) {
+  if (scState.answered || d.winner) return;
+
+  if (choice !== d.answer) {
+    // WRONG — local flash only, keep guessing. No Firebase write.
+    scFlashWrong(choice);
+    return;
+  }
+
+  // CORRECT — claim the win via transaction (only the first correct scores).
+  scState.answered = true;
+  var scRef = roomRef.child("statecapitals");
+  scRef.transaction(function(cur) {
+    if (!cur) return cur;
+    if (cur.winner) return;            // someone already won — abort
+    cur.winner = playerId;
+    cur.winTime = firebase.database.ServerValue.TIMESTAMP;
+    if (playerId === "p1") cur.p1Score = (cur.p1Score || 0) + SC_WIN_POINTS;
+    else                   cur.p2Score = (cur.p2Score || 0) + SC_WIN_POINTS;
+    cur.phase = "resolved";
+    return cur;
+  });
+}
+
+// Flash a wrong choice button red briefly.
+function scFlashWrong(choice) {
+  var btns = document.querySelectorAll("#sc-choices .sc-choice");
+  btns.forEach(function(b) {
+    if (b.textContent === choice) {
+      b.classList.add("wrong");
+      setTimeout(function() { b.classList.remove("wrong"); }, 500);
+    }
+  });
+}
+
+// Init (called once at page load, alongside mbInit etc.).
+function scInit() {
+  document.getElementById("sc-level-basic").addEventListener("click", function() { scChooseLevel("basic"); });
+  document.getElementById("sc-level-advanced").addEventListener("click", function() { scChooseLevel("advanced"); });
+  document.getElementById("sc-playagain-btn").addEventListener("click", scPlayAgain);
+}
+
+// Back to hub + cleanup (matches the hub's leave/cleanup pattern).
+function scLeaveGame() { scCleanup(); showView("hub"); }
+function scCleanup() {
+  scState.active = false;
+  scState.qNum = 0;
+  scState.answered = false;
+  if (scState._advanceTimer) { clearTimeout(scState._advanceTimer); scState._advanceTimer = null; }
+  scState.listeners.forEach(function(l) { l.ref.off(l.event, l.fn); });
+  scState.listeners = [];
+}
+
 
 function mbInit() {
   document.getElementById('mb-mute-btn').addEventListener('click', function() {
