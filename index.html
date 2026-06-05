@@ -288,6 +288,8 @@ body {
 .game-card[data-game="codebreaker"]:hover { box-shadow: 0 8px 24px rgba(199, 125, 255, 0.3); }
 .game-card[data-game="mathbattle"] { border-color: #48cae4; }
 .game-card[data-game="mathbattle"]:hover { box-shadow: 0 8px 24px rgba(72, 202, 228, 0.3); }
+.game-card[data-game="statecapitals"] { border-color: #3a86ff; }
+.game-card[data-game="statecapitals"]:hover { box-shadow: 0 8px 24px rgba(58, 134, 255, 0.3); }
 .game-card[data-game="cipher"] { border-color: #ffd700; }
 .game-card[data-game="cipher"]:hover { box-shadow: 0 8px 24px rgba(255, 215, 0, 0.3); }
 .game-card[data-game="goatcards"] { border-color: #27ae60; }
@@ -314,6 +316,7 @@ body {
 .game-card[data-game="wouldyourather"] .game-icon { color: #F4A261; }
 .game-card[data-game="codebreaker"] .game-icon { color: #c77dff; }
 .game-card[data-game="mathbattle"] .game-icon { color: #48cae4; }
+.game-card[data-game="statecapitals"] .game-icon { color: #3a86ff; }
 .game-card[data-game="cipher"] .game-icon { color: #ffd700; }
 .game-card[data-game="goatcards"] .game-icon { color: #27ae60; }
 .game-card[data-game="colorsandclues"] .game-icon { color: #ff4d8d; }
@@ -8556,6 +8559,7 @@ var scState = {
 function scStartGame() {
   scState.active = true;
   scState.qNum = 0;
+  scState._advancedFrom = null;   // reset the advance guard for a fresh game
 
   showView("statecapitals"); // hub helper prepends "view-"
 
@@ -8630,7 +8634,13 @@ function scListen() {
     // Auto-advance: once a question is resolved (someone won), p1 waits a
     // beat so both players see the correct answer, then moves to the next
     // question — or ends the round after #10. Single advancer = p1.
-    if (d.winner && d.phase === "resolved" && playerId === "p1") {
+    // GUARD: only schedule one advance per qNum. Firebase can deliver the
+    // resolved snapshot more than once (local echo + server), which used to
+    // double-advance and run ~20 questions instead of 10. _advancedFrom
+    // records the qNum we've already advanced from, so a repeat is ignored.
+    if (d.winner && d.phase === "resolved" && playerId === "p1" &&
+        scState._advancedFrom !== d.qNum) {
+      scState._advancedFrom = d.qNum;
       if (scState._advanceTimer) clearTimeout(scState._advanceTimer);
       scState._advanceTimer = setTimeout(function() { scAdvance(d); }, 1800);
     }
