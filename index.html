@@ -9400,7 +9400,7 @@ function goatStartListening() {
     var data = snap.val();
     if (!data || !data.clip || data.ts <= goatState.lastTs) return;
     goatState.lastTs = data.ts;
-    goatPlay(data.clip);
+    goatPlay(data.clip, data.by);
   });
 
   // Fire button + random pop-ups belong to Yaya's screen only
@@ -9425,7 +9425,7 @@ function goatCleanup() {
 
 function goatScheduleRandom() {
   if (goatState.randomTimer) clearTimeout(goatState.randomTimer);
-  var delay = 600000;  // every 10 minutes (tunable)
+  var delay = 300000;  // every 5 minutes (tunable)
   goatState.randomTimer = setTimeout(function() {
     if (roomRef) {
       var clip = GOAT_CLIPS[Math.floor(Math.random() * GOAT_CLIPS.length)];
@@ -9435,15 +9435,17 @@ function goatScheduleRandom() {
   }, delay);
 }
 
-function goatPlay(clipPath) {
+function goatPlay(clipPath, firedBy) {
   var canvas = document.getElementById('goat-overlay-canvas');
   var video = document.getElementById('goat-overlay-video');
   if (!canvas || !video) return;
   if (goatState.rafId) { cancelAnimationFrame(goatState.rafId); goatState.rafId = null; }  // cancel any in-flight goat
   var ctx = canvas.getContext('2d', { willReadFrequently: true });
 
-  // Goat scream on top — respects the sound-board mute
-  if (!fsbState.muted && typeof gsPlaySoundEffect === 'function') gsPlaySoundEffect('goatscream');
+  // Goat scream on top — respects the sound-board mute.
+  // The AUTO goat (fired by the timer, by:'random') is SILENT — only the
+  // manual FIRE GOAT button screams. (Connie 2026-06-05.)
+  if (firedBy !== 'random' && !fsbState.muted && typeof gsPlaySoundEffect === 'function') gsPlaySoundEffect('goatscream');
 
   var cleanup = function() {
     if (goatState.rafId) { cancelAnimationFrame(goatState.rafId); goatState.rafId = null; }
