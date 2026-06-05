@@ -298,6 +298,8 @@ body {
 .game-card[data-game="colorsandclues"]:hover { box-shadow: 0 8px 24px rgba(255, 77, 141, 0.3); }
 .game-card[data-game="stackattack"] { border-color: #c1121f; }
 .game-card[data-game="stackattack"]:hover { box-shadow: 0 8px 24px rgba(193, 18, 31, 0.3); }
+.game-card[data-game="kaidanvsyaya"] { border-color: #f4b400; }
+.game-card[data-game="kaidanvsyaya"]:hover { box-shadow: 0 8px 24px rgba(244, 180, 0, 0.3); }
 
 .game-icon {
   font-size: 48px;
@@ -316,6 +318,7 @@ body {
 .game-card[data-game="goatcards"] .game-icon { color: #27ae60; }
 .game-card[data-game="colorsandclues"] .game-icon { color: #ff4d8d; }
 .game-card[data-game="stackattack"] .game-icon { color: #c1121f; }
+.game-card[data-game="kaidanvsyaya"] .game-icon { color: #f4b400; }
 
 /* ========== STACK ATTACK STYLES ========== */
 .sa-wrap {
@@ -4141,8 +4144,8 @@ body {
     <div id="kvy-play-area">
       <!-- Score bar (current round) -->
       <div class="kvy-score-bar">
-        <div class="kvy-score-item">You: <span class="kvy-score-val" id="kvy-myscore">0</span></div>
-        <div class="kvy-score-item">Them: <span class="kvy-score-val" id="kvy-opscore">0</span></div>
+        <div class="kvy-score-item"><span id="kvy-myname">You</span>: <span class="kvy-score-val" id="kvy-myscore">0</span></div>
+        <div class="kvy-score-item"><span id="kvy-opname">Them</span>: <span class="kvy-score-val" id="kvy-opscore">0</span></div>
       </div>
 
       <!-- Question card -->
@@ -11106,12 +11109,19 @@ function kvyInit() {
 // -- Start the game (called from the hub's gameListener) ------
 function kvyStartGame() {
   kvyState.active = true;
+  kvyState.qIndex = -1;     // force the next snapshot to count as a "new question"
   showView("kaidanvsyaya"); // hub helper — prepends "view-" itself
 
-  // p1 seeds the live room state — RESUMING from the permanent keepsake.
-  // Read what's already been answered (across all past sessions), then
-  // start the room at the first unanswered question. p2 just listens to
-  // whatever p1 seeds, so resume logic lives in one place.
+  // Clear the answer box on entry so no stale text from a prior visit shows.
+  var ansBox0 = document.getElementById("kvy-answer");
+  if (ansBox0) { ansBox0.value = ""; ansBox0.disabled = false; }
+
+  // p1 RE-SEEDS the live room every time the game opens — always starting at
+  // the first question of the first UNSAVED round (kvyFirstUnanswered lands
+  // on a round boundary because only complete rounds are saved). This is what
+  // enforces Connie's rule: a finished round never reappears; an unfinished
+  // round is discarded and RESTARTED from scratch, boxes blank, score 0-0.
+  // (Connie 2026-06-05.) p2 just listens to whatever p1 seeds.
   var kvyRef = roomRef.child("kaidanvsyaya");
   if (playerId === "p1") {
     db.ref(KVY_KEEPSAKE + "/answers").once("value").then(function(asnap) {
@@ -11146,10 +11156,14 @@ function kvyListen() {
     var d = snap.val();
     if (!d || !kvyState.active) return;
 
-    // New question? reset my local "done" latch.
+    // New question? reset my local "done" latch AND clear the answer box
+    // (so the previous answer doesn't linger). Done here — on question
+    // change only — so it never wipes text while you're mid-typing.
     if (d.qIndex !== kvyState.qIndex) {
       kvyState.qIndex = d.qIndex;
       kvyState.myDone = false;
+      var ansBox = document.getElementById("kvy-answer");
+      if (ansBox) { ansBox.value = ""; ansBox.disabled = false; }
     }
 
     var me = playerId;                       // 'p1' or 'p2'
@@ -11207,7 +11221,9 @@ function kvyRenderQuestion(d, mine, theirs) {
     "Question " + (d.qIndex + 1) + " of " + KVY_QUESTIONS.length;
   document.getElementById("kvy-question").textContent = q.q;
 
-  // Scores
+  // Scores (labelled by name)
+  document.getElementById("kvy-myname").textContent = playerName || "You";
+  document.getElementById("kvy-opname").textContent = opponentName || "Them";
   document.getElementById("kvy-myscore").textContent =
     (playerId === "p1" ? (d.p1Score || 0) : (d.p2Score || 0));
   document.getElementById("kvy-opscore").textContent =
@@ -11227,10 +11243,14 @@ function kvyRenderQuestion(d, mine, theirs) {
     doneBtn.textContent = "Done";
   }
 
+  // Names: my own + opponent's (fall back only if not yet known).
+  var myName = playerName || "You";
+  var opName = opponentName || "Them";
+
   // Opponent status line
   var opStatus = document.getElementById("kvy-op-status");
-  opStatus.textContent = theirs.done ? (opponentName || "They") + " is done"
-                                     : "Waiting for " + (opponentName || "the other player") + "...";
+  opStatus.textContent = theirs.done ? opName + " is done"
+                                     : "Waiting for " + opName + "...";
 
   // Reveal once both done.
   var reveal = document.getElementById("kvy-reveal");
@@ -11239,13 +11259,13 @@ function kvyRenderQuestion(d, mine, theirs) {
     var iWasFirst = (firstSlot === playerId);
     reveal.style.display = "block";
     document.getElementById("kvy-reveal-text").textContent =
-      iWasFirst ? "You finished first — +2 points!" :
-                  (opponentName || "They") + " finished first — +2 points to them.";
-    // Show BOTH answers, mine and theirs.
+      iWasFirst ? myName + " finished first — +2 points!" :
+                  opName + " finished first — +2 points to them.";
+    // Show BOTH answers, by name.
     document.getElementById("kvy-my-answer").textContent =
-      "You: " + (mine.text || "(blank)");
+      myName + ": " + (mine.text || "(blank)");
     document.getElementById("kvy-their-answer").textContent =
-      (opponentName || "Them") + ": " + (theirs.text || "(blank)");
+      opName + ": " + (theirs.text || "(blank)");
     // Next button on BOTH players (idempotent advance, see kvyNext).
     // Label changes on the last question of a round.
     var nextBtn = document.getElementById("kvy-next-btn");
@@ -11377,6 +11397,9 @@ function kvyCleanup() {
   kvyState.myDone = false;
   kvyState.listeners.forEach(function(l) { l.ref.off(l.event, l.fn); });
   kvyState.listeners = [];
+  // Clear the answer box so leftover text never lingers to the next entry.
+  var ansBox = document.getElementById("kvy-answer");
+  if (ansBox) { ansBox.value = ""; ansBox.disabled = false; }
 }
 
 
