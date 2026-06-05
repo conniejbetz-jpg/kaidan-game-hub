@@ -4130,6 +4130,9 @@ body {
 .kvy-bigscreen-title { font-size: 26px; font-weight: 900; color: #fff; margin-bottom: 12px; }
 .kvy-bigscreen-score { font-size: 20px; font-weight: 700; color: #2dc653; margin-bottom: 22px; }
 .kvy-bigscreen-sub { font-size: 15px; color: #c9c9d4; margin-bottom: 8px; }
+.kvy-keepsake-btn { margin-top: 16px; background: #f4b400; color: #1a1a2e; border: none;
+  border-radius: 10px; font-size: 15px; font-weight: 800; padding: 11px 26px; cursor: pointer; }
+.kvy-keepsake-btn:hover { box-shadow: 0 4px 16px rgba(244, 180, 0, 0.4); }
 </style>
 
 <div class="game-view" id="view-kaidanvsyaya">
@@ -4178,12 +4181,14 @@ body {
       <div class="kvy-bigscreen-title" id="kvy-roundend-title">Round 1 winner!</div>
       <div class="kvy-bigscreen-score" id="kvy-roundend-score">You 0 — 0 Them</div>
       <button class="kvy-next-btn" id="kvy-startround-btn">Start Round 2 &#x27A1;</button>
+      <div><button class="kvy-keepsake-btn" id="kvy-keepsake-btn-round">&#x1F4D6; Download Keepsake</button></div>
     </div>
 
     <!-- GAME-OVER screen -->
     <div id="kvy-gameover" class="kvy-bigscreen" style="display:none;">
       <div class="kvy-bigscreen-title" id="kvy-gameover-title">That's all the questions!</div>
       <div class="kvy-bigscreen-sub" id="kvy-gameover-sub">Every answer is saved.</div>
+      <div><button class="kvy-keepsake-btn" id="kvy-keepsake-btn-over">&#x1F4D6; Download Keepsake</button></div>
     </div>
   </div>
 </div>
@@ -11104,6 +11109,97 @@ function kvyInit() {
   document.getElementById("kvy-done-btn").addEventListener("click", kvyDone);
   document.getElementById("kvy-next-btn").addEventListener("click", kvyNext);
   document.getElementById("kvy-startround-btn").addEventListener("click", kvyStartNextRound);
+  document.getElementById("kvy-keepsake-btn-round").addEventListener("click", kvyDownloadKeepsake);
+  document.getElementById("kvy-keepsake-btn-over").addEventListener("click", kvyDownloadKeepsake);
+}
+
+// -- PIECE 6 — download the keepsake -------------------------
+// Reads the ENTIRE permanent keepsake from Firebase in ONE go, pulls
+// KAIDAN's answer for every saved question (using the frozen "kaidan"
+// slot tag on each record), groups them BY THEME in canonical order,
+// and downloads a single styled, printable HTML document. No clicking
+// through entries — one button, the whole book. (Connie 2026-06-05.)
+function kvyDownloadKeepsake() {
+  db.ref(KVY_KEEPSAKE + "/answers").once("value").then(function(snap) {
+    var answers = snap.val() || {};
+    var keys = Object.keys(answers);
+    if (keys.length === 0) {
+      toast("No answers saved yet — finish a round first.", "info");
+      return;
+    }
+
+    // Group Kaidan's answers by theme. A record's "kaidan" field says
+    // which slot (p1/p2) was his; pull that side. Unanswered questions
+    // simply aren't in the data, so they're naturally omitted.
+    var byTheme = {};
+    KVY_THEMES.forEach(function(t) { byTheme[t.key] = []; });
+    Object.keys(answers).forEach(function(qIndex) {
+      var r = answers[qIndex];
+      if (!r) return;
+      var his = (r.kaidan === "p1") ? r.p1 : r.p2;
+      if (byTheme[r.theme]) {
+        byTheme[r.theme].push({ idx: parseInt(qIndex, 10), q: r.q, a: his || "" });
+      }
+    });
+
+    // Build the HTML document, themes in canonical order, questions in
+    // their original order within each theme.
+    var esc = function(s) {
+      return String(s == null ? "" : s)
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    };
+    var total = 0;
+    var sections = "";
+    KVY_THEMES.forEach(function(t) {
+      var items = byTheme[t.key] || [];
+      if (items.length === 0) return;            // skip empty themes
+      items.sort(function(a, b) { return a.idx - b.idx; });
+      total += items.length;
+      var rows = items.map(function(it) {
+        return '<div class="qa"><div class="q">' + esc(it.q) +
+               '</div><div class="a">' + (it.a ? esc(it.a) : "<em>(left blank)</em>") +
+               '</div></div>';
+      }).join("");
+      sections += '<section><h2>' + esc(t.label) + '</h2>' + rows + '</section>';
+    });
+
+    var today = new Date().toLocaleDateString();
+    var doc =
+'<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">' +
+'<title>Kaidan’s Answers — A Keepsake</title><style>' +
+'body{font-family:Georgia,"Times New Roman",serif;background:#fff;color:#1a1a2e;' +
+'max-width:760px;margin:0 auto;padding:48px 28px;font-size:15px;line-height:1.5;}' +
+'h1{font-size:32px;text-align:center;margin-bottom:4px;color:#1a1a2e;}' +
+'.sub{text-align:center;color:#777;margin-bottom:36px;font-style:italic;}' +
+'h2{font-size:20px;color:#f4b400;border-bottom:2px solid #f4b400;padding-bottom:4px;' +
+'margin-top:34px;}' +
+'.qa{margin:16px 0;}' +
+'.q{font-weight:bold;color:#444;}' +
+'.a{margin-top:3px;padding-left:12px;border-left:3px solid #eee;}' +
+'.print-btn{display:block;margin:0 auto 28px;background:#f4b400;color:#1a1a2e;border:none;' +
+'border-radius:8px;font-size:15px;font-weight:bold;padding:10px 24px;cursor:pointer;}' +
+'@media print{.print-btn{display:none;}body{padding:0;}}' +
+'</style></head><body>' +
+'<button class="print-btn" onclick="window.print()">Print this keepsake</button>' +
+'<h1>Kaidan’s Answers</h1>' +
+'<div class="sub">A keepsake from Yaya • ' + total + ' answers • ' + esc(today) + '</div>' +
+sections +
+'</body></html>';
+
+    // Trigger a download of the document.
+    var blob = new Blob([doc], { type: "text/html" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = "Kaidan-Keepsake-" + new Date().toISOString().slice(0, 10) + ".html";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast("Keepsake downloaded — " + total + " answers.", "success");
+  }).catch(function(e) {
+    toast("Could not read keepsake: " + (e && e.message ? e.message : "error"), "error");
+  });
 }
 
 // -- Start the game (called from the hub's gameListener) ------
