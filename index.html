@@ -4130,8 +4130,9 @@ body {
 .kvy-bigscreen-title { font-size: 26px; font-weight: 900; color: #fff; margin-bottom: 12px; }
 .kvy-bigscreen-score { font-size: 20px; font-weight: 700; color: #2dc653; margin-bottom: 22px; }
 .kvy-bigscreen-sub { font-size: 15px; color: #c9c9d4; margin-bottom: 8px; }
-.kvy-keepsake-btn { margin-top: 16px; background: #f4b400; color: #1a1a2e; border: none;
-  border-radius: 10px; font-size: 15px; font-weight: 800; padding: 11px 26px; cursor: pointer; }
+.kvy-keepsake-btn { width: 100%; margin-top: 10px; background: #f4b400; color: #1a1a2e;
+  border: none; border-radius: 10px; font-size: 14px; font-weight: 800; padding: 11px 14px;
+  cursor: pointer; }
 .kvy-keepsake-btn:hover { box-shadow: 0 4px 16px rgba(244, 180, 0, 0.4); }
 </style>
 
@@ -4181,14 +4182,12 @@ body {
       <div class="kvy-bigscreen-title" id="kvy-roundend-title">Round 1 winner!</div>
       <div class="kvy-bigscreen-score" id="kvy-roundend-score">You 0 — 0 Them</div>
       <button class="kvy-next-btn" id="kvy-startround-btn">Start Round 2 &#x27A1;</button>
-      <div><button class="kvy-keepsake-btn" id="kvy-keepsake-btn-round">&#x1F4D6; Download Keepsake</button></div>
     </div>
 
     <!-- GAME-OVER screen -->
     <div id="kvy-gameover" class="kvy-bigscreen" style="display:none;">
       <div class="kvy-bigscreen-title" id="kvy-gameover-title">That's all the questions!</div>
       <div class="kvy-bigscreen-sub" id="kvy-gameover-sub">Every answer is saved.</div>
-      <div><button class="kvy-keepsake-btn" id="kvy-keepsake-btn-over">&#x1F4D6; Download Keepsake</button></div>
     </div>
   </div>
 </div>
@@ -4693,6 +4692,9 @@ body {
     <div class="fsb-btn" data-fsound="gameover"><span class="fsb-icon">&#x1F480;</span><span class="fsb-label">GAME OVER</span></div>
     <div class="fsb-btn" data-fsound="suspense"><span class="fsb-icon">&#x23F3;</span><span class="fsb-label">SUSPENSE</span></div>
   </div>
+  <!-- Yaya-only keepsake download. Hidden by default; shown in kvyInit when
+       the logged-in player is "Yaya". Must NEVER show on Kaidan's screen. -->
+  <button class="kvy-keepsake-btn" id="kvy-keepsake-btn" style="display:none;">&#x1F4D6; Download Keepsake</button>
 </div>
 
 <!-- ========== CHAT PANEL (persists across all views) ========== -->
@@ -11109,8 +11111,17 @@ function kvyInit() {
   document.getElementById("kvy-done-btn").addEventListener("click", kvyDone);
   document.getElementById("kvy-next-btn").addEventListener("click", kvyNext);
   document.getElementById("kvy-startround-btn").addEventListener("click", kvyStartNextRound);
-  document.getElementById("kvy-keepsake-btn-round").addEventListener("click", kvyDownloadKeepsake);
-  document.getElementById("kvy-keepsake-btn-over").addEventListener("click", kvyDownloadKeepsake);
+
+  // Keepsake download lives on the floating sound board and is YAYA-ONLY —
+  // it must never show on Kaidan's screen (it would spoil the surprise).
+  // playerName is already set before kvyInit runs, so decide visibility now.
+  // (Connie 2026-06-05.)
+  var keepBtn = document.getElementById("kvy-keepsake-btn");
+  if (keepBtn) {
+    keepBtn.addEventListener("click", kvyDownloadKeepsake);
+    var amYaya = (playerName || "").trim().toLowerCase() === "yaya";
+    keepBtn.style.display = amYaya ? "block" : "none";
+  }
 }
 
 // -- PIECE 6 — download the keepsake -------------------------
