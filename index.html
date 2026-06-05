@@ -3438,6 +3438,13 @@ body {
       <span class="game-status coming-soon">Join a room to play</span>
     </div>
 
+    <div class="game-card" data-game="kaidanvsyaya">
+      <span class="game-icon">&#x1F3C6;</span>
+      <div class="game-name">Kaidan vs. Yaya</div>
+      <div class="game-tagline">240 questions. First done wins.</div>
+      <span class="game-status waiting">Join a room to play</span>
+    </div>
+
     <div class="game-card disabled" data-game="codebreaker">
       <span class="game-icon">&#x1F50D;</span>
       <div class="game-name">Code Breaker</div>
@@ -4080,6 +4087,104 @@ body {
 </div>
 
 <!-- ========== WOULD YOU RATHER VIEW ========== -->
+<style>
+.kvy-container { width: 100%; max-width: 640px; margin: 0 auto; padding: 16px 20px 32px; }
+.kvy-header { text-align: center; margin-bottom: 16px; }
+.kvy-title { font-size: 30px; font-weight: 900; letter-spacing: 2px; color: #fff; }
+.kvy-accent { color: #c1121f; }
+
+.kvy-score-bar { display: flex; justify-content: center; gap: 28px; margin-bottom: 18px;
+  font-size: 15px; font-weight: 600; color: #c9c9d4; }
+.kvy-score-val { color: #2dc653; font-weight: 900; font-size: 18px; }
+
+.kvy-card { background: #232340; border: 2px solid #34345a; border-radius: 16px;
+  padding: 24px 22px; text-align: center; margin-bottom: 18px; }
+.kvy-theme { font-size: 12px; font-weight: 700; letter-spacing: 2px; color: #2dc653; text-transform: uppercase; }
+.kvy-progress { font-size: 12px; color: #8a8a9a; margin-top: 4px; }
+.kvy-question { font-size: 21px; font-weight: 700; color: #fff; margin-top: 14px; line-height: 1.35; }
+
+.kvy-answer-area { text-align: center; }
+.kvy-answer { width: 100%; background: #1a1a2e; border: 2px solid #34345a; border-radius: 12px;
+  color: #fff; font-size: 16px; font-family: inherit; padding: 12px 14px; resize: vertical; }
+.kvy-answer:disabled { opacity: 0.6; }
+.kvy-done-btn { margin-top: 12px; background: #2dc653; color: #0d1117; border: none;
+  border-radius: 10px; font-size: 16px; font-weight: 800; padding: 12px 32px; cursor: pointer; }
+.kvy-done-btn:disabled { background: #4a4a63; color: #aaa; cursor: default; }
+.kvy-op-status { margin-top: 10px; font-size: 13px; color: #8a8a9a; min-height: 18px; }
+
+.kvy-reveal { margin-top: 18px; background: #232340; border: 2px solid #2dc653;
+  border-radius: 16px; padding: 20px; text-align: center; }
+.kvy-reveal-text { font-size: 17px; font-weight: 800; color: #2dc653; margin-bottom: 14px; }
+.kvy-reveal-answers { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+.kvy-reveal-answer { background: #1a1a2e; border-radius: 10px; padding: 12px 14px;
+  font-size: 15px; color: #e0e0e0; text-align: left; }
+.kvy-next-btn { background: #c1121f; color: #fff; border: none; border-radius: 10px;
+  font-size: 16px; font-weight: 800; padding: 12px 32px; cursor: pointer; }
+
+/* Round-end + game-over screens */
+.kvy-bigscreen { text-align: center; background: #232340; border: 2px solid #c1121f;
+  border-radius: 16px; padding: 36px 24px; margin-top: 8px; }
+.kvy-bigscreen-title { font-size: 26px; font-weight: 900; color: #fff; margin-bottom: 12px; }
+.kvy-bigscreen-score { font-size: 20px; font-weight: 700; color: #2dc653; margin-bottom: 22px; }
+.kvy-bigscreen-sub { font-size: 15px; color: #c9c9d4; margin-bottom: 8px; }
+</style>
+
+<div class="game-view" id="view-kaidanvsyaya">
+  <button class="back-to-hub" id="back-kaidanvsyaya">&#x2190; Back to Hub</button>
+
+  <div class="kvy-container">
+    <div class="kvy-header">
+      <div class="kvy-title">KAIDAN <span class="kvy-accent">vs.</span> YAYA</div>
+    </div>
+
+    <!-- PLAYING screen -->
+    <div id="kvy-play-area">
+      <!-- Score bar (current round) -->
+      <div class="kvy-score-bar">
+        <div class="kvy-score-item">You: <span class="kvy-score-val" id="kvy-myscore">0</span></div>
+        <div class="kvy-score-item">Them: <span class="kvy-score-val" id="kvy-opscore">0</span></div>
+      </div>
+
+      <!-- Question card -->
+      <div class="kvy-card">
+        <div class="kvy-theme" id="kvy-theme">LOADING...</div>
+        <div class="kvy-progress" id="kvy-progress">&nbsp;</div>
+        <div class="kvy-question" id="kvy-question">Getting your first question ready...</div>
+      </div>
+
+      <!-- Answer + Done -->
+      <div class="kvy-answer-area">
+        <textarea id="kvy-answer" class="kvy-answer" placeholder="Type your answer, then hit Done!" rows="3"></textarea>
+        <button class="kvy-done-btn" id="kvy-done-btn">Done</button>
+        <div class="kvy-op-status" id="kvy-op-status">&nbsp;</div>
+      </div>
+
+      <!-- Reveal (shown once both are Done) -->
+      <div class="kvy-reveal" id="kvy-reveal" style="display:none;">
+        <div class="kvy-reveal-text" id="kvy-reveal-text">&nbsp;</div>
+        <div class="kvy-reveal-answers">
+          <div class="kvy-reveal-answer" id="kvy-my-answer">You: —</div>
+          <div class="kvy-reveal-answer" id="kvy-their-answer">Them: —</div>
+        </div>
+        <button class="kvy-next-btn" id="kvy-next-btn">Next Question &#x27A1;</button>
+      </div>
+    </div>
+
+    <!-- ROUND-END screen -->
+    <div id="kvy-roundend" class="kvy-bigscreen" style="display:none;">
+      <div class="kvy-bigscreen-title" id="kvy-roundend-title">Round 1 winner!</div>
+      <div class="kvy-bigscreen-score" id="kvy-roundend-score">You 0 — 0 Them</div>
+      <button class="kvy-next-btn" id="kvy-startround-btn">Start Round 2 &#x27A1;</button>
+    </div>
+
+    <!-- GAME-OVER screen -->
+    <div id="kvy-gameover" class="kvy-bigscreen" style="display:none;">
+      <div class="kvy-bigscreen-title" id="kvy-gameover-title">That's all the questions!</div>
+      <div class="kvy-bigscreen-sub" id="kvy-gameover-sub">Every answer is saved.</div>
+    </div>
+  </div>
+</div>
+
 <div class="game-view" id="view-wouldyourather">
   <button class="back-to-hub" id="back-wouldyourather">&#x2190; Back to Hub</button>
 
@@ -4648,6 +4753,7 @@ function init() {
   bindUI();
   bsInit();
   wyrInit();
+  kvyInit();
   hmInit();
   cbInit();
   mbInit();
@@ -4725,6 +4831,7 @@ function bindUI() {
   document.getElementById('back-cipher').addEventListener('click', function() { ccLeaveGame(); });
   document.getElementById('back-goatcards').addEventListener('click', function() { gcLeaveGame(); });
   document.getElementById('back-wouldyourather').addEventListener('click', function() { wyrLeaveGame(); });
+  document.getElementById('back-kaidanvsyaya').addEventListener('click', function() { kvyLeaveGame(); });
   document.getElementById('back-spanishmath').addEventListener('click', function() { smLeaveGame(); });
   document.getElementById('back-colorsandclues').addEventListener('click', function() { hcLeaveGame(); });
 
@@ -4893,6 +5000,9 @@ function listenToRoom() {
       if (game === 'battleship') {
         bsStartGame();
       }
+      if (game === 'kaidanvsyaya' && !kvyState.active) {
+        kvyStartGame();
+      }
       if (game === 'wouldyourather' && !wyrState.active) {
         wyrStartGame();
       }
@@ -4961,7 +5071,7 @@ function updateGameCards(players) {
     }
 
     // Coming soon games stay disabled
-    if (game !== 'battleship' && game !== 'wouldyourather' && game !== 'hangman' && game !== 'codebreaker' && game !== 'mathbattle' && game !== 'cipher' && game !== 'goatcards' && game !== 'goatstation' && game !== 'spanishmath' && game !== 'colorsandclues' && game !== 'stackattack') {
+    if (game !== 'battleship' && game !== 'wouldyourather' && game !== 'hangman' && game !== 'codebreaker' && game !== 'mathbattle' && game !== 'cipher' && game !== 'goatcards' && game !== 'goatstation' && game !== 'spanishmath' && game !== 'colorsandclues' && game !== 'stackattack' && game !== 'kaidanvsyaya') {
       card.classList.add('disabled');
       return;
     }
@@ -5073,7 +5183,7 @@ function leaveRoom() {
     card.classList.add('disabled');
     var statusEl = card.querySelector('.game-status');
     var game = card.getAttribute('data-game');
-    if (game === 'battleship' || game === 'wouldyourather' || game === 'hangman' || game === 'codebreaker' || game === 'mathbattle' || game === 'cipher' || game === 'goatcards' || game === 'goatstation' || game === 'spanishmath' || game === 'colorsandclues') {
+    if (game === 'battleship' || game === 'wouldyourather' || game === 'hangman' || game === 'codebreaker' || game === 'mathbattle' || game === 'cipher' || game === 'goatcards' || game === 'goatstation' || game === 'spanishmath' || game === 'colorsandclues' || game === 'kaidanvsyaya') {
       statusEl.textContent = 'Join a room to play';
       statusEl.className = 'game-status waiting';
     }
@@ -10603,6 +10713,672 @@ var wyrState = {
   allTimeP1: 0,
   allTimeP2: 0
 };
+
+
+// -- Themes (ordered) + timer tier per theme --------------
+var KVY_THEMES = [
+  { key: "warmup",      label: "Warm-Up",                 sec: 45 },
+  { key: "wyr",         label: "Would You Rather",        sec: 20 },
+  { key: "thisorthat",  label: "This or That",            sec: 20 },
+  { key: "favorites",   label: "Favorites & Faves",       sec: 45 },
+  { key: "crazy",       label: "Things That Drive Me Crazy", sec: 45 },
+  { key: "funny",       label: "Funny & Embarrassing",    sec: 75 },
+  { key: "pets",        label: "Pets & The Crew",         sec: 45 },
+  { key: "superpowers", label: "Superpowers & Secret Talents", sec: 45 },
+  { key: "school",      label: "School, Smarts & Everyday Life", sec: 45 },
+  { key: "deep",        label: "Deep Questions",          sec: 90 },
+  { key: "dreams",      label: "Dreams & The Future",     sec: 45 },
+  { key: "youandme",    label: "You & Me (Kaidan & Yaya)", sec: 90 }
+];
+
+// Lookup: theme key -> seconds (built once, used by the timer)
+var KVY_THEME_SEC = {};
+KVY_THEMES.forEach(function(t) { KVY_THEME_SEC[t.key] = t.sec; });
+
+// -- Question bank -- 240 questions, flat, in level order --
+var KVY_QUESTIONS = [
+  // === LEVEL 1 — WARM-UP (20) ===
+  { t: "warmup", q: "If you could only eat ONE food forever, what would it be?" },
+  { t: "warmup", q: "What's the grossest food in the world?" },
+  { t: "warmup", q: "What superpower do you want most?" },
+  { t: "warmup", q: "What's the funniest word to say out loud?" },
+  { t: "warmup", q: "If you had a million dollars, what's the FIRST thing you'd buy?" },
+  { t: "warmup", q: "What animal would be the worst as a teacher?" },
+  { t: "warmup", q: "What's the best thing you've ever eaten?" },
+  { t: "warmup", q: "If you could be any age, what age would you pick?" },
+  { t: "warmup", q: "What's a sound you love? What's a sound you hate?" },
+  { t: "warmup", q: "What's the coolest thing you own?" },
+  { t: "warmup", q: "If you could rename yourself, what name would you pick?" },
+  { t: "warmup", q: "What's something that always makes you laugh?" },
+  { t: "warmup", q: "What's your favorite song right now?" },
+  { t: "warmup", q: "What's the last thing you laughed about today?" },
+  { t: "warmup", q: "Do you dream a lot? What's the wildest dream you remember?" },
+  { t: "warmup", q: "What are you scared of — any phobias?" },
+  { t: "warmup", q: "What's a tiny thing that makes you ridiculously happy?" },
+  { t: "warmup", q: "What's your most useless talent?" },
+  { t: "warmup", q: "What's the weirdest food combo you secretly love?" },
+  { t: "warmup", q: "What's something most people don't know about you?" },
+
+  // === LEVEL 2 — WOULD YOU RATHER (20) ===
+  { t: "wyr", q: "Pet pig or pet skunk?" },
+  { t: "wyr", q: "Fight 100 duck-sized horses or one horse-sized duck?" },
+  { t: "wyr", q: "Sneeze glitter or burp bubbles?" },
+  { t: "wyr", q: "Be able to fly or be invisible?" },
+  { t: "wyr", q: "Swim in a pool of Goldfish crackers or a pool of Sprite?" },
+  { t: "wyr", q: "Fight 100 tiny Salems or one giant Salem?" },
+  { t: "wyr", q: "Hands for feet or feet for hands?" },
+  { t: "wyr", q: "Smell like pizza forever or hear pizza noises forever?" },
+  { t: "wyr", q: "Have a pet dragon or a pet T-rex?" },
+  { t: "wyr", q: "Be famous on YouTube or famous in real life?" },
+  { t: "wyr", q: "Eat a bug for $100 — yes or no?" },
+  { t: "wyr", q: "Have a tail or have wings?" },
+  { t: "wyr", q: "Live in a treehouse or underground?" },
+  { t: "wyr", q: "Talk to animals or read minds?" },
+  { t: "wyr", q: "Always be too hot or always be too cold?" },
+  { t: "wyr", q: "Be a giant for a day or tiny for a day?" },
+  { t: "wyr", q: "Never use a screen for a month or never eat candy for a month?" },
+  { t: "wyr", q: "Have a robot butler or a magic carpet?" },
+  { t: "wyr", q: "Be the funniest person alive or the smartest?" },
+  { t: "wyr", q: "Time travel to the past or the future?" },
+
+  // === LEVEL 3 — THIS OR THAT (20) ===
+  { t: "thisorthat", q: "Pizza or chicken nuggets?" },
+  { t: "thisorthat", q: "Summer or winter?" },
+  { t: "thisorthat", q: "Morning or night?" },
+  { t: "thisorthat", q: "Sprite or any other drink?" },
+  { t: "thisorthat", q: "Minecraft or Roblox?" },
+  { t: "thisorthat", q: "Beach or mountains?" },
+  { t: "thisorthat", q: "Books or movies?" },
+  { t: "thisorthat", q: "Sweet or sour?" },
+  { t: "thisorthat", q: "Indoors or outdoors?" },
+  { t: "thisorthat", q: "Cake or ice cream?" },
+  { t: "thisorthat", q: "Hot or cold?" },
+  { t: "thisorthat", q: "Loud or quiet?" },
+  { t: "thisorthat", q: "Funny or scary movies?" },
+  { t: "thisorthat", q: "Big party or small hangout?" },
+  { t: "thisorthat", q: "Cats or dogs?" },
+  { t: "thisorthat", q: "Salty or sweet snacks?" },
+  { t: "thisorthat", q: "New stuff or old favorites?" },
+  { t: "thisorthat", q: "Texting or calling?" },
+  { t: "thisorthat", q: "Fast or slow?" },
+  { t: "thisorthat", q: "Early bird or night owl?" },
+
+  // === LEVEL 4 — FAVORITES & FAVES (20) ===
+  { t: "favorites", q: "Favorite color, and why that one?" },
+  { t: "favorites", q: "Favorite snack? (Goldfish, maybe?)" },
+  { t: "favorites", q: "Favorite dinner?" },
+  { t: "favorites", q: "Favorite dessert?" },
+  { t: "favorites", q: "Favorite drink?" },
+  { t: "favorites", q: "Favorite candy?" },
+  { t: "favorites", q: "Favorite game right now?" },
+  { t: "favorites", q: "Favorite YouTuber or show?" },
+  { t: "favorites", q: "Favorite movie?" },
+  { t: "favorites", q: "Favorite book?" },
+  { t: "favorites", q: "Favorite animal?" },
+  { t: "favorites", q: "Favorite season?" },
+  { t: "favorites", q: "Favorite holiday?" },
+  { t: "favorites", q: "Favorite thing to do outside?" },
+  { t: "favorites", q: "Favorite app or game on the computer?" },
+  { t: "favorites", q: "Favorite ice cream flavor?" },
+  { t: "favorites", q: "Favorite place you've ever been?" },
+  { t: "favorites", q: "Favorite thing to do with friends?" },
+  { t: "favorites", q: "Favorite chore (yes, there's gotta be one!)?" },
+  { t: "favorites", q: "Your lucky number, and why do you love it?" },
+
+  // === LEVEL 5 — THINGS THAT DRIVE ME CRAZY (20) ===
+  { t: "crazy", q: "What's a sound that drives you up the wall?" },
+  { t: "crazy", q: "What food do you refuse to eat, no matter what?" },
+  { t: "crazy", q: "What's the most annoying thing a grown-up does?" },
+  { t: "crazy", q: "What's the most annoying thing a kid does?" },
+  { t: "crazy", q: "What's a chore you'd pay someone else to do?" },
+  { t: "crazy", q: "What's something everyone likes that you secretly can't stand?" },
+  { t: "crazy", q: "What's the worst smell in the world?" },
+  { t: "crazy", q: "What's a word people say that bugs you?" },
+  { t: "crazy", q: "What totally ruins your day?" },
+  { t: "crazy", q: "What's the most boring thing you have to sit through?" },
+  { t: "crazy", q: "What's something that's WAY harder than it should be?" },
+  { t: "crazy", q: "What app, website, or gadget annoys you the most?" },
+  { t: "crazy", q: "What's a rule you think is dumb?" },
+  { t: "crazy", q: "What's the worst part about school or work?" },
+  { t: "crazy", q: "What's something that's always breaking or not working right?" },
+  { t: "crazy", q: "What's a show or video you can't stand?" },
+  { t: "crazy", q: "What's the most annoying noise a pet makes? (Salem, anyone?)" },
+  { t: "crazy", q: "What's something people do that's just plain rude?" },
+  { t: "crazy", q: "What weather do you hate most?" },
+  { t: "crazy", q: "What's the one thing guaranteed to put you in a bad mood?" },
+
+  // === LEVEL 6 — FUNNY & EMBARRASSING STUFF (20) ===
+  { t: "funny", q: "What's the funniest thing that ever happened to you?" },
+  { t: "funny", q: "What's the most trouble you've ever gotten into?" },
+  { t: "funny", q: "Is your room (or office) messy, or do you have to clean before you can think?" },
+  { t: "funny", q: "Do you make your bed? Does it ever look weird — like you're hiding something under there?" },
+  { t: "funny", q: "What's a joke that always makes you laugh?" },
+  { t: "funny", q: "What's the funniest thing about our screaming goats? (BOTH answer)" },
+  { t: "funny", q: "What's something you do that makes your friends (or family) crack up?" },
+  { t: "funny", q: "What's the most embarrassing thing that's happened to you?" },
+  { t: "funny", q: "If you got \"arrested,\" who's your ONE phone call? (Parents don't count!)" },
+  { t: "funny", q: "What's the silliest thing you believed when you were little?" },
+  { t: "funny", q: "What's a word you said wrong as a little kid? (Yaya can help!)" },
+  { t: "funny", q: "What's the weirdest thing in your room or bag right now?" },
+  { t: "funny", q: "What's a habit you have that's a little weird?" },
+  { t: "funny", q: "What's the goofiest face you can make? (Make it!)" },
+  { t: "funny", q: "What's the worst haircut or outfit you've ever had?" },
+  { t: "funny", q: "What's a time you laughed at the worst possible moment?" },
+  { t: "funny", q: "What's your best impression of someone or something?" },
+  { t: "funny", q: "What's a prank you'd love to pull (or have pulled)?" },
+  { t: "funny", q: "What song do you sing when you think no one's listening?" },
+  { t: "funny", q: "What's the silliest reason you've ever cried laughing?" },
+
+  // === LEVEL 7 — PETS & THE CREW (20) ===
+  { t: "pets", q: "What does Brady (the dog) do that's funny or sweet?" },
+  { t: "pets", q: "What's the most cat-like thing Weezy does?" },
+  { t: "pets", q: "If Salem could talk, what would all that screaming be saying?" },
+  { t: "pets", q: "Which pet is the bravest? Which is the most useless in an emergency?" },
+  { t: "pets", q: "What's the funniest thing Jace has ever done?" },
+  { t: "pets", q: "What is Kai really good at?" },
+  { t: "pets", q: "What makes someone a really good friend?" },
+  { t: "pets", q: "Who's the funniest person you know?" },
+  { t: "pets", q: "Who do you go to when you need help?" },
+  { t: "pets", q: "What's the best thing about your best friend?" },
+  { t: "pets", q: "If your pets had jobs, what would each one do?" },
+  { t: "pets", q: "What's a fun memory with a friend?" },
+  { t: "pets", q: "Who would you want on your team for ANY challenge?" },
+  { t: "pets", q: "What animal would you add to the family if you could?" },
+  { t: "pets", q: "What's something nice a friend has done for you?" },
+  { t: "pets", q: "Who makes you laugh the most?" },
+  { t: "pets", q: "If you could have any famous person as a friend, who?" },
+  { t: "pets", q: "What pet would be the worst to own?" },
+  { t: "pets", q: "What's the best thing about having pets?" },
+  { t: "pets", q: "Who's someone you look up to, and why?" },
+
+  // === LEVEL 8 — SUPERPOWERS & SECRET TALENTS (20) ===
+  { t: "superpowers", q: "What are you better at than almost anyone you know?" },
+  { t: "superpowers", q: "How fast can you solve a Rubik's cube? What's your secret?" },
+  { t: "superpowers", q: "What's a cool trick you can do on your scooter?" },
+  { t: "superpowers", q: "If you were a hero, what would your special power be?" },
+  { t: "superpowers", q: "What's something you're getting better and better at?" },
+  { t: "superpowers", q: "What's a hidden skill you wish more people knew about?" },
+  { t: "superpowers", q: "What's something surprising about you?" },
+  { t: "superpowers", q: "If you could instantly be amazing at one thing, what?" },
+  { t: "superpowers", q: "What's a talent you're secretly proud of?" },
+  { t: "superpowers", q: "What's something you can do that looks impossible?" },
+  { t: "superpowers", q: "What's the smartest thing you've ever figured out?" },
+  { t: "superpowers", q: "What would you teach a class on if you had to?" },
+  { t: "superpowers", q: "What's a skill you really want to learn?" },
+  { t: "superpowers", q: "What's something you fixed or built that you're proud of?" },
+  { t: "superpowers", q: "What's the hardest puzzle or level you've ever beaten?" },
+  { t: "superpowers", q: "Do you like cracking codes? What kind is coolest?" },
+  { t: "superpowers", q: "Do you like games of chance — wheels, dice, guessing odds?" },
+  { t: "superpowers", q: "(Yaya answers) What's a talent of Kaidan's that makes you proud?" },
+  { t: "superpowers", q: "What's your most useful talent? Your most useless one?" },
+  { t: "superpowers", q: "If you went on a talent show, what would you do?" },
+
+  // === LEVEL 9 — SCHOOL, SMARTS & EVERYDAY LIFE (20) ===
+  { t: "school", q: "Favorite class — or favorite thing about your job?" },
+  { t: "school", q: "Which class (or task) would you delete forever?" },
+  { t: "school", q: "What's your favorite thing you actually get to DO in class or at work?" },
+  { t: "school", q: "What time do you wake up? Does anyone have to drag you out of bed?" },
+  { t: "school", q: "What time do you go to bed?" },
+  { t: "school", q: "Are you a morning person or a night owl?" },
+  { t: "school", q: "What's the first thing you do when you get home?" },
+  { t: "school", q: "What's your room or workspace like — messy or neat?" },
+  { t: "school", q: "What's your least favorite chore?" },
+  { t: "school", q: "What's your favorite chore (there's gotta be one!)?" },
+  { t: "school", q: "What's the best part of your day, usually?" },
+  { t: "school", q: "What's your favorite day of the week, and why?" },
+  { t: "school", q: "What do you eat for breakfast?" },
+  { t: "school", q: "What's something you do every single day?" },
+  { t: "school", q: "What's a subject or topic you're really good at?" },
+  { t: "school", q: "What's something at school or work that's WAY harder than it should be?" },
+  { t: "school", q: "If you could change one rule at school or work, what?" },
+  { t: "school", q: "What's the best field trip or work trip you've ever had?" },
+  { t: "school", q: "What's something you learned recently that surprised you?" },
+  { t: "school", q: "What would your perfect school (or work) day look like?" },
+
+  // === LEVEL 10 — DEEP QUESTIONS (20) ===
+  { t: "deep", q: "What's a perfect day from start to finish?" },
+  { t: "deep", q: "What's the best gift you've ever gotten?" },
+  { t: "deep", q: "If you could have dinner with anyone in the world, who?" },
+  { t: "deep", q: "What's something you're really proud of but don't brag about?" },
+  { t: "deep", q: "What's the bravest thing you've ever done?" },
+  { t: "deep", q: "What's a memory that always makes you smile?" },
+  { t: "deep", q: "What's something you wish people knew about you?" },
+  { t: "deep", q: "What's the best advice anyone's ever given you?" },
+  { t: "deep", q: "If your house was on fire (everyone safe), what 3 things would you grab?" },
+  { t: "deep", q: "What's something you've changed your mind about?" },
+  { t: "deep", q: "What would you do with a day where you could break ALL the rules?" },
+  { t: "deep", q: "If you had your own holiday, what would people do on it?" },
+  { t: "deep", q: "What's a tiny thing that makes a day great?" },
+  { t: "deep", q: "When something gets really frustrating, what helps you calm down and try again?" },
+  { t: "deep", q: "What makes you feel brave?" },
+  { t: "deep", q: "What's something hard you didn't give up on? How'd it feel to win?" },
+  { t: "deep", q: "Have you ever helped someone having a tough time? What did you do?" },
+  { t: "deep", q: "What's a nice thing someone could do that would mean a lot to you?" },
+  { t: "deep", q: "What's something kind someone did for you that you never forgot?" },
+  { t: "deep", q: "What do you think makes someone a really good person?" },
+
+  // === LEVEL 11 — DREAMS & THE FUTURE (20) ===
+  { t: "dreams", q: "You want to be a YouTuber — what would your channel be about?" },
+  { t: "dreams", q: "What's a dream you have for when you're older?" },
+  { t: "dreams", q: "What's something you want to learn how to do?" },
+  { t: "dreams", q: "If you could invent anything, what would it be?" },
+  { t: "dreams", q: "Where do you want to live someday?" },
+  { t: "dreams", q: "What's your dream job — real or totally made up?" },
+  { t: "dreams", q: "What country do you most want to visit?" },
+  { t: "dreams", q: "You want to go to Tokyo — what would you do there first?" },
+  { t: "dreams", q: "What did you love about Alaska? About Japan?" },
+  { t: "dreams", q: "If a game could drop you anywhere on Earth, where would you go?" },
+  { t: "dreams", q: "What's an adventure you'd love to have someday?" },
+  { t: "dreams", q: "What's a goal you're working on right now?" },
+  { t: "dreams", q: "If you could meet your future self, what would you ask?" },
+  { t: "dreams", q: "What's something you hope never changes?" },
+  { t: "dreams", q: "What would you do if you won a year of anything you wanted?" },
+  { t: "dreams", q: "What's a place you'd love to take your family?" },
+  { t: "dreams", q: "If you could be the best in the world at one thing, what?" },
+  { t: "dreams", q: "What do you want to be remembered for?" },
+  { t: "dreams", q: "What's a big dream that feels impossible but you wish for anyway?" },
+  { t: "dreams", q: "What's one thing you want to do before you grow up?" },
+
+  // === LEVEL 12 — YOU & ME (KAIDAN & YAYA) (20) ===
+  { t: "youandme", q: "What do you wish we could do together if we lived closer?" },
+  { t: "youandme", q: "What's something you'd want to teach me?" },
+  { t: "youandme", q: "What's something you've always wanted to ASK me?" },
+  { t: "youandme", q: "What do you think you and I have in common?" },
+  { t: "youandme", q: "If I visited you for a whole week, what would we do?" },
+  { t: "youandme", q: "What's your favorite thing we do together?" },
+  { t: "youandme", q: "What's the funniest thing about us?" },
+  { t: "youandme", q: "What's something you want to know about when I was your age?" },
+  { t: "youandme", q: "What's a question you've always wondered about your Yaya?" },
+  { t: "youandme", q: "What's the best thing about being part of our family?" },
+  { t: "youandme", q: "What's a tradition you love (or one we should start)?" },
+  { t: "youandme", q: "What would the perfect visit together look like?" },
+  { t: "youandme", q: "What's something you think I'm really good at?" },
+  { t: "youandme", q: "What's a story you want me to tell you?" },
+  { t: "youandme", q: "What do you hope we do together someday?" },
+  { t: "youandme", q: "What's something you want me to always remember about you?" },
+  { t: "youandme", q: "What makes our family special?" },
+  { t: "youandme", q: "What's something you love about your mom? Your dad?" },
+  { t: "youandme", q: "If you wrote one sentence about your life so far, what would it say?" },
+  { t: "youandme", q: "What's the best thing about being YOU?" }
+];
+
+// -- Self-check (dev only -- logs once at load) -----------
+// Confirms the data structure is intact before gameplay is built on it.
+(function kvyDataSelfCheck() {
+  var total = KVY_QUESTIONS.length;
+  var themeKeys = KVY_THEMES.map(function(t) { return t.key; });
+  var bad = KVY_QUESTIONS.filter(function(q) {
+    return themeKeys.indexOf(q.t) === -1 || !q.q || !q.q.trim();
+  });
+  var counts = {};
+  KVY_QUESTIONS.forEach(function(q) { counts[q.t] = (counts[q.t] || 0) + 1; });
+  console.log("[KVY data] " + total + " questions, " +
+    themeKeys.length + " themes, " +
+    Math.ceil(total / 15) + " rounds of 15. Bad entries: " + bad.length);
+  if (bad.length) console.warn("[KVY data] malformed questions:", bad);
+})();
+
+
+// -- KVY constants --------------------------------------------
+var KVY_ROUND_SIZE = 15;                              // questions per round
+var KVY_ROUNDS = Math.ceil(KVY_QUESTIONS.length / 15); // 16
+
+// Permanent, global keepsake store — NOT under any room. All sessions
+// (any room) append answers here. This is what survives across the ~15
+// sittings and what the export (Piece 6) reads. Single shared store:
+// this game is specifically Kaidan & Yaya's keepsake.
+var KVY_KEEPSAKE = "kaidanvsyaya_keepsake";
+
+// First UNANSWERED question index, given the saved keepsake answers.
+// Resume starts here. If all answered, returns KVY_QUESTIONS.length
+// (caller treats that as "game complete").
+function kvyFirstUnanswered(answers) {
+  answers = answers || {};
+  for (var i = 0; i < KVY_QUESTIONS.length; i++) {
+    if (!answers[i]) return i;
+  }
+  return KVY_QUESTIONS.length; // all done
+}
+
+// Round number (1-based) for a given question index.
+function kvyRoundOf(qIndex) { return Math.floor(qIndex / KVY_ROUND_SIZE) + 1; }
+// True if qIndex is the LAST question of its round (or the very last question).
+function kvyIsRoundEnd(qIndex) {
+  return ((qIndex + 1) % KVY_ROUND_SIZE === 0) || (qIndex === KVY_QUESTIONS.length - 1);
+}
+
+// -- KVY state ------------------------------------------------
+var kvyState = {
+  active: false,
+  qIndex: 0,
+  myDone: false,
+  listeners: []
+};
+
+// "His answer = not Yaya": returns 'p1'/'p2' for whichever slot is Kaidan.
+// Read from the live players node. Used by the keepsake export (later);
+// defined here so the rule lives in one place.
+function kvyKaidanSlot(players) {
+  players = players || {};
+  var n1 = ((players.p1 && players.p1.name) || "").trim().toLowerCase();
+  if (n1 && n1 !== "yaya") return "p1";
+  return "p2"; // default: if p1 is Yaya (or unknown), the other slot is Kaidan
+}
+
+// -- PIECE 4/5 — save a COMPLETED round to the keepsake -------
+// Called at the round boundary (from kvyNext) by p1 only. Copies the
+// round's accumulated roundLog (15 questions held in the live room)
+// into the PERMANENT, GLOBAL keepsake — keyed by qIndex so a replay of
+// the same round overwrites cleanly (one clean record per question).
+// Freezes which slot is Kaidan at save time. Nothing persists until the
+// round is complete; an abandoned round's roundLog is simply never copied.
+function kvySaveRound(roundLog, done) {
+  roundLog = roundLog || {};
+  roomRef.child("players").once("value").then(function(psnap) {
+    var kaidan = kvyKaidanSlot(psnap.val());
+    var batch = {};
+    Object.keys(roundLog).forEach(function(qIndex) {
+      var r = roundLog[qIndex];
+      batch[qIndex] = {
+        q: r.q,
+        theme: r.theme,
+        p1: r.p1 || "",
+        p2: r.p2 || "",
+        kaidan: kaidan,                               // "p1" or "p2"
+        ts: firebase.database.ServerValue.TIMESTAMP
+      };
+    });
+    // Single multi-path update under the permanent answers node.
+    db.ref(KVY_KEEPSAKE + "/answers").update(batch).then(function() {
+      if (typeof done === "function") done();
+    });
+  });
+}
+
+// -- Init (called once at page load, alongside wyrInit) ------
+// ADD THIS CALL to the hub's init() function: kvyInit();
+function kvyInit() {
+  document.getElementById("kvy-done-btn").addEventListener("click", kvyDone);
+  document.getElementById("kvy-next-btn").addEventListener("click", kvyNext);
+  document.getElementById("kvy-startround-btn").addEventListener("click", kvyStartNextRound);
+}
+
+// -- Start the game (called from the hub's gameListener) ------
+function kvyStartGame() {
+  kvyState.active = true;
+  showView("kaidanvsyaya"); // hub helper — prepends "view-" itself
+
+  // p1 seeds the live room state — RESUMING from the permanent keepsake.
+  // Read what's already been answered (across all past sessions), then
+  // start the room at the first unanswered question. p2 just listens to
+  // whatever p1 seeds, so resume logic lives in one place.
+  var kvyRef = roomRef.child("kaidanvsyaya");
+  if (playerId === "p1") {
+    db.ref(KVY_KEEPSAKE + "/answers").once("value").then(function(asnap) {
+      var resumeAt = kvyFirstUnanswered(asnap.val());
+      if (resumeAt >= KVY_QUESTIONS.length) {
+        // Everything answered already — go straight to game over.
+        kvyRef.set({ phase: "gameover", qIndex: KVY_QUESTIONS.length - 1,
+          p1: { text: "", done: false, doneAt: null },
+          p2: { text: "", done: false, doneAt: null },
+          scored: true, p1Score: 0, p2Score: 0 });
+        return;
+      }
+      kvyRef.set({
+        phase: "playing",          // "playing" | "roundend" | "gameover"
+        qIndex: resumeAt,          // RESUME point — first unanswered question
+        p1: { text: "", done: false, doneAt: null },
+        p2: { text: "", done: false, doneAt: null },
+        scored: false,
+        p1Score: 0,                // CURRENT ROUND score (resets each round)
+        p2Score: 0
+      });
+    });
+  }
+
+  kvyListen();
+}
+
+// -- Listen for question state -------------------------------
+function kvyListen() {
+  var kvyRef = roomRef.child("kaidanvsyaya");
+  var fn = kvyRef.on("value", function(snap) {
+    var d = snap.val();
+    if (!d || !kvyState.active) return;
+
+    // New question? reset my local "done" latch.
+    if (d.qIndex !== kvyState.qIndex) {
+      kvyState.qIndex = d.qIndex;
+      kvyState.myDone = false;
+    }
+
+    var me = playerId;                       // 'p1' or 'p2'
+    var op = (me === "p1") ? "p2" : "p1";
+    var mine = d[me] || {};
+    var theirs = d[op] || {};
+    kvyState.myDone = !!mine.done;
+
+    // Phase routing: show the right screen on both clients.
+    var phase = d.phase || "playing";
+    document.getElementById("kvy-play-area").style.display = (phase === "playing") ? "block" : "none";
+    document.getElementById("kvy-roundend").style.display = (phase === "roundend") ? "block" : "none";
+    document.getElementById("kvy-gameover").style.display = (phase === "gameover") ? "block" : "none";
+
+    if (phase === "roundend") { kvyRenderRoundEnd(d); return; }
+    if (phase === "gameover") { kvyRenderGameOver(d); return; }
+
+    kvyRenderQuestion(d, mine, theirs);
+
+    // Award points exactly once, when BOTH are done. Single writer = p1.
+    if (d.p1 && d.p2 && d.p1.done && d.p2.done && !d.scored && playerId === "p1") {
+      var a1 = d.p1.doneAt || 0;
+      var a2 = d.p2.doneAt || 0;
+      var upd = { scored: true };
+      // Smaller timestamp clicked Done first = 2 points. Tie -> both 0
+      // (shouldn't happen with server timestamps, but safe).
+      if (a1 < a2) upd.p1Score = (d.p1Score || 0) + 2;
+      else if (a2 < a1) upd.p2Score = (d.p2Score || 0) + 2;
+      // Accumulate THIS question's answers into the round log (in the live
+      // room, not the permanent keepsake). Nothing persists permanently
+      // until the round's 15th question finishes — see kvySaveRound, called
+      // from kvyNext at the round boundary. (Connie 2026-06-05: only save
+      // completed rounds; an abandoned round saves nothing.)
+      upd["roundLog/" + d.qIndex] = {
+        q: KVY_QUESTIONS[d.qIndex].q,
+        theme: KVY_QUESTIONS[d.qIndex].t,
+        p1: (d.p1 && d.p1.text) || "",
+        p2: (d.p2 && d.p2.text) || ""
+      };
+      kvyRef.update(upd);
+    }
+  });
+  kvyState.listeners.push({ ref: kvyRef, event: "value", fn: fn });
+}
+
+// -- Render the current question + answers --------------------
+function kvyRenderQuestion(d, mine, theirs) {
+  var q = KVY_QUESTIONS[d.qIndex];
+  if (!q) return;
+  var themeLabel = "";
+  KVY_THEMES.forEach(function(t) { if (t.key === q.t) themeLabel = t.label; });
+
+  document.getElementById("kvy-theme").textContent = themeLabel;
+  document.getElementById("kvy-progress").textContent =
+    "Question " + (d.qIndex + 1) + " of " + KVY_QUESTIONS.length;
+  document.getElementById("kvy-question").textContent = q.q;
+
+  // Scores
+  document.getElementById("kvy-myscore").textContent =
+    (playerId === "p1" ? (d.p1Score || 0) : (d.p2Score || 0));
+  document.getElementById("kvy-opscore").textContent =
+    (playerId === "p1" ? (d.p2Score || 0) : (d.p1Score || 0));
+
+  // My input — locked once I've clicked Done.
+  var input = document.getElementById("kvy-answer");
+  var doneBtn = document.getElementById("kvy-done-btn");
+  if (mine.done) {
+    input.value = mine.text || input.value;
+    input.disabled = true;
+    doneBtn.disabled = true;
+    doneBtn.textContent = "Locked in ✓";
+  } else {
+    input.disabled = false;
+    doneBtn.disabled = false;
+    doneBtn.textContent = "Done";
+  }
+
+  // Opponent status line
+  var opStatus = document.getElementById("kvy-op-status");
+  opStatus.textContent = theirs.done ? (opponentName || "They") + " is done"
+                                     : "Waiting for " + (opponentName || "the other player") + "...";
+
+  // Reveal once both done.
+  var reveal = document.getElementById("kvy-reveal");
+  if (d.p1 && d.p2 && d.p1.done && d.p2.done && d.scored) {
+    var firstSlot = (d.p1.doneAt < d.p2.doneAt) ? "p1" : "p2";
+    var iWasFirst = (firstSlot === playerId);
+    reveal.style.display = "block";
+    document.getElementById("kvy-reveal-text").textContent =
+      iWasFirst ? "You finished first — +2 points!" :
+                  (opponentName || "They") + " finished first — +2 points to them.";
+    // Show BOTH answers, mine and theirs.
+    document.getElementById("kvy-my-answer").textContent =
+      "You: " + (mine.text || "(blank)");
+    document.getElementById("kvy-their-answer").textContent =
+      (opponentName || "Them") + ": " + (theirs.text || "(blank)");
+    // Next button on BOTH players (idempotent advance, see kvyNext).
+    // Label changes on the last question of a round.
+    var nextBtn = document.getElementById("kvy-next-btn");
+    nextBtn.style.display = "inline-block";
+    nextBtn.textContent = kvyIsRoundEnd(d.qIndex)
+      ? "See Round Result ➡" : "Next Question ➡";
+  } else {
+    reveal.style.display = "none";
+  }
+}
+
+// -- Render the round-winner screen --------------------------
+function kvyRenderRoundEnd(d) {
+  var round = kvyRoundOf(d.qIndex);
+  var s1 = d.p1Score || 0, s2 = d.p2Score || 0;
+  // Names come from the room globals (not stored under kaidanvsyaya).
+  var myName = playerName || "You";
+  var opName = opponentName || "Them";
+  var myScore = (playerId === "p1") ? s1 : s2;
+  var opScore = (playerId === "p1") ? s2 : s1;
+
+  var headline;
+  if (myScore > opScore) headline = "You win Round " + round + "!";
+  else if (opScore > myScore) headline = opName + " wins Round " + round + "!";
+  else headline = "Round " + round + " is a tie!";
+
+  document.getElementById("kvy-roundend-title").textContent = headline;
+  document.getElementById("kvy-roundend-score").textContent =
+    myName + " " + myScore + " — " + opScore + " " + opName;
+
+  var btn = document.getElementById("kvy-startround-btn");
+  if (round >= KVY_ROUNDS) {
+    btn.textContent = "Finish ➡";
+  } else {
+    btn.textContent = "Start Round " + (round + 1) + " ➡";
+  }
+}
+
+// -- Render the game-over screen -----------------------------
+function kvyRenderGameOver(d) {
+  document.getElementById("kvy-gameover-title").textContent =
+    "That's all " + KVY_QUESTIONS.length + " questions!";
+  document.getElementById("kvy-gameover-sub").textContent =
+    "Every answer is saved. Open the keepsake to read them back.";
+}
+
+// -- Click Done: save my answer + stamp the time -------------
+function kvyDone() {
+  if (kvyState.myDone) return;
+  var input = document.getElementById("kvy-answer");
+  kvyState.myDone = true;
+  roomRef.child("kaidanvsyaya/" + playerId).set({
+    text: input.value || "",
+    done: true,
+    doneAt: firebase.database.ServerValue.TIMESTAMP
+  });
+}
+
+// -- Next question (either player can click) -----------------
+// Idempotent: advances to (the question we're revealing) + 1. If both
+// players click, the second click computes the same target and the
+// transaction no-ops instead of skipping a question. A Firebase
+// transaction guarantees only the first writer actually advances.
+function kvyNext() {
+  var fromIndex = kvyState.qIndex; // the question currently revealed on MY screen
+  var kvyRef = roomRef.child("kaidanvsyaya");
+  kvyRef.transaction(function(d) {
+    if (!d) return d;
+    // Only advance if nobody has already moved us past this question.
+    if (d.qIndex !== fromIndex) return; // abort — already advanced
+    if (kvyIsRoundEnd(fromIndex)) {
+      // End of a round (or the game): show the round-winner screen instead
+      // of advancing the question. Scores stay so the screen can show them.
+      d.phase = "roundend";
+      return d;
+    }
+    var next = fromIndex + 1;
+    d.qIndex = next;
+    d.p1 = { text: "", done: false, doneAt: null };
+    d.p2 = { text: "", done: false, doneAt: null };
+    d.scored = false;
+    return d;
+  }, function(err, committed, snap) {
+    // After the transaction: if WE just transitioned to roundend, the round
+    // is complete — save its 15 answers to the permanent keepsake. Single
+    // writer (p1) to avoid a double save. (Connie 2026-06-05: save only
+    // completed rounds.)
+    if (err || !committed || playerId !== "p1") return;
+    var d = snap.val();
+    if (d && d.phase === "roundend") {
+      kvySaveRound(d.roundLog);
+    }
+  });
+}
+
+// -- Start the next round (either player; idempotent) --------
+// From the round-end screen: if this was the last round, go to game over.
+// Otherwise advance to the next question and RESET round scores to 0-0.
+function kvyStartNextRound() {
+  var kvyRef = roomRef.child("kaidanvsyaya");
+  kvyRef.transaction(function(d) {
+    if (!d || d.phase !== "roundend") return; // abort — already moved on
+    var round = kvyRoundOf(d.qIndex);
+    if (round >= KVY_ROUNDS) {
+      d.phase = "gameover";
+      return d;
+    }
+    d.phase = "playing";
+    d.qIndex = d.qIndex + 1;        // first question of the next round
+    d.p1 = { text: "", done: false, doneAt: null };
+    d.p2 = { text: "", done: false, doneAt: null };
+    d.scored = false;
+    d.p1Score = 0;                  // reset — each round scored on its own
+    d.p2Score = 0;
+    d.roundLog = null;             // clear — next round accumulates fresh
+    return d;
+  });
+}
+
+// -- Back to hub + cleanup (matches the hub's leave/cleanup pattern) --
+function kvyLeaveGame() {
+  kvyCleanup();
+  showView("hub");
+}
+
+function kvyCleanup() {
+  kvyState.active = false;
+  kvyState.qIndex = 0;
+  kvyState.myDone = false;
+  kvyState.listeners.forEach(function(l) { l.ref.off(l.event, l.fn); });
+  kvyState.listeners = [];
+}
+
 
 function wyrInit() {
   document.getElementById('wyr-mute-btn').addEventListener('click', function() {
