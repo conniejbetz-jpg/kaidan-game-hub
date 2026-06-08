@@ -276,6 +276,9 @@ body {
 
 .game-card[data-game="battleship"] { border-color: #0077b6; }
 .game-card[data-game="battleship"]:hover { box-shadow: 0 8px 24px rgba(0, 119, 182, 0.3); }
+.game-card[data-game="redfiles"] { border-color: #d62828; }
+.game-card[data-game="redfiles"]:hover { box-shadow: 0 8px 24px rgba(214, 40, 40, 0.3); }
+.game-card[data-game="redfiles"] .game-icon { color: #d62828; }
 .game-card[data-game="hangman"] { border-color: #f4a261; }
 .game-card[data-game="hangman"]:hover { box-shadow: 0 8px 24px rgba(244, 162, 97, 0.3); }
 .game-card[data-game="goatstation"] { border-color: #2dc653; }
@@ -3451,6 +3454,13 @@ body {
       <span class="game-status waiting">Join a room to play</span>
     </div>
 
+    <div class="game-card disabled" data-game="redfiles">
+      <span class="game-icon">&#x1F4D5;</span>
+      <div class="game-name">The Red Files</div>
+      <div class="game-tagline">Kaidan's secret mission. A new chapter every Sunday.</div>
+      <span class="game-status coming-soon" id="redfiles-status">Coming soon</span>
+    </div>
+
     <div class="game-card disabled" data-game="codebreaker">
       <span class="game-icon">&#x1F50D;</span>
       <div class="game-name">Code Breaker</div>
@@ -4884,6 +4894,23 @@ function init() {
   chatInit();
 }
 
+// ── Red Files gate (solo reading site, Yaya-only) ────────
+function isYayaPlayer() {
+  return (playerName || '').trim().toLowerCase() === 'yaya';
+}
+function applyRedFilesGate() {
+  var card = document.querySelector('.game-card[data-game="redfiles"]');
+  if (!card) return;
+  var status = document.getElementById('redfiles-status');
+  if (isYayaPlayer()) {
+    card.classList.remove('disabled');
+    if (status) { status.textContent = 'Open the book'; status.className = 'game-status ready'; }
+  } else {
+    card.classList.add('disabled');
+    if (status) { status.textContent = 'Coming soon'; status.className = 'game-status coming-soon'; }
+  }
+}
+
 // ── UI Bindings ──────────────────────────────────────────
 function bindUI() {
   document.getElementById('btn-create').addEventListener('click', createRoom);
@@ -4929,8 +4956,13 @@ function bindUI() {
 
   document.querySelectorAll('.game-card').forEach(function(card) {
     card.addEventListener('click', function() {
-      if (card.classList.contains('disabled')) return;
       var game = card.getAttribute('data-game');
+      // The Red Files — solo reading site, not a room game. Yaya-only soft gate.
+      if (game === 'redfiles') {
+        if (isYayaPlayer()) window.location.href = 'red-files.html';
+        return; // anyone else: card stays "Coming soon", does nothing
+      }
+      if (card.classList.contains('disabled')) return;
       if (game === 'chess') {
         window.open('https://lichess.org/?any#friend', '_blank');
         return;
@@ -4938,6 +4970,9 @@ function bindUI() {
       proposeGame(game);
     });
   });
+
+  // Red Files gate: unlock the card only for the player signed in as "Yaya".
+  applyRedFilesGate();
 
   document.getElementById('back-battleship').addEventListener('click', function() { bsLeaveGame(); });
   document.getElementById('back-hangman').addEventListener('click', function() { hmLeaveGame(); });
@@ -5190,6 +5225,9 @@ function updateGameCards(players) {
       return;
     }
 
+    // The Red Files — solo reading site, not a room game. Gate handles its state.
+    if (game === 'redfiles') { applyRedFilesGate(); return; }
+
     // Coming soon games stay disabled
     if (game !== 'battleship' && game !== 'wouldyourather' && game !== 'hangman' && game !== 'codebreaker' && game !== 'mathbattle' && game !== 'cipher' && game !== 'goatcards' && game !== 'goatstation' && game !== 'colorsandclues' && game !== 'stackattack' && game !== 'kaidanvsyaya' && game !== 'statecapitals') {
       card.classList.add('disabled');
@@ -5308,6 +5346,7 @@ function leaveRoom() {
       statusEl.className = 'game-status waiting';
     }
   });
+  applyRedFilesGate(); // re-unlock for Yaya after the blanket disable above
 
   toast('Left room', 'info');
 }
