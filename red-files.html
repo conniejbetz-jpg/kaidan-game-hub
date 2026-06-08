@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Red Files: Kaidan's Secret Mission</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Russo+One&family=Special+Elite&display=swap');
+
+  :root{
+    --red:#d62828; --red-deep:#9d0208; --red-glow:#ff4d4d;
+    --ink:#1c1410; --paper:#f4ead8; --paper-edge:#e6d6ba;
+    --gold:#e8b54b; --night:#140a0c;
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  body{
+    font-family:'Crimson Pro',Georgia,serif;
+    font-size:15px;
+    background:radial-gradient(circle at 50% 0%, #2a1216 0%, transparent 60%), #100709;
+    color:var(--paper); min-height:100vh; padding:24px 16px 70px;
+  }
+  .container{max-width:920px; margin:0 auto}
+  .hidden{display:none !important}
+  button{font-family:inherit}
+
+  /* ---- Top nav ---- */
+  .topnav{
+    display:flex; justify-content:center; align-items:center; gap:8px; flex-wrap:wrap;
+    margin-bottom:22px;
+  }
+  .topnav button{
+    font-family:'Russo One',sans-serif; background:#241618; color:var(--gold);
+    border:1px solid rgba(232,181,75,.3); padding:7px 13px; border-radius:9px;
+    cursor:pointer; letter-spacing:1px; font-size:12px; transition:.15s;
+  }
+  .topnav button:hover{border-color:var(--gold); color:#fff}
+  .topnav .spacer{flex:1}
+
+  h1.title{
+    font-family:'Cinzel',serif; font-weight:700; text-align:center;
+    font-size:clamp(30px,6vw,52px); color:var(--gold); line-height:1.05;
+    text-shadow:0 2px 0 var(--red-deep), 0 0 26px rgba(214,40,40,.4);
+    margin-bottom:6px;
+  }
+  .subtitle{
+    text-align:center; font-family:'Russo One',sans-serif; color:var(--red-glow);
+    letter-spacing:5px; text-transform:uppercase; font-size:13px; margin-bottom:20px;
+  }
+  .sec-label{
+    font-family:'Russo One',sans-serif; color:var(--red-glow);
+    letter-spacing:4px; text-transform:uppercase; font-size:13px;
+    text-align:center; margin:30px 0 6px;
+  }
+
+  /* ---- COVER ---- */
+  .cover{ text-align:center; padding:18px 0 0; }
+  .cover-art{
+    width:min(420px,84vw); aspect-ratio:1/1; margin:18px auto 6px;
+    border-radius:18px; border:2px solid rgba(232,181,75,.3);
+    background:radial-gradient(circle at 50% 38%, #3a0d14, #14080b);
+    display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden;
+    box-shadow:0 18px 50px rgba(0,0,0,.6);
+  }
+  .cover-art svg{ width:62%; height:62%; filter:drop-shadow(0 0 14px var(--red-glow)); }
+  .cover-art .art-slot-tag{
+    position:absolute; bottom:10px; left:0; right:0; text-align:center;
+    font-family:'Special Elite',monospace; font-size:11px; color:#7a6a5c; letter-spacing:1px;
+  }
+  .cover .blurb{ max-width:560px; margin:6px auto 18px; color:#d8c9ad; font-size:16px; line-height:1.55; }
+  .btn-primary{
+    font-family:'Russo One',sans-serif; background:var(--red); color:#fff; border:none;
+    padding:13px 26px; border-radius:10px; cursor:pointer; letter-spacing:1.5px; font-size:15px;
+    box-shadow:0 4px 0 var(--red-deep); transition:transform .1s;
+  }
+  .btn-primary:hover{transform:translateY(-1px)}
+  .btn-primary:active{transform:translateY(2px); box-shadow:0 1px 0 var(--red-deep)}
+  .btn-ghost{
+    font-family:'Russo One',sans-serif; background:transparent; color:var(--gold);
+    border:1px solid var(--gold); padding:11px 22px; border-radius:10px; cursor:pointer;
+    letter-spacing:1px; font-size:13px; margin-left:10px;
+  }
+
+  /* ---- Pre-launch / countdown ---- */
+  .prelaunch{
+    margin:22px auto; max-width:560px; text-align:center;
+    background:#1a0e10; border:1px solid rgba(232,181,75,.25); border-radius:16px; padding:26px 22px;
+  }
+  .prelaunch h2{ font-family:'Cinzel',serif; color:var(--gold); font-size:24px; margin-bottom:8px; }
+  .countdown{
+    font-family:'Russo One',sans-serif; color:var(--red-glow); font-size:clamp(22px,5vw,34px);
+    letter-spacing:2px; margin:12px 0 4px; text-shadow:0 0 18px rgba(214,40,40,.5);
+  }
+  .countdown-sub{ color:#9c8b70; font-size:14px; font-style:italic; }
+
+  /* ---- How This Works card ---- */
+  .modal-backdrop{
+    position:fixed; inset:0; background:rgba(8,3,5,.82); z-index:60;
+    display:flex; align-items:center; justify-content:center; padding:18px;
+  }
+  .htw-card{
+    max-width:440px; background:#1c1212; border:1px solid rgba(232,181,75,.35);
+    border-radius:16px; padding:26px 24px; box-shadow:0 20px 60px rgba(0,0,0,.7);
+  }
+  .htw-card h2{ font-family:'Cinzel',serif; color:var(--gold); font-size:23px; margin-bottom:14px; text-align:center; }
+  .htw-card ul{ list-style:none; margin:0 0 18px; }
+  .htw-card li{ display:flex; gap:11px; align-items:flex-start; margin-bottom:12px; font-size:16px; line-height:1.45; color:#e3d4b6; }
+  .htw-card li .ic{ font-size:20px; flex:none; }
+  .htw-card .btn-primary{ display:block; width:100%; }
+
+  /* ---- Dedication ---- */
+  .dedication{
+    max-width:560px; margin:30px auto; background:var(--paper); color:var(--ink);
+    border-radius:12px; border-left:6px solid var(--gold); padding:38px 34px; text-align:center;
+  }
+  .dedication h2{ font-family:'Cinzel',serif; color:var(--red-deep); font-size:22px; margin-bottom:14px; }
+  .dedication .ded-body{ font-size:18px; line-height:1.7; font-style:italic; color:#3a2f24; min-height:60px; }
+  .dedication .ded-empty{ color:#9c8b70; font-style:italic; }
+
+  /* ---- MISSION LOG ---- */
+  .chapter-map{
+    background:linear-gradient(180deg,#1a0e10,#100709);
+    border-radius:16px; padding:24px 20px; border:1px solid rgba(232,181,75,.2); margin-top:10px;
+  }
+  .cm-head{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:8px}
+  .cm-head h2{font-family:'Cinzel',serif; color:var(--gold); font-size:24px}
+  .stat-11{font-family:'Russo One',sans-serif; background:var(--red); color:#fff; padding:5px 12px; border-radius:20px; font-size:13px; letter-spacing:1px}
+  .cm-countdown{
+    text-align:center; font-family:'Russo One',sans-serif; color:var(--red-glow);
+    font-size:15px; letter-spacing:1px; margin:6px 0 18px; padding:9px;
+    background:#241618; border-radius:10px;
+  }
+  .part-label{
+    font-family:'Russo One',sans-serif; color:#9c8b70; letter-spacing:3px; text-transform:uppercase;
+    font-size:12px; margin:18px 0 8px 2px;
+  }
+  .ch-row{
+    display:flex; align-items:center; gap:14px; padding:13px 16px; margin-bottom:9px;
+    background:#241618; border-radius:11px; border-left:4px solid var(--red); cursor:pointer; transition:.12s;
+  }
+  .ch-row:hover{ background:#2c1b1d; }
+  .ch-row.locked{opacity:.62; border-left-color:#5a4a4c; cursor:not-allowed}
+  .ch-row.locked:hover{ background:#241618; }
+  .ch-row .badge{
+    font-family:'Russo One',sans-serif; width:38px; height:38px; flex:none; border-radius:9px;
+    background:var(--red); color:#fff; display:flex; align-items:center; justify-content:center; font-size:16px;
+  }
+  .ch-row.locked .badge{background:#3a2e30; color:#8a7a7c}
+  .ch-row .info{flex:1; min-width:0}
+  .ch-row .info .t{font-family:'Cinzel',serif; font-weight:600; font-size:17px; color:var(--paper)}
+  .ch-row.locked .info .t{color:#b6a6a8}
+  .ch-row .info .s{font-size:13px; color:#9c8b70; margin-top:1px}
+  .ch-row .lock-icon{font-size:18px}
+  .ch-row .read-tag{font-family:'Russo One',sans-serif; font-size:11px; letter-spacing:1px; color:var(--gold); border:1px solid var(--gold); padding:4px 9px; border-radius:14px; white-space:nowrap}
+  .ch-row .new-tag{font-family:'Russo One',sans-serif; font-size:11px; letter-spacing:1px; color:#fff; background:var(--red-glow); padding:4px 9px; border-radius:14px; white-space:nowrap; box-shadow:0 0 12px rgba(255,77,77,.6)}
+  .ch-row .check{ color:#2dc653; font-size:20px; }
+  @keyframes lockbreak{ 0%{transform:scale(1)} 40%{transform:scale(1.25) rotate(-8deg)} 100%{transform:scale(1) rotate(0)} }
+  .ch-row.unlocking .badge{ animation:lockbreak .6s ease; box-shadow:0 0 22px var(--red-glow); }
+
+  /* ---- READING VIEW ---- */
+  .book-stage{
+    background:linear-gradient(180deg,#1a0e10,#0d0607);
+    border-radius:18px; padding:24px 14px; margin-top:6px;
+    border:1px solid rgba(232,181,75,.2); display:flex; flex-direction:column; align-items:center;
+  }
+  .book{
+    width:100%; max-width:580px; background:var(--paper);
+    border-radius:6px 12px 12px 6px; color:var(--ink);
+    box-shadow:-8px 0 0 #d9c8a8, -8px 0 18px rgba(0,0,0,.4), 0 18px 40px rgba(0,0,0,.6);
+    position:relative; padding:38px 40px 28px; min-height:460px; border-left:6px solid var(--red-deep);
+    transition:opacity .18s ease;
+  }
+  .book.turning{ opacity:0; }
+  .book::after{content:""; position:absolute; top:0; bottom:0; left:0; width:30px;
+    background:linear-gradient(90deg, rgba(0,0,0,.12), transparent); border-radius:6px 0 0 6px}
+  .ch-num{font-family:'Russo One',sans-serif; color:var(--red); letter-spacing:3px; font-size:13px; text-transform:uppercase}
+  .ch-title{font-family:'Cinzel',serif; font-weight:700; font-size:27px; color:var(--ink); margin:2px 0 4px; line-height:1.1}
+  .ch-rule{height:2px; width:70px; background:var(--red); margin:10px 0 18px; position:relative}
+  .ch-rule::after{content:"❖"; position:absolute; left:80px; top:-10px; color:var(--gold); font-size:14px}
+  .page-body p{font-size:18px; line-height:1.62; margin-bottom:13px; text-align:justify}
+  .page-body.firstpage p:first-of-type::first-letter{
+    font-family:'Cinzel',serif; font-size:58px; float:left; line-height:.8; padding:6px 8px 0 0; color:var(--red-deep);
+  }
+  .vocab{ border-bottom:2px dotted var(--red); cursor:help; font-weight:600; color:var(--red-deep); position:relative; }
+  .vocab:hover::after, .vocab.tapped::after{
+    content:attr(data-def); position:absolute; left:0; bottom:130%;
+    background:var(--ink); color:var(--paper); padding:8px 12px; border-radius:8px;
+    width:210px; font-size:13px; line-height:1.35; z-index:5; box-shadow:0 6px 18px rgba(0,0,0,.4);
+    font-weight:400; text-align:left;
+  }
+  .yaya-note{
+    background:rgba(232,181,75,.14); border-left:4px solid var(--gold); border-radius:8px;
+    padding:12px 14px; margin:6px 0 16px; font-style:italic; color:#5a4a32; font-size:16px; line-height:1.5;
+  }
+  .yaya-note b{ font-style:normal; font-family:'Russo One',sans-serif; color:var(--red-deep); font-size:12px; letter-spacing:1px; display:block; margin-bottom:3px; }
+  .page-foot{display:flex; justify-content:space-between; align-items:center; margin-top:22px; border-top:1px solid #cdbb9a; padding-top:10px; gap:10px}
+  .page-foot .pg{font-family:'Russo One',sans-serif; color:var(--red); font-size:14px}
+  .turn-btn{
+    font-family:'Russo One',sans-serif; background:var(--red); color:#fff; border:none;
+    padding:9px 18px; border-radius:8px; cursor:pointer; letter-spacing:1px; font-size:13px; box-shadow:0 3px 0 var(--red-deep);
+  }
+  .turn-btn:disabled{ opacity:.4; cursor:default; box-shadow:none; }
+  .turn-btn.back{ background:#3a2e30; box-shadow:0 3px 0 #241618; }
+  .book-nav{ display:flex; gap:10px; margin-top:14px; }
+  .chapter-end{ text-align:center; margin-top:20px; }
+  .chapter-end .ce-msg{ color:#9c8b70; font-style:italic; margin-bottom:12px; font-size:15px; }
+
+  /* ---- VOCAB PAGE ---- */
+  .vocab-page{background:var(--paper); color:var(--ink); border-radius:14px; padding:24px 26px; margin-top:6px; border-left:6px solid var(--gold)}
+  .vocab-page h2{font-family:'Cinzel',serif; color:var(--red-deep); font-size:24px; margin-bottom:4px}
+  .vocab-page .vsub{font-style:italic; color:#6b5d48; margin-bottom:16px; font-size:15px}
+  .vgrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:10px}
+  .vcard{background:#fff; border:1px solid #ddccaa; border-radius:10px; padding:11px 13px; box-shadow:0 2px 6px rgba(0,0,0,.06)}
+  .vcard .w{font-family:'Russo One',sans-serif; color:var(--red); font-size:15px; letter-spacing:.5px}
+  .vcard .d{font-size:14px; line-height:1.4; color:#3a2f24; margin-top:3px}
+  .vcard .ch{font-size:11px; color:#9c8b70; margin-top:5px; text-transform:uppercase; letter-spacing:1px}
+  .vcard.tbd{opacity:.45; border-style:dashed; display:flex; align-items:center; justify-content:center; min-height:70px; font-style:italic; color:#9c8b70; text-align:center}
+
+  /* ---- Decrypt celebration ---- */
+  .decrypt-overlay{
+    position:fixed; inset:0; z-index:70; display:flex; align-items:center; justify-content:center;
+    background:rgba(8,3,5,.6); pointer-events:none;
+  }
+  .decrypt-banner{
+    font-family:'Russo One',sans-serif; color:#fff; background:var(--red);
+    padding:18px 30px; border-radius:14px; letter-spacing:2px; font-size:clamp(16px,4vw,24px);
+    box-shadow:0 0 40px var(--red-glow); text-align:center; animation:pop .5s ease;
+  }
+  .decrypt-banner small{ display:block; font-family:'Crimson Pro',serif; font-size:15px; letter-spacing:0; margin-top:6px; color:#ffe; font-style:italic; }
+  @keyframes pop{ 0%{transform:scale(.4); opacity:0} 60%{transform:scale(1.08)} 100%{transform:scale(1); opacity:1} }
+  .confetti-pc{ position:fixed; width:10px; height:14px; top:-20px; z-index:69; pointer-events:none; }
+  @keyframes fall{ to{ transform:translateY(105vh) rotate(540deg); opacity:.9 } }
+
+  .note{max-width:680px; margin:18px auto 0; background:rgba(232,181,75,.08); border:1px solid rgba(232,181,75,.25); border-radius:12px; padding:14px 18px; font-size:14px; line-height:1.5; color:#e3d4b6}
+  .note b{color:var(--gold)}
+
+  .site-footer{ text-align:center; color:#6a5c50; font-size:12px; margin-top:40px; font-family:'Russo One',sans-serif; letter-spacing:1px; }
+
+  @media (max-width:540px){
+    .book{ padding:28px 22px 22px; }
+    .ch-title{ font-size:23px; }
+    .page-body p{ font-size:17px; }
+  }
+
+  /* ---- PRINT (keepsake-ready) ---- */
+  @media print{
+    body{ background:#fff; color:#000; padding:0; }
+    .topnav, .book-nav, .note, .site-footer, .modal-backdrop, .decrypt-overlay, .confetti-pc, .cm-countdown, .btn-primary, .btn-ghost{ display:none !important; }
+    .view.hidden{ display:none !important; }
+    .book{ box-shadow:none; border-left:3px solid #9d0208; max-width:100%; min-height:0; }
+    .book-stage{ background:#fff; border:none; padding:0; }
+    .ch-title, .ch-num, .page-body p{ color:#000; }
+    .vocab{ color:#9d0208; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ===== TOP NAV ===== -->
+  <div class="topnav" id="topnav">
+    <button data-nav="cover">🏠 Cover</button>
+    <button data-nav="missionlog">❖ Mission Log</button>
+    <button data-nav="vocab">📖 Word Power</button>
+    <button data-nav="dedication">✍ Dedication</button>
+    <span class="spacer"></span>
+    <button id="print-btn" title="Print this page as a keepsake">🖨 Print</button>
+    <button id="sound-toggle">🔊 Sound</button>
+    <button id="reset-btn" title="Clear saved progress on this device">↺ Reset</button>
+    <button id="back-hub-btn">← Game Hub</button>
+  </div>
+
+  <!-- ===== COVER ===== -->
+  <section id="view-cover" class="view">
+    <h1 class="title">THE RED FILES</h1>
+    <div class="subtitle">Kaidan's Secret Mission</div>
+
+    <div class="cover" id="cover-live">
+      <div class="cover-art">
+        <!-- HERO ART SLOT — replaced with final cover art in Wave 2 -->
+        <svg viewBox="0 0 100 100" fill="none">
+          <circle cx="50" cy="50" r="34" stroke="#ff4d4d" stroke-width="2.5"/>
+          <circle cx="50" cy="50" r="26" stroke="#ff4d4d" stroke-width="1.2" stroke-dasharray="3 3"/>
+          <text x="50" y="57" font-family="Russo One" font-size="16" fill="#ff4d4d" text-anchor="middle">11:11</text>
+          <path d="M30 30 L36 36 M70 30 L64 36 M30 70 L36 64 M70 70 L64 64" stroke="#ff4d4d" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <div class="art-slot-tag">[ hero cover art drops in here ]</div>
+      </div>
+      <p class="blurb">A mysterious game update arrives at exactly 11:11 — and pulls Kaidan inside. A secret mission, eleven levels, and a friend who needs saving. Read a new chapter every Sunday.</p>
+      <button class="btn-primary" id="begin-btn">Open the Mission Log →</button>
+    </div>
+
+    <!-- Pre-launch (shown instead of cover-live when before launch date) -->
+    <div class="prelaunch hidden" id="cover-prelaunch">
+      <h2>The Mission Begins Soon!</h2>
+      <div class="countdown" id="prelaunch-countdown">--</div>
+      <div class="countdown-sub">until the first mission file unlocks</div>
+    </div>
+  </section>
+
+  <!-- ===== DEDICATION ===== -->
+  <section id="view-dedication" class="view hidden">
+    <div class="sec-label">Dedication</div>
+    <div class="dedication">
+      <h2>❖ From Yaya ❖</h2>
+      <div class="ded-body" id="ded-body"></div>
+    </div>
+  </section>
+
+  <!-- ===== MISSION LOG ===== -->
+  <section id="view-missionlog" class="view hidden">
+    <div class="chapter-map">
+      <div class="cm-head">
+        <h2>❖ The Mission Log</h2>
+        <span class="stat-11">★ Lucky 11</span>
+      </div>
+      <div class="cm-countdown" id="cm-countdown">Next chapter unlocks Sunday at 4:00 PM</div>
+      <div id="mission-log-rows"></div>
+    </div>
+    <div class="note">Tap an unlocked chapter to read it. Locked chapters open on their Sunday. <span id="preview-note"></span></div>
+  </section>
+
+  <!-- ===== READING VIEW ===== -->
+  <section id="view-reading" class="view hidden">
+    <div class="book-stage">
+      <div class="book" id="book-page"><!-- rendered by JS --></div>
+      <div class="book-nav">
+        <button class="turn-btn back" id="page-back">← Back</button>
+        <button class="turn-btn" id="page-fwd">Turn the Page →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== VOCAB ===== -->
+  <section id="view-vocab" class="view hidden">
+    <div class="sec-label">Word Power</div>
+    <div class="vocab-page">
+      <h2>Word Power Collection</h2>
+      <div class="vsub" id="vocab-sub"></div>
+      <div class="vgrid" id="vocab-grid"></div>
+    </div>
+  </section>
+
+  <div class="site-footer">The Red Files &bull; Built with love by Yaya &amp; Claude — Quality &amp; Efficiency Partner</div>
+
+</div>
+
+<script>
+/* ============================================================
+   THE RED FILES — reading-website shell (Wave 1)
+   Self-contained. No backend. Per-device progress in localStorage.
+   Story text below is PLACEHOLDER; real content drops into BOOK in Wave 2.
+   ============================================================ */
+
+/* ---- BOOK DATA ----------------------------------------------------------
+   Real 31 chapter titles + parts (from the Story Bible).
+   Chapters 1-6 carry placeholder pages + placeholder vocab so the shell
+   is fully testable. unlockOffsetWeeks drives the real launch later;
+   for the Wave-1 PREVIEW STATE we force ch 1 unlocked, the rest locked.
+------------------------------------------------------------------------- */
+const LOREM = [
+  "This is placeholder text so the page layout can be tested before the real story arrives. The clock blinked, the screen glowed red, and something that should not have been possible began to happen anyway.",
+  "Another placeholder paragraph. It exists only to show how the book page wraps, justifies, and flows from line to line so spacing can be judged honestly.",
+  "A third placeholder paragraph rounds out the page. When the real chapter is written, this whole block is swapped out — no layout code changes, only the data."
+];
+function ph(n){ return LOREM.slice(0, n || 3); }
+
+const BOOK = {
+  title: "The Red Files: Kaidan's Secret Mission",
+  dedication: "",                              // filled in Wave 2
+  launchDate: null,                            // real Sunday 4 PM set in Wave 2; null = use preview state
+  unlockIntervalDays: 7,
+  unlockTime: "16:00",
+  chapters: [
+    // ---- PART ONE — THE PULL ----
+    { number:1, part:"Part One — The Pull", title:"The Update at 11:11", unlockOffsetWeeks:0, estReadMin:20,
+      yayaNote:"",
+      pages:[
+        ["Chapter one, page one placeholder. The first paragraph gets a drop cap so the opening looks like a real novel page.", "Tap the dotted red word <span class=\"vocab\" data-def=\"Making a low rumbling sound, like a small engine.\">rumbling</span> to see how Word Power tooltips work.", LOREM[1]],
+        ph(3), ph(2)
+      ],
+      vocab:[
+        {word:"rumbling", def:"Making a low rumbling sound, like a small engine."},
+        {word:"mysterious", def:"Hard to explain or understand; full of secrets."}
+      ]
+    },
+    { number:2, part:"Part One — The Pull", title:"One Player Short", unlockOffsetWeeks:1, estReadMin:20,
+      yayaNote:"", pages:[ ["Chapter two placeholder opening paragraph with a drop cap.", LOREM[1]], ph(3) ],
+      vocab:[ {word:"coincidence", def:"When two things happen at the same time by chance."} ] },
+    { number:3, part:"Part One — The Pull", title:"Sucked In", unlockOffsetWeeks:2, estReadMin:20,
+      yayaNote:"", pages:[ ["Chapter three placeholder opening paragraph.", LOREM[1]], ph(2) ],
+      vocab:[ {word:"impossible", def:"Not able to happen or be done."} ] },
+    { number:4, part:"Part One — The Pull", title:"Respawn", unlockOffsetWeeks:3, estReadMin:20,
+      yayaNote:"", pages:[ ["Chapter four placeholder opening paragraph.", LOREM[1]], ph(2) ],
+      vocab:[ {word:"navigate", def:"To find your way through a place or problem."} ] },
+    { number:5, part:"Part One — The Pull", title:"The Rules of 11", unlockOffsetWeeks:4, estReadMin:20,
+      yayaNote:"", pages:[ ["Chapter five placeholder opening paragraph.", LOREM[1]], ph(2) ],
+      vocab:[ {word:"decode", def:"To turn a secret message back into something you can read."} ] },
+    // ---- PART TWO — THE RESCUE ----
+    { number:6, part:"Part Two — The Rescue", title:"The Empty Chair", unlockOffsetWeeks:5, estReadMin:20,
+      yayaNote:"", pages:[ ["Chapter six placeholder opening paragraph.", LOREM[1]], ph(2) ],
+      vocab:[ {word:"investigate", def:"To look into something carefully to find the truth."} ] },
+    { number:7, part:"Part Two — The Rescue", title:"Following the Signal", unlockOffsetWeeks:6, estReadMin:20 },
+    { number:8, part:"Part Two — The Rescue", title:"Salem's Code", unlockOffsetWeeks:7, estReadMin:20 },
+    { number:9, part:"Part Two — The Rescue", title:"The Only Way In", unlockOffsetWeeks:8, estReadMin:20 },
+    { number:10, part:"Part Two — The Rescue", title:"Jace Goes Under", unlockOffsetWeeks:9, estReadMin:20 },
+    { number:11, part:"Part Two — The Rescue", title:"Kai Holds Out", unlockOffsetWeeks:10, estReadMin:20 },
+    { number:12, part:"Part Two — The Rescue", title:"All In (Cat Signal Rises)", unlockOffsetWeeks:11, estReadMin:20 },
+    // ---- PART THREE — THE WORLD TOUR ----
+    { number:13, part:"Part Three — The World Tour", title:"The Map Is the World", unlockOffsetWeeks:12, estReadMin:20 },
+    { number:14, part:"Part Three — The World Tour", title:"The Frozen North (Alaska)", unlockOffsetWeeks:13, estReadMin:20 },
+    { number:15, part:"Part Three — The World Tour", title:"Teamwork or Nothing", unlockOffsetWeeks:14, estReadMin:20 },
+    { number:16, part:"Part Three — The World Tour", title:"The Scooter Canyon", unlockOffsetWeeks:15, estReadMin:20 },
+    { number:17, part:"Part Three — The World Tour", title:"The First Guardian", unlockOffsetWeeks:16, estReadMin:20 },
+    { number:18, part:"Part Three — The World Tour", title:"Who Built This?", unlockOffsetWeeks:17, estReadMin:20 },
+    // ---- PART FOUR — DEEPER AND FARTHER ----
+    { number:19, part:"Part Four — Deeper and Farther", title:"Levels That Fight Back", unlockOffsetWeeks:18, estReadMin:20 },
+    { number:20, part:"Part Four — Deeper and Farther", title:"Split Up (Cat Signal Saves Them)", unlockOffsetWeeks:19, estReadMin:20 },
+    { number:21, part:"Part Four — Deeper and Farther", title:"The Level That Wouldn't Let Him Win", unlockOffsetWeeks:20, estReadMin:20 },
+    { number:22, part:"Part Four — Deeper and Farther", title:"Jace's Trial (Courage for Others)", unlockOffsetWeeks:21, estReadMin:20 },
+    { number:23, part:"Part Four — Deeper and Farther", title:"Kai's Trial (Looking Out for the Team)", unlockOffsetWeeks:22, estReadMin:20 },
+    { number:24, part:"Part Four — Deeper and Farther", title:"Reunited", unlockOffsetWeeks:23, estReadMin:20 },
+    { number:25, part:"Part Four — Deeper and Farther", title:"The Pattern of 11", unlockOffsetWeeks:24, estReadMin:20 },
+    // ---- PART FIVE — TOKYO (THE FINALE) ----
+    { number:26, part:"Part Five — Tokyo (The Finale)", title:"The City of Lights", unlockOffsetWeeks:25, estReadMin:20 },
+    { number:27, part:"Part Five — Tokyo (The Finale)", title:"The Lonely Creator", unlockOffsetWeeks:26, estReadMin:20 },
+    { number:28, part:"Part Five — Tokyo (The Finale)", title:"The Hardest Level Ever Made", unlockOffsetWeeks:27, estReadMin:20 },
+    { number:29, part:"Part Five — Tokyo (The Finale)", title:"Kaidan's Choice (the heart)", unlockOffsetWeeks:28, estReadMin:20 },
+    { number:30, part:"Part Five — Tokyo (The Finale)", title:"A Channel for Everyone", unlockOffsetWeeks:29, estReadMin:20 },
+    { number:31, part:"Part Five — Tokyo (The Finale)", title:"11:11 Again", unlockOffsetWeeks:30, estReadMin:20 }
+  ]
+};
+
+/* PREVIEW_MODE: Wave-1 state for Connie's first look.
+   true  -> ch 1 unlocked, 2-31 locked, all titles visible (ignores launchDate).
+   false -> real date-driven unlocks off BOOK.launchDate (Wave 2). */
+const PREVIEW_MODE = true;
+
+/* ---- STATE / STORAGE ---- */
+const LS_KEY = "redfiles_progress_v1";
+let state = loadState();
+function loadState(){
+  try { return JSON.parse(localStorage.getItem(LS_KEY)) || freshState(); }
+  catch(e){ return freshState(); }
+}
+function freshState(){
+  return { lastChapter:null, lastPage:0, finished:{}, opened:{}, collectedVocab:{}, htwSeen:false, soundOn:true };
+}
+function saveState(){ try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch(e){} }
+
+/* ---- SOUND (Web Audio, no files) ---- */
+let audioCtx = null;
+function tone(freq, dur, type){
+  if(!state.soundOn) return;
+  try{
+    audioCtx = audioCtx || new (window.AudioContext||window.webkitAudioContext)();
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = type||'sine'; o.frequency.value = freq;
+    o.connect(g); g.connect(audioCtx.destination);
+    g.gain.setValueAtTime(.0001, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.25, audioCtx.currentTime+.02);
+    g.gain.exponentialRampToValueAtTime(.0001, audioCtx.currentTime+dur);
+    o.start(); o.stop(audioCtx.currentTime+dur);
+  }catch(e){}
+}
+function pageTurnSound(){ tone(320, .12, 'triangle'); }
+function unlockChime(){ tone(660,.14,'sine'); setTimeout(()=>tone(880,.18,'sine'),120); setTimeout(()=>tone(1175,.28,'sine'),260); }
+
+/* ---- UNLOCK LOGIC ---- */
+function chapterUnlockDate(ch){
+  if(!BOOK.launchDate) return null;
+  const base = new Date(BOOK.launchDate);
+  return new Date(base.getTime() + ch.unlockOffsetWeeks * BOOK.unlockIntervalDays * 86400000);
+}
+function isUnlocked(ch){
+  if(PREVIEW_MODE) return ch.number === 1;          // preview: only ch 1
+  const u = chapterUnlockDate(ch);
+  if(!u) return ch.unlockOffsetWeeks === 0;          // no launch date -> only ch0
+  return Date.now() >= u.getTime();
+}
+function launched(){
+  if(PREVIEW_MODE) return true;
+  return BOOK.launchDate ? Date.now() >= new Date(BOOK.launchDate).getTime() : false;
+}
+function nextLockedChapter(){
+  for(const ch of BOOK.chapters){ if(!isUnlocked(ch)) return ch; }
+  return null;
+}
+
+/* ---- NAVIGATION ---- */
+const views = ['cover','dedication','missionlog','reading','vocab'];
+function showView(name){
+  views.forEach(v => document.getElementById('view-'+v).classList.toggle('hidden', v!==name));
+  window.scrollTo(0,0);
+}
+
+/* ---- RENDER: COVER ---- */
+function renderCover(){
+  const live = document.getElementById('cover-live');
+  const pre  = document.getElementById('cover-prelaunch');
+  if(launched()){ live.classList.remove('hidden'); pre.classList.add('hidden'); }
+  else { live.classList.add('hidden'); pre.classList.remove('hidden'); }
+}
+
+/* ---- RENDER: DEDICATION ---- */
+function renderDedication(){
+  const el = document.getElementById('ded-body');
+  if(BOOK.dedication && BOOK.dedication.trim()){ el.textContent = BOOK.dedication; el.classList.remove('ded-empty'); }
+  else { el.textContent = "Kaidan — this one's for you. (Yaya's dedication drops in here.)"; el.classList.add('ded-empty'); }
+}
+
+/* ---- RENDER: MISSION LOG ---- */
+function fmtUnlock(ch){
+  const u = chapterUnlockDate(ch);
+  if(!u) return "Unlocks Sunday, 4:00 PM";
+  const now = Date.now();
+  const weeks = Math.ceil((u.getTime()-now)/(7*86400000));
+  if(weeks <= 1) return "Unlocks " + u.toLocaleDateString(undefined,{weekday:'long'}) + ", 4:00 PM";
+  return "Unlocks in " + weeks + " weeks";
+}
+function renderMissionLog(){
+  const wrap = document.getElementById('mission-log-rows');
+  wrap.innerHTML = '';
+  let lastPart = '';
+  BOOK.chapters.forEach(ch => {
+    if(ch.part && ch.part !== lastPart){
+      const pl = document.createElement('div'); pl.className='part-label'; pl.textContent = ch.part;
+      wrap.appendChild(pl); lastPart = ch.part;
+    }
+    const unlocked = isUnlocked(ch);
+    const finished = !!state.finished[ch.number];
+    const opened = !!state.opened[ch.number];
+    const isNew = unlocked && !opened && ch.number !== 1; // freshly unlocked, not yet opened
+    const row = document.createElement('div');
+    row.className = 'ch-row' + (unlocked ? '' : ' locked');
+    let right;
+    if(!unlocked) right = '<span class="lock-icon">🔒</span>';
+    else if(finished) right = '<span class="check">✓</span>';
+    else if(isNew) right = '<span class="new-tag">NEW!</span>';
+    else right = '<span class="read-tag">READ</span>';
+    const sub = unlocked ? ('Available now · ~'+(ch.estReadMin||20)+' min read') : fmtUnlock(ch);
+    row.innerHTML =
+      '<div class="badge">'+ch.number+'</div>' +
+      '<div class="info"><div class="t">'+ch.title+'</div><div class="s">'+sub+'</div></div>' + right;
+    if(unlocked) row.addEventListener('click', ()=>openChapter(ch.number));
+    wrap.appendChild(row);
+  });
+  // Countdown line
+  const cd = document.getElementById('cm-countdown');
+  const nl = nextLockedChapter();
+  if(PREVIEW_MODE){ cd.textContent = "Preview mode — Chapter 1 is open; the rest are locked so you can see both looks."; }
+  else if(!launched()){ cd.textContent = "The mission begins soon — first chapter drops at launch."; }
+  else if(nl){ const u = chapterUnlockDate(nl); cd.textContent = u ? ("Next chapter unlocks "+u.toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'})+" at 4:00 PM") : "Next chapter unlocks Sunday at 4:00 PM"; }
+  else { cd.textContent = "All chapters unlocked. Read on, Agent."; }
+  document.getElementById('preview-note').textContent = PREVIEW_MODE ? "(Preview: only Chapter 1 opens right now.)" : "";
+}
+
+/* ---- READING ---- */
+let curChapter = null, curPage = 0;
+function chapterByNum(n){ return BOOK.chapters.find(c=>c.number===n); }
+function openChapter(n){
+  const ch = chapterByNum(n);
+  if(!ch || !isUnlocked(ch)) return;
+  const firstOpen = !state.opened[n];
+  state.opened[n] = true; saveState();
+  if(firstOpen && n !== 1){ celebrateDecrypt(ch); }
+  curChapter = ch; curPage = (state.lastChapter===n ? (state.lastPage||0) : 0);
+  const total = (ch.pages && ch.pages.length) || 0;
+  if(curPage >= total) curPage = 0;
+  state.lastChapter = n; saveState();
+  renderPage(); showView('reading');
+}
+function renderPage(){
+  const ch = curChapter; const book = document.getElementById('book-page');
+  const hasPages = ch.pages && ch.pages.length;
+  if(!hasPages){
+    book.innerHTML = '<div class="ch-num">Chapter '+numWord(ch.number)+'</div><div class="ch-title">'+ch.title+'</div><div class="ch-rule"></div><div class="page-body"><p><em>This chapter\'s text drops in here once it\'s written.</em></p></div>';
+    document.getElementById('page-fwd').disabled = true;
+    document.getElementById('page-back').disabled = true;
+    return;
+  }
+  const total = ch.pages.length;
+  if(curPage<0) curPage=0; if(curPage>=total) curPage=total-1;
+  const paras = ch.pages[curPage].map(p=>'<p>'+p+'</p>').join('');
+  let head = '';
+  if(curPage===0){
+    head = '<div class="ch-num">Chapter '+numWord(ch.number)+'</div><div class="ch-title">'+ch.title+'</div><div class="ch-rule"></div>';
+    if(ch.yayaNote && ch.yayaNote.trim()) head += '<div class="yaya-note"><b>A note from Yaya</b>'+ch.yayaNote+'</div>';
+  }
+  book.innerHTML = head + '<div class="page-body'+(curPage===0?' firstpage':'')+'">'+paras+
+    '</div><div class="page-foot"><span class="pg">Page '+(curPage+1)+' of '+total+'</span></div>';
+  collectVocabOnPage(ch);
+  wireVocabTaps(book);
+  document.getElementById('page-back').disabled = (curPage===0);
+  const fwd = document.getElementById('page-fwd');
+  fwd.disabled = false;
+  fwd.textContent = (curPage === total-1) ? 'Finish Chapter ✓' : 'Turn the Page →';
+  state.lastPage = curPage; saveState();
+}
+function pageFwd(){
+  const total = curChapter.pages.length;
+  if(curPage < total-1){ turnTo(curPage+1); }
+  else { finishChapter(); }
+}
+function pageBack(){ if(curPage>0) turnTo(curPage-1); }
+function turnTo(p){
+  const book = document.getElementById('book-page');
+  pageTurnSound();
+  book.classList.add('turning');
+  setTimeout(()=>{ curPage=p; renderPage(); book.classList.remove('turning'); }, 170);
+}
+function finishChapter(){
+  state.finished[curChapter.number] = true; saveState();
+  const next = chapterByNum(curChapter.number+1);
+  const book = document.getElementById('book-page');
+  let msg;
+  if(next && isUnlocked(next)) msg = '<div class="ce-msg">Chapter complete! Ready for the next mission file?</div><button class="btn-primary" id="ce-next">Next Chapter →</button>';
+  else if(next) msg = '<div class="ce-msg">Chapter complete! The next chapter unlocks Sunday at 4 PM.</div><button class="btn-ghost" id="ce-log">← Back to Mission Log</button>';
+  else msg = '<div class="ce-msg">That\'s the end of what\'s unlocked. Nicely done, Agent.</div><button class="btn-ghost" id="ce-log">← Back to Mission Log</button>';
+  book.innerHTML = '<div class="ch-num">Chapter '+numWord(curChapter.number)+'</div><div class="ch-title">'+curChapter.title+'</div><div class="ch-rule"></div><div class="chapter-end">'+msg+'</div>';
+  document.getElementById('page-fwd').disabled = true;
+  document.getElementById('page-back').disabled = false;
+  const nb = document.getElementById('ce-next'); if(nb) nb.addEventListener('click', ()=>openChapter(next.number));
+  const lb = document.getElementById('ce-log'); if(lb) lb.addEventListener('click', ()=>{ renderMissionLog(); showView('missionlog'); });
+}
+
+/* ---- VOCAB ---- */
+function collectVocabOnPage(ch){
+  if(!ch.vocab) return;
+  ch.vocab.forEach(v=>{
+    const onThisPage = (ch.pages[curPage]||[]).some(p=>p.toLowerCase().indexOf(v.word.toLowerCase())>=0);
+    if(onThisPage && !state.collectedVocab[v.word.toLowerCase()]){
+      state.collectedVocab[v.word.toLowerCase()] = {word:v.word, def:v.def, ch:ch.number};
+    }
+  });
+  saveState();
+}
+function wireVocabTaps(scope){
+  scope.querySelectorAll('.vocab').forEach(el=>{
+    el.addEventListener('click', ()=> el.classList.toggle('tapped'));
+  });
+}
+function renderVocab(){
+  const grid = document.getElementById('vocab-grid'); grid.innerHTML='';
+  const collected = Object.values(state.collectedVocab);
+  document.getElementById('vocab-sub').textContent =
+    'Every word Kaidan unlocks by reading lands here. '+collected.length+' of ~200 collected!';
+  collected.forEach(v=>{
+    const c = document.createElement('div'); c.className='vcard';
+    c.innerHTML = '<div class="w">'+v.word+'</div><div class="d">'+v.def+'</div><div class="ch">Ch. '+v.ch+'</div>';
+    grid.appendChild(c);
+  });
+  const tbd = Math.max(0, 4 - collected.length);
+  for(let i=0;i<tbd;i++){ const c=document.createElement('div'); c.className='vcard tbd'; c.textContent='unlocks as he reads…'; grid.appendChild(c); }
+}
+
+/* ---- DECRYPT CELEBRATION ---- */
+function celebrateDecrypt(ch){
+  unlockChime();
+  const ov = document.createElement('div'); ov.className='decrypt-overlay';
+  ov.innerHTML = '<div class="decrypt-banner">MISSION FILE DECRYPTED<small>Chapter '+ch.number+' unlocked, Agent. New briefing inside.</small></div>';
+  document.body.appendChild(ov);
+  const colors=['#d62828','#e8b54b','#ff4d4d','#fff'];
+  for(let i=0;i<40;i++){
+    const pc=document.createElement('div'); pc.className='confetti-pc';
+    pc.style.left=Math.random()*100+'vw';
+    pc.style.background=colors[i%colors.length];
+    pc.style.animation='fall '+(1.4+Math.random()*1.2)+'s linear '+(Math.random()*.4)+'s forwards';
+    document.body.appendChild(pc);
+    setTimeout(()=>pc.remove(), 3200);
+  }
+  setTimeout(()=>ov.remove(), 2400);
+}
+
+/* ---- COUNTDOWN TICKER ---- */
+function tickCountdown(){
+  if(launched()) return;
+  const el = document.getElementById('prelaunch-countdown');
+  if(!el || !BOOK.launchDate) { if(el) el.textContent = "Launch date coming soon"; return; }
+  const ms = new Date(BOOK.launchDate).getTime() - Date.now();
+  if(ms<=0){ renderCover(); return; }
+  const d=Math.floor(ms/86400000), h=Math.floor(ms%86400000/3600000), m=Math.floor(ms%3600000/60000), s=Math.floor(ms%60000/1000);
+  el.textContent = d+'d '+h+'h '+m+'m '+s+'s';
+}
+
+function numWord(n){
+  const w=['Zero','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen','Twenty','Twenty-One','Twenty-Two','Twenty-Three','Twenty-Four','Twenty-Five','Twenty-Six','Twenty-Seven','Twenty-Eight','Twenty-Nine','Thirty','Thirty-One'];
+  return w[n]||n;
+}
+
+/* ---- HOW THIS WORKS ---- */
+function maybeShowHowItWorks(){
+  if(state.htwSeen) return;
+  const bk = document.createElement('div'); bk.className='modal-backdrop';
+  bk.innerHTML =
+    '<div class="htw-card"><h2>How This Works</h2><ul>'+
+    '<li><span class="ic">📅</span><span>A new chapter unlocks every <b>Sunday at 4 PM</b>.</span></li>'+
+    '<li><span class="ic">🔴</span><span>Tap the <b>red dotted words</b> to see what they mean.</span></li>'+
+    '<li><span class="ic">🔖</span><span>Your place is <b>saved automatically</b> on this device.</span></li>'+
+    '</ul><button class="btn-primary" id="htw-ok">Got it — Begin!</button></div>';
+  document.body.appendChild(bk);
+  document.getElementById('htw-ok').addEventListener('click', ()=>{ state.htwSeen=true; saveState(); bk.remove(); });
+}
+
+/* ---- SOUND TOGGLE ---- */
+function renderSoundBtn(){ document.getElementById('sound-toggle').textContent = state.soundOn ? '🔊 Sound' : '🔇 Muted'; }
+
+/* ---- WIRE UP ---- */
+function bind(){
+  document.querySelectorAll('.topnav button[data-nav]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const v=b.getAttribute('data-nav');
+      if(v==='missionlog') renderMissionLog();
+      if(v==='vocab') renderVocab();
+      if(v==='dedication') renderDedication();
+      if(v==='cover') renderCover();
+      showView(v);
+    });
+  });
+  document.getElementById('begin-btn').addEventListener('click', ()=>{ renderMissionLog(); showView('missionlog'); });
+  document.getElementById('page-fwd').addEventListener('click', pageFwd);
+  document.getElementById('page-back').addEventListener('click', pageBack);
+  document.getElementById('print-btn').addEventListener('click', ()=>{ window.print(); });
+  document.getElementById('sound-toggle').addEventListener('click', ()=>{ state.soundOn=!state.soundOn; saveState(); renderSoundBtn(); if(state.soundOn) tone(560,.1,'sine'); });
+  document.getElementById('reset-btn').addEventListener('click', ()=>{
+    if(confirm('Clear saved reading progress on this device? (The book itself is not deleted.)')){
+      localStorage.removeItem(LS_KEY); state=freshState();
+      renderSoundBtn(); renderCover(); renderMissionLog(); renderVocab(); renderDedication();
+      showView('cover'); alert('Progress reset.');
+    }
+  });
+  document.getElementById('back-hub-btn').addEventListener('click', ()=>{ window.location.href='index.html'; });
+}
+
+/* ---- INIT ---- */
+function init(){
+  bind();
+  renderSoundBtn();
+  renderCover();
+  renderDedication();
+  renderMissionLog();
+  renderVocab();
+  showView('cover');
+  maybeShowHowItWorks();
+  tickCountdown(); setInterval(tickCountdown, 1000);
+}
+init();
+</script>
+</body>
+</html>
